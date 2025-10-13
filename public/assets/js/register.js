@@ -1,41 +1,36 @@
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector("#registerModal form");
-
   if (!form) return;
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // Mostrar animación de carga
     Swal.fire({
       title: "Creando tu cuenta...",
-      text: "Enviando correo de verificación, por favor espera.",
+      text: "Por favor espera.",
       allowOutsideClick: false,
       didOpen: () => Swal.showLoading(),
     });
 
-    // Preparar datos
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
 
     try {
-      const response = await fetch("./src/auth/register.php", {
+      const response = await fetch("./src/auth/registerPrueba.php", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
       });
 
-      const result = await response.json();
+      const result = await response.text(); // 👈 ahora es texto plano
 
       Swal.close();
 
-      if (result.success) {
+      if (result.trim() === "ok") {
         Swal.fire({
           icon: "success",
           title: "¡Registro exitoso!",
-          text: "Hemos enviado un correo de verificación. Por favor revisa tu bandeja.",
+          text: "Tu cuenta fue creada correctamente.",
           confirmButtonText: "Entendido",
         });
         form.reset();
@@ -43,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: result.message || "Ocurrió un problema al registrar tu cuenta.",
+          text: result || "Ocurrió un problema al registrar la cuenta.",
         });
       }
     } catch (error) {
@@ -56,3 +51,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+

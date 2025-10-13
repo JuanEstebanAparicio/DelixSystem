@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DELIX | Gestión Inteligente para Restaurantes</title>
-    <link rel="stylesheet" href="./public/assets/css/style.css">
+    <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 <body>
 
@@ -35,7 +35,7 @@
                 </div>
             </div>
             <div class="hero-img">
-                <img src="./public/assets/img/hero.jpg" alt="Restaurante moderno y acogedor">
+                <img src="./assets/img/hero.jpg" alt="Restaurante moderno y acogedor">
 
             </div>
         </div>
@@ -75,10 +75,10 @@
         <div class="container">
             <h2>Así se vive la experiencia DELIX</h2>
             <div class="gallery-grid">
-                <img src="./public/assets/img/RestauranteModerno.png" alt="Restaurante moderno">
-                <img src="./public/assets/img/CocinaProfecional.png" alt="Cocina profesional">
-                <img src="./public/assets/img/BuenServicio.png" alt="Servicio eficiente">
-                <img src="./public/assets/img/BuenAmbiente.png" alt="Ambiente amigable">
+                <img src="./assets/img/RestauranteModerno.png" alt="Restaurante moderno">
+                <img src="./assets/img/CocinaProfecional.png" alt="Cocina profesional">
+                <img src="./assets/img/BuenServicio.png" alt="Servicio eficiente">
+                <img src="./assets/img/BuenAmbiente.png" alt="Ambiente amigable">
             </div>
         </div>
     </section>
@@ -138,7 +138,7 @@
     <div class="modal-content">
       <span class="close" id="closeRegister">&times;</span>
       <h3>Crear una cuenta</h3>
-      <form method="POST" action="./src/auth/register.php">
+      <form method="POST" action="../src/auth/register.php">
         <div class="form-group">
           <input type="text" name="first_name" placeholder="Nombre" required>
         </div>
@@ -185,10 +185,8 @@
         </div>
     </footer>
 
-    <script src="./public/assets/js/modal.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
-    <script src="./public/assets/js/register.js"></script>
 
 
+<script src="./assets/js/modal.js"></script>
 </body>
 </html>

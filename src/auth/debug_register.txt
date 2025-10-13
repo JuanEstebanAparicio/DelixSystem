@@ -1,0 +1,7 @@
+Array
+(
+    [code] => PGRST205
+    [details] => 
+    [hint] => Perhaps you meant the table 'public.areas'
+    [message] => Could not find the table 'public.users' in the schema cache
+)
