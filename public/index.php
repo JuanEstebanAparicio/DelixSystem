@@ -1,10 +1,13 @@
+
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DELIX | Gestión Inteligente para Restaurantes</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
 
@@ -127,17 +130,47 @@
     </div>
 
     <div id="registerModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeRegister">&times;</span>
-            <h3>Crear una cuenta</h3>
-            <form method="POST" action="register.php">
-                <input type="text" name="usuario" placeholder="Usuario" required>
-                <input type="email" name="email" placeholder="Correo electrónico" required>
-                <input type="password" name="password" placeholder="Contraseña" required>
-                <button type="submit" class="btn-primary">Registrarse</button>
-            </form>
-        </div>
-    </div>
+  <div class="modal-content">
+    <span class="close" id="closeRegister">&times;</span>
+    <h3>Crear una cuenta</h3>
+    <form method="POST" action="../public/register.php">
+      
+      <div class="form-group">
+        <input type="text" name="first_name" placeholder="Nombre" required>
+      </div>
+
+      <div class="form-group">
+        <input type="text" name="last_name" placeholder="Apellido" required>
+      </div>
+
+      <div class="form-group">
+        <input type="email" name="email" placeholder="Correo electrónico" required>
+      </div>
+
+      <div class="form-group">
+        <input type="text" name="restaurant_name" placeholder="Nombre del restaurante" required>
+      </div>
+
+      <div class="form-group">
+        <input type="password" name="password" placeholder="Contraseña" required minlength="8">
+      </div>
+
+      <div class="form-group">
+        <input type="password" name="confirm_password" placeholder="Confirmar contraseña" required minlength="8">
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" name="accept_terms" required>
+          Acepto los <a href="#">términos</a> y la <a href="#">política de privacidad</a>
+        </label>
+      </div>
+
+      <button type="submit" class="btn-primary">Registrarse</button>
+    </form>
+  </div>
+</div>
+
 
     <!-- FOOTER -->
     <footer class="footer">
