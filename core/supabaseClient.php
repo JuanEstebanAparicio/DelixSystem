@@ -1,46 +1,34 @@
 <?php
-class SupabaseClient {
-    private $url;
-    private $key;
-    private $authUrl;
-    private $restUrl;
+// core/supabaseClient.php
+require_once __DIR__ . '/../config/constants.php';
 
-    public function __construct(array $config) {
-        $this->url = $config['supabase_url'];
-        $this->key = $config['supabase_key'];
-        $this->authUrl = $config['supabase_auth_url'];
-        $this->restUrl = $config['supabase_rest_url'];
+function supabaseRequest(string $endpoint, array $data, string $method = 'POST'): array {
+    $url = SUPABASE_URL . $endpoint;
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            'Content-Type: application/json',
+            'apikey: ' . SUPABASE_SERVICE_KEY,
+            'Authorization: Bearer ' . SUPABASE_SERVICE_KEY
+        ],
+        CURLOPT_CUSTOMREQUEST => $method,
+        CURLOPT_POSTFIELDS => json_encode($data),
+        CURLOPT_SSL_VERIFYPEER => false // solo para local dev
+    ]);
+
+    $response = curl_exec($ch);
+    $error = curl_error($ch);
+    $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($error) {
+        return ['error' => $error, 'status' => 0];
     }
 
-    private function request($method, $url, $data = null) {
-        $ch = curl_init($url);
-        $headers = [
-            "apikey: {$this->key}",
-            "Authorization: Bearer {$this->key}",
-            "Content-Type: application/json"
-        ];
-
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-        if ($data) {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        }
-
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        return json_decode($response, true);
-    }
-
-    // Ejemplo: obtener datos de una tabla
-    public function select($table) {
-        return $this->request("GET", "{$this->restUrl}/{$table}");
-    }
-
-    // Ejemplo: insertar datos
-    public function insert($table, $data) {
-        return $this->request("POST", "{$this->restUrl}/{$table}", $data);
-    }
+    return [
+        'status' => $status,
+        'data' => json_decode($response, true)
+    ];
 }

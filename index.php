@@ -1,13 +1,10 @@
-
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DELIX | Gestión Inteligente para Restaurantes</title>
-    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./public/assets/css/style.css">
 </head>
 <body>
 
@@ -38,7 +35,7 @@
                 </div>
             </div>
             <div class="hero-img">
-                <img src="./img/hero.jpg" alt="Restaurante moderno y acogedor">
+                <img src="./public/assets/img/hero.jpg" alt="Restaurante moderno y acogedor">
 
             </div>
         </div>
@@ -78,10 +75,10 @@
         <div class="container">
             <h2>Así se vive la experiencia DELIX</h2>
             <div class="gallery-grid">
-                <img src="./img/RestauranteModerno.png" alt="Restaurante moderno">
-                <img src="./img/CocinaProfecional.png" alt="Cocina profesional">
-                <img src="./img/BuenServicio.png" alt="Servicio eficiente">
-                <img src="./img/BuenAmbiente.png" alt="Ambiente amigable">
+                <img src="./public/assets/img/RestauranteModerno.png" alt="Restaurante moderno">
+                <img src="./public/assets/img/CocinaProfecional.png" alt="Cocina profesional">
+                <img src="./public/assets/img/BuenServicio.png" alt="Servicio eficiente">
+                <img src="./public/assets/img/BuenAmbiente.png" alt="Ambiente amigable">
             </div>
         </div>
     </section>
@@ -117,59 +114,67 @@
     </section>
 
     <!-- MODALES -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeLogin">&times;</span>
-            <h3>Iniciar Sesión</h3>
-            <form method="POST" action="login.php">
-                <input type="text" name="usuario" placeholder="Usuario" required>
-                <input type="password" name="password" placeholder="Contraseña" required>
-                <button type="submit" class="btn-primary">Entrar</button>
-            </form>
+     <!-- MODAL DE LOGIN -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeLogin">&times;</span>
+      <h3>Iniciar Sesión</h3>
+      <form method="POST" action="../src/auth/login.php">
+        <div class="form-group">
+          <input type="email" name="email" placeholder="Correo electrónico" required>
         </div>
+
+        <div class="form-group">
+          <input type="password" name="password" placeholder="Contraseña" required>
+        </div>
+
+        <button type="submit" class="btn-primary">Entrar</button>
+      </form>
     </div>
-
-    <div id="registerModal" class="modal">
-  <div class="modal-content">
-    <span class="close" id="closeRegister">&times;</span>
-    <h3>Crear una cuenta</h3>
-    <form method="POST" action="../public/register.php">
-      
-      <div class="form-group">
-        <input type="text" name="first_name" placeholder="Nombre" required>
-      </div>
-
-      <div class="form-group">
-        <input type="text" name="last_name" placeholder="Apellido" required>
-      </div>
-
-      <div class="form-group">
-        <input type="email" name="email" placeholder="Correo electrónico" required>
-      </div>
-
-      <div class="form-group">
-        <input type="text" name="restaurant_name" placeholder="Nombre del restaurante" required>
-      </div>
-
-      <div class="form-group">
-        <input type="password" name="password" placeholder="Contraseña" required minlength="8">
-      </div>
-
-      <div class="form-group">
-        <input type="password" name="confirm_password" placeholder="Confirmar contraseña" required minlength="8">
-      </div>
-
-      <div class="form-group">
-        <label>
-          <input type="checkbox" name="accept_terms" required>
-          Acepto los <a href="#">términos</a> y la <a href="#">política de privacidad</a>
-        </label>
-      </div>
-
-      <button type="submit" class="btn-primary">Registrarse</button>
-    </form>
   </div>
-</div>
+
+     <!-- MODAL DE REGISTRO -->
+  <div id="registerModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeRegister">&times;</span>
+      <h3>Crear una cuenta</h3>
+      <form method="POST" action="./src/auth/register.php">
+        <div class="form-group">
+          <input type="text" name="first_name" placeholder="Nombre" required>
+        </div>
+
+        <div class="form-group">
+          <input type="text" name="last_name" placeholder="Apellido" required>
+        </div>
+
+        <div class="form-group">
+          <input type="email" name="email" placeholder="Correo electrónico" required>
+        </div>
+
+        <div class="form-group">
+          <input type="text" name="restaurant_name" placeholder="Nombre del restaurante" required>
+        </div>
+
+        <div class="form-group">
+          <input type="password" name="password" placeholder="Contraseña" required minlength="8">
+        </div>
+
+        <div class="form-group">
+          <input type="password" name="confirm_password" placeholder="Confirmar contraseña" required minlength="8">
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" name="accept_terms" required>
+            Acepto los <a href="#">términos</a> y la <a href="#">política de privacidad</a>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-primary">Registrarse</button>
+      </form>
+    </div>
+  </div>
+
 
 
     <!-- FOOTER -->
@@ -180,8 +185,8 @@
         </div>
     </footer>
 
-    <script src="./js/modal.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="./public/assets/js/modal.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
 
 </body>
 </html>
