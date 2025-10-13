@@ -354,6 +354,17 @@ body {
 .footer p {
     margin-bottom: 5px;
 }
+.logo {
+  font-size: 2rem; /* controla el tamaño del logo */
+  line-height: 1;  /* opcional: evita espacio extra */
+}
+
+.logo img {
+  height: 1em; /* iguala la altura al texto */
+  width: auto; /* mantiene proporciones */
+  vertical-align: middle; /* centra verticalmente */
+}
+
 
 /* -------------------------
    ANIMACIONES

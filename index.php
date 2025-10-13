@@ -11,7 +11,7 @@
     <!-- HEADER -->
     <header class="header">
         <div class="container header-content">
-            <h1 class="logo">img</h1>
+            <h1 class="logo">DELIX</h1>
             <nav class="nav">
                 <a href="#features">Características</a>
                 <a href="#gallery">Galería</a>
@@ -187,6 +187,8 @@
 
     <script src="./public/assets/js/modal.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+    <script src="./public/assets/js/register.js"></script>
+
 
 </body>
 </html>

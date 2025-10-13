@@ -4,8 +4,8 @@ require_once __DIR__ . '/constants.php';
 function supabaseRequest($endpoint, $method = 'GET', $data = null) {
     $url = SUPABASE_URL . $endpoint;
     $headers = [
-        "apikey: " . SUPABASE_KEY,
-        "Authorization: Bearer " . SUPABASE_KEY,
+        "apikey: " . SUPABASE_SERVICE_KEY,
+        "Authorization: Bearer " . SUPABASE_SERVICE_KEY,
         "Content-Type: application/json"
     ];
 

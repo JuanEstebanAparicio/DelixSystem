@@ -1,0 +1,7 @@
+Array
+(
+    [code] => 500
+    [error_code] => unexpected_failure
+    [msg] => Error sending confirmation email
+    [error_id] => 98e1eccbe71e3dd2-MIA
+)
