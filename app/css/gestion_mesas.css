@@ -1,0 +1,60 @@
+   body {
+      font-family: Arial;
+      background: #f4f4f4;
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+    }
+    h2 {
+      margin-top: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .area {
+      background: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .mesas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .mesa {
+      background: #d9d9d9;
+      padding: 10px 15px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 160px;
+    }
+    .qr-btn, .edit-btn, .delete-btn {
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      padding: 5px 8px;
+      color: white;
+    }
+    .qr-btn { background: #205ca4; }
+    .edit-btn { background: #ffa500; }
+    .delete-btn { background: #e53935; }
+    .add-btn {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+    form { display: inline; }
+    input[type="text"] {
+      padding: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
