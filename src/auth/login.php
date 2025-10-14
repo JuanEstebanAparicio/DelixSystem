@@ -42,4 +42,4 @@ $_SESSION['admin'] = [
 ];
 
 // Redirigir al dashboard
-echo '<script>alert("Bienvenido, ' . htmlspecialchars($admin['nombre']) . '!"); window.location.href = "../../public/dashboard.php";</script>';
+echo '<script>alert("Bienvenido, ' . htmlspecialchars($admin['nombre']) . '!"); window.location.href = "../../app/views/dashboard.php";</script>';

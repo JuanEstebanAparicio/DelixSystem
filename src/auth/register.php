@@ -1,12 +1,13 @@
 <?php
 // PROJECTDELIX/src/auth/register.php
-
 require_once __DIR__ . '/../../app/config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    exit('Método no permitido');
+    echo json_encode(['status' => 'error', 'message' => 'Método no permitido']);
+    exit;
 }
 
+// --- Sanitizar datos ---
 $nombre       = trim($_POST['first_name'] ?? '');
 $apellido     = trim($_POST['last_name'] ?? '');
 $correo       = trim($_POST['email'] ?? '');
@@ -14,14 +15,26 @@ $restaurante  = trim($_POST['restaurant_name'] ?? '');
 $contrasena   = $_POST['password'] ?? '';
 $confirmacion = $_POST['confirm_password'] ?? '';
 
+// --- Validaciones básicas ---
 if ($contrasena !== $confirmacion) {
-    exit('Las contraseñas no coinciden.');
+    echo json_encode(['status' => 'error', 'message' => 'Las contraseñas no coinciden.']);
+    exit;
 }
 
 if (!$nombre || !$apellido || !$correo || !$restaurante || !$contrasena) {
-    exit('Por favor completa todos los campos.');
+    echo json_encode(['status' => 'error', 'message' => 'Por favor completa todos los campos.']);
+    exit;
 }
 
+// --- Verificar si el correo ya existe ---
+$check = supabase('admins?correo=eq.' . urlencode($correo), 'GET');
+
+if (!empty($check['data'])) {
+    echo json_encode(['status' => 'error', 'message' => 'El correo ya está registrado.']);
+    exit;
+}
+
+// --- Insertar nuevo admin ---
 $hash = password_hash($contrasena, PASSWORD_BCRYPT);
 
 $data = [
@@ -33,11 +46,13 @@ $data = [
     'verificado'  => false
 ];
 
-// Insertar en tabla admins
 $response = supabase('admins', 'POST', [$data]);
 
 if ($response['status'] >= 200 && $response['status'] < 300) {
-    echo '<script>alert("Registro exitoso ✅"); window.location.href = "../../public/index.php";</script>';
+    echo json_encode(['status' => 'success', 'message' => 'Registro exitoso']);
 } else {
-    echo '<script>alert("Error al registrar: ' . htmlspecialchars($response['error'] ?? 'Error desconocido') . '"); window.history.back();</script>';
+    echo json_encode([
+        'status'  => 'error',
+        'message' => 'Error al registrar: ' . ($response['error'] ?: json_encode($response['data']))
+    ]);
 }
