@@ -138,7 +138,7 @@
     <div class="modal-content">
       <span class="close" id="closeRegister">&times;</span>
       <h3>Crear una cuenta</h3>
-      <form method="POST" action="../src/auth/register.php">
+      <form id="registerForm" method="POST">
         <div class="form-group">
           <input type="text" name="first_name" placeholder="Nombre" required>
         </div>
@@ -186,7 +186,8 @@
     </footer>
 
 
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="../public/js/register.js"></script>
 <script src="./assets/js/modal.js"></script>
 </body>
 </html>
