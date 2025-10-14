@@ -1,6 +1,0 @@
-Array
-(
-    [code] => 429
-    [error_code] => over_email_send_rate_limit
-    [msg] => email rate limit exceeded
-)
