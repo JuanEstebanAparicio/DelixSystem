@@ -1,6 +1,6 @@
 <?php
 // gestion_mesas.php
-include __DIR__ . '/../../../config/supabase.php';
+include __DIR__ . '/../../config/supabase.php';
 ?>
 
 <!DOCTYPE html>

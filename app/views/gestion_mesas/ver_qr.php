@@ -1,5 +1,5 @@
 <?php
-include __DIR__ . '/../../../config/supabase.php';
+include __DIR__ . '/../../config/supabase.php';
 
 $id_mesa = $_GET['id'] ?? null;
 
