@@ -1,110 +1,108 @@
 <?php
-// gestion_mesas.php
 include __DIR__ . '/../../config/supabase.php';
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Gestión de Mesas (Supabase)</title>
-    <link rel="stylesheet" href="../../CSS/gestion_mesas.css">
+  <title>Gestión de Mesas</title>
+  <link rel="stylesheet" href="../../CSS/gestion_mesas.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  
-<?php if (isset($_GET['error'])): ?>
-  <div style="background:#f8d7da; color:#721c24; padding:10px; border-radius:6px; margin-bottom:15px;">
-    <?php if ($_GET['error'] === 'area_existente'): ?>
-      ⚠️ Ya existe un área con ese nombre.
-    <?php elseif ($_GET['error'] === 'mesa_existente'): ?>
-      ⚠️ Ya existe una mesa con ese nombre en esta área.
-    <?php endif; ?>
-  </div>
-<?php endif; ?>
 
-<h1>Gestión de Mesas (Supabase)</h1>
+<header class="main-header">
+  <h1><i class="fa-solid fa-utensils"></i> Gestión de Mesas</h1>
+</header>
 
-<!-- Crear nueva área -->
-<h3>Agregar nueva área</h3>
-<form action="crud_areas.php" method="POST">
-  <input type="hidden" name="accion" value="crear">
-  <input type="text" name="nombre_area" placeholder="Nombre del área" required>
-  <button type="submit" class="add-btn">+ Área</button>
-</form>
+<div class="container">
 
-<hr>
+  <?php if (isset($_GET['error'])): ?>
+    <div class="alert <?= $_GET['error'] ? 'alert-error' : 'alert-success' ?>">
+      <?php if ($_GET['error'] === 'area_existente'): ?>
+        ⚠️ Ya existe un área con ese nombre.
+      <?php elseif ($_GET['error'] === 'mesa_existente'): ?>
+        ⚠️ Ya existe una mesa con ese nombre en esta área.
+      <?php endif; ?>
+    </div>
+  <?php endif; ?>
 
-<?php
-$areasStmt = $conexion->query("SELECT * FROM areas ORDER BY id_area");
-$areas = $areasStmt->fetchAll(PDO::FETCH_ASSOC);
+  <section class="add-section">
+    <h2><i class="fa-solid fa-plus"></i> Nueva área</h2>
+    <form action="crud_areas.php" method="POST" class="add-form">
+      <input type="hidden" name="accion" value="crear">
+      <input type="text" name="nombre_area" placeholder="Nombre del área" required class="input-text">
+      <button type="submit" class="btn-primary">
+        <i class="fa-solid fa-plus"></i> Crear área
+      </button>
+    </form>
+  </section>
 
-foreach ($areas as $area):
-?>
-  <div class="area">
-    <h2>
-      <?= htmlspecialchars($area['nombre']) ?>
+  <hr class="divider">
 
-      <span>
-        <!-- Editar área -->
-        <form action="crud_areas.php" method="POST" style="display:inline;">
+  <?php
+  $areasStmt = $conexion->query("SELECT * FROM areas ORDER BY id_area");
+  $areas = $areasStmt->fetchAll(PDO::FETCH_ASSOC);
+
+  foreach ($areas as $area):
+  ?>
+  <div class="area-card">
+    <div class="area-header">
+      <h3><i class="fa-solid fa-layer-group"></i> <?= htmlspecialchars($area['nombre']) ?></h3>
+      <div class="area-actions">
+        <form action="crud_areas.php" method="POST" class="inline-form">
           <input type="hidden" name="accion" value="editar">
           <input type="hidden" name="id_area" value="<?= $area['id_area'] ?>">
-          <input type="text" name="nombre_area" placeholder="Nuevo nombre" required>
-          <button type="submit" class="edit-btn">Editar</button>
+          <input type="text" name="nombre_area" placeholder="Nuevo nombre" required class="input-text-small">
+          <button type="submit" class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
         </form>
-
-        <!-- Eliminar área -->
-        <a href="crud_areas.php?accion=eliminar&id_area=<?= $area['id_area'] ?>"
-           onclick="return confirm('¿Eliminar esta área y sus mesas?');">
-           <button class="delete-btn">Eliminar</button>
+        <a href="crud_areas.php?accion=eliminar&id_area=<?= $area['id_area'] ?>" onclick="return confirm('¿Eliminar esta área y sus mesas?');" class="btn-icon delete">
+          <i class="fa-solid fa-trash"></i>
         </a>
-      </span>
-    </h2>
+      </div>
+    </div>
 
-    <!-- Crear mesa en esta área -->
-    <form action="crud_mesas.php" method="POST" style="margin-top:10px;">
+    <form action="crud_mesas.php" method="POST" class="add-form mesa-form">
       <input type="hidden" name="accion" value="crear">
       <input type="hidden" name="id_area" value="<?= $area['id_area'] ?>">
-      <input type="text" name="nombre_mesa" placeholder="Nombre de la mesa" required>
-      <button type="submit" class="add-btn">+ Mesa</button>
+      <input type="text" name="nombre_mesa" placeholder="Nombre de la mesa" required class="input-text-small">
+      <button type="submit" class="btn-secondary">
+        <i class="fa-solid fa-plus"></i> Añadir mesa
+      </button>
     </form>
 
-    <!-- Listado de mesas -->
-    <div class="mesas">
+    <div class="mesas-grid">
       <?php
       $stmt = $conexion->prepare("SELECT * FROM mesas WHERE id_area = ?");
       $stmt->execute([$area['id_area']]);
       while ($mesa = $stmt->fetch(PDO::FETCH_ASSOC)):
       ?>
-        <div class="mesa">
-          <?= htmlspecialchars($mesa['nombre']) ?>
-          <span>
-            <!-- Ver QR -->
-            <form action="ver_qr.php" method="GET" target="_blank">
-              <input type="hidden" name="id" value="<?= htmlspecialchars($mesa['id_mesa']) ?>">
-              <button type="submit" class="qr-btn">QR</button>
-            </form>
+      <div class="mesa-card">
+        <h4><i class="fa-solid fa-chair"></i> <?= htmlspecialchars($mesa['nombre']) ?></h4>
+        <div class="mesa-actions">
+          <form action="ver_qr.php" method="GET" target="_blank" class="inline-form">
+            <input type="hidden" name="id" value="<?= htmlspecialchars($mesa['id_mesa']) ?>">
+            <button type="submit" class="btn-icon qr"><i class="fa-solid fa-qrcode"></i></button>
+          </form>
 
-            <!-- Editar mesa -->
-            <form action="crud_mesas.php" method="POST" style="display:inline;">
-              <input type="hidden" name="accion" value="editar">
-              <input type="hidden" name="id_mesa" value="<?= $mesa['id_mesa'] ?>">
-              <input type="hidden" name="id_area" value="<?= $area['id_area'] ?>">
-              <input type="text" name="nombre_mesa" placeholder="Nuevo nombre" required>
-              <button type="submit" class="edit-btn">✏️</button>
-            </form>
+          <form action="crud_mesas.php" method="POST" class="inline-form">
+            <input type="hidden" name="accion" value="editar">
+            <input type="hidden" name="id_mesa" value="<?= $mesa['id_mesa'] ?>">
+            <input type="hidden" name="id_area" value="<?= $area['id_area'] ?>">
+            <input type="text" name="nombre_mesa" placeholder="Nuevo nombre" required class="input-text-small">
+            <button type="submit" class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
+          </form>
 
-            <!-- Eliminar mesa -->
-            <a href="crud_mesas.php?accion=eliminar&id_mesa=<?= $mesa['id_mesa'] ?>"
-               onclick="return confirm('¿Eliminar esta mesa?');">
-               <button class="delete-btn">🗑️</button>
-            </a>
-          </span>
+          <a href="crud_mesas.php?accion=eliminar&id_mesa=<?= $mesa['id_mesa'] ?>" onclick="return confirm('¿Eliminar esta mesa?');" class="btn-icon delete">
+            <i class="fa-solid fa-trash"></i>
+          </a>
         </div>
+      </div>
       <?php endwhile; ?>
     </div>
   </div>
-<?php endforeach; ?>
+  <?php endforeach; ?>
 
+</div>
 </body>
 </html>
