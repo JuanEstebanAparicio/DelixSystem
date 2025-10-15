@@ -22,13 +22,22 @@ if (!$mesa) {
 }
 
 // Texto que contendrá el QR
-// Genera la URL pública del túnel ngrok (ajústala a tu dominio actual)
 $ngrok_url = "https://uncatered-thomasina-arousingly.ngrok-free.dev/Proyecto_aula";
 $contenido = "$ngrok_url/app/views/mesas/mesa.php?id={$id_mesa}";
 
-
-// Genera la URL del QR con la API pública
+// Genera la URL del QR
 $qr_url = "https://api.qrserver.com/v1/create-qr-code/?data=" . urlencode($contenido) . "&size=250x250";
+
+
+/* 🔽 INSERTA AQUÍ ESTE BLOQUE 🔽 */
+$isAjax = isset($_GET['ajax']);
+if ($isAjax) {
+    echo "<h3>QR de " . htmlspecialchars($mesa['mesa']) . " (" . htmlspecialchars($mesa['area']) . ")</h3>";
+    echo "<img src='$qr_url' alt='QR de la mesa' style='width:250px;height:250px;'>";
+    echo "<p><a href='$qr_url' download='QR_". htmlspecialchars($mesa['mesa']) .".png'>Descargar QR</a></p>";
+    exit;
+}
+/* 🔼 HASTA AQUÍ 🔼 */
 
 ?>
 <!DOCTYPE html>

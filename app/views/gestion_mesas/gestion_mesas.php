@@ -80,10 +80,9 @@ include __DIR__ . '/../../config/supabase.php';
       <div class="mesa-card">
         <h4><i class="fa-solid fa-chair"></i> <?= htmlspecialchars($mesa['nombre']) ?></h4>
         <div class="mesa-actions">
-          <form action="ver_qr.php" method="GET" target="_blank" class="inline-form">
-            <input type="hidden" name="id" value="<?= htmlspecialchars($mesa['id_mesa']) ?>">
-            <button type="submit" class="btn-icon qr"><i class="fa-solid fa-qrcode"></i></button>
-          </form>
+          <button type="button"class="btn-icon qr"data-modal-target="#qrModal"data-id-mesa="<?= htmlspecialchars($mesa['id_mesa']) ?>"title="Ver QR"><i class="fa-solid fa-qrcode"></i></button>
+
+
 
           <form action="crud_mesas.php" method="POST" class="inline-form">
             <input type="hidden" name="accion" value="editar">
@@ -104,5 +103,41 @@ include __DIR__ . '/../../config/supabase.php';
   <?php endforeach; ?>
 
 </div>
+<!-- Modal QR -->
+<div id="qrModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <button class="close">&times;</button>
+    <div id="qrModalContent" class="qr-content">
+      <p>Cargando QR...</p>
+    </div>
+  </div>
+</div>
+
+<script src="/ProjectDelix/public/js/modal.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const qrButtons = document.querySelectorAll(".btn-icon.qr");
+  const qrContent = document.getElementById("qrModalContent");
+
+  qrButtons.forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const idMesa = btn.dataset.idMesa;
+      if (!idMesa) return;
+
+      qrContent.innerHTML = "<p>Cargando QR...</p>";
+
+      try {
+        const response = await fetch(`ver_qr.php?id=${idMesa}&ajax=1`);
+        const html = await response.text();
+        qrContent.innerHTML = html;
+      } catch (err) {
+        qrContent.innerHTML = "<p style='color:red;'>Error al cargar el QR.</p>";
+      }
+    });
+  });
+});
+</script>
+
 </body>
 </html>
