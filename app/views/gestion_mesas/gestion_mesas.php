@@ -53,12 +53,14 @@ include __DIR__ . '/../../config/supabase.php';
         <form action="crud_areas.php" method="POST" class="inline-form">
           <input type="hidden" name="accion" value="editar">
           <input type="hidden" name="id_area" value="<?= $area['id_area'] ?>">
+            <div>
           <input type="text" name="nombre_area" placeholder="Nuevo nombre" required class="input-text-small">
+          
           <button type="submit" class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
         </form>
         <a href="crud_areas.php?accion=eliminar&id_area=<?= $area['id_area'] ?>"data-confirm="¿Eliminar esta área y sus mesas?"class="btn-icon delete"><i class="fa-solid fa-trash"></i>
-</a>
-
+        </a>
+        </div>
       </div>
     </div>
 
@@ -82,8 +84,6 @@ include __DIR__ . '/../../config/supabase.php';
         <div class="mesa-actions">
           <button type="button"class="btn-icon qr"data-modal-target="#qrModal"data-id-mesa="<?= htmlspecialchars($mesa['id_mesa']) ?>"title="Ver QR"><i class="fa-solid fa-qrcode"></i></button>
 
-
-
           <form action="crud_mesas.php" method="POST" class="inline-form">
             <input type="hidden" name="accion" value="editar">
             <input type="hidden" name="id_mesa" value="<?= $mesa['id_mesa'] ?>">
@@ -91,7 +91,6 @@ include __DIR__ . '/../../config/supabase.php';
             <input type="text" name="nombre_mesa" placeholder="Nuevo nombre" required class="input-text-small">
             <button type="submit" class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
           </form>
-
           <a href="crud_mesas.php?accion=eliminar&id_mesa=<?= $mesa['id_mesa'] ?>"data-confirm="¿Eliminar esta mesa?"class="btn-icon delete"><i class="fa-solid fa-trash"></i></a>
 
         </div>
