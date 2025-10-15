@@ -9,7 +9,7 @@ $password = "Delix2025"; // tu contraseña
 try {
     $conexion = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $user, $password);
     $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-   // echo "Conexión exitosa a Supabase";
+    // echo "Conexión exitosa a Supabase";
 } catch (PDOException $e) {
     die("Error de conexión a Supabase: " . $e->getMessage());
 }

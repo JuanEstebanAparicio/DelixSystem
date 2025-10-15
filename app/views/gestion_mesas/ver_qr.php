@@ -22,7 +22,10 @@ if (!$mesa) {
 }
 
 // Texto que contendrá el QR
-$contenido = "Mesa: {$mesa['mesa']} | Área: {$mesa['area']}";
+// Genera la URL pública del túnel ngrok (ajústala a tu dominio actual)
+$ngrok_url = "https://uncatered-thomasina-arousingly.ngrok-free.dev/Proyecto_aula";
+$contenido = "$ngrok_url/app/views/mesas/mesa.php?id={$id_mesa}";
+
 
 // Genera la URL del QR con la API pública
 $qr_url = "https://api.qrserver.com/v1/create-qr-code/?data=" . urlencode($contenido) . "&size=250x250";

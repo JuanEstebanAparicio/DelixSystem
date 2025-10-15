@@ -11,6 +11,16 @@ include __DIR__ . '/../../config/supabase.php';
     <link rel="stylesheet" href="../../CSS/gestion_mesas.css">
 </head>
 <body>
+  
+<?php if (isset($_GET['error'])): ?>
+  <div style="background:#f8d7da; color:#721c24; padding:10px; border-radius:6px; margin-bottom:15px;">
+    <?php if ($_GET['error'] === 'area_existente'): ?>
+      ⚠️ Ya existe un área con ese nombre.
+    <?php elseif ($_GET['error'] === 'mesa_existente'): ?>
+      ⚠️ Ya existe una mesa con ese nombre en esta área.
+    <?php endif; ?>
+  </div>
+<?php endif; ?>
 
 <h1>Gestión de Mesas (Supabase)</h1>
 
