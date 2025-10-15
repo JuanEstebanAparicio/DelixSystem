@@ -56,9 +56,9 @@ include __DIR__ . '/../../config/supabase.php';
           <input type="text" name="nombre_area" placeholder="Nuevo nombre" required class="input-text-small">
           <button type="submit" class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
         </form>
-        <a href="crud_areas.php?accion=eliminar&id_area=<?= $area['id_area'] ?>" onclick="return confirm('¿Eliminar esta área y sus mesas?');" class="btn-icon delete">
-          <i class="fa-solid fa-trash"></i>
-        </a>
+        <a href="crud_areas.php?accion=eliminar&id_area=<?= $area['id_area'] ?>"data-confirm="¿Eliminar esta área y sus mesas?"class="btn-icon delete"><i class="fa-solid fa-trash"></i>
+</a>
+
       </div>
     </div>
 
@@ -92,9 +92,8 @@ include __DIR__ . '/../../config/supabase.php';
             <button type="submit" class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
           </form>
 
-          <a href="crud_mesas.php?accion=eliminar&id_mesa=<?= $mesa['id_mesa'] ?>" onclick="return confirm('¿Eliminar esta mesa?');" class="btn-icon delete">
-            <i class="fa-solid fa-trash"></i>
-          </a>
+          <a href="crud_mesas.php?accion=eliminar&id_mesa=<?= $mesa['id_mesa'] ?>"data-confirm="¿Eliminar esta mesa?"class="btn-icon delete"><i class="fa-solid fa-trash"></i></a>
+
         </div>
       </div>
       <?php endwhile; ?>
@@ -138,6 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/ProjectDelix/public/js/alert.js"></script>
 </body>
 </html>

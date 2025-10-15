@@ -1,65 +1,99 @@
 // PROJECTDELIX/public/js/alert.js
-// Archivo central de notificaciones con SweetAlert2
-// Se importa una sola vez y puede usarse en cualquier script
-
-// Asegúrate de incluir SweetAlert2 antes de este script en tu HTML:
-// <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-// <script src="./js/alert.js"></script>
+// Sistema centralizado de SweetAlert2 reutilizable en todo el proyecto
 
 window.Alerts = {
-  success: (message, title = 'Éxito') => {
+  success(message, title = 'Éxito') {
     Swal.fire({
       icon: 'success',
-      title: title,
+      title,
       text: message,
       confirmButtonColor: '#3085d6',
       confirmButtonText: 'Aceptar',
-      timer: 3000,
-      timerProgressBar: true
+      timer: 2500,
+      timerProgressBar: true,
     });
   },
 
-  error: (message, title = 'Error') => {
+  error(message, title = 'Error') {
     Swal.fire({
       icon: 'error',
-      title: title,
+      title,
       text: message,
       confirmButtonColor: '#d33',
-      confirmButtonText: 'Cerrar'
+      confirmButtonText: 'Cerrar',
     });
   },
 
-  warning: (message, title = 'Advertencia') => {
+  warning(message, title = 'Advertencia') {
     Swal.fire({
       icon: 'warning',
-      title: title,
+      title,
       text: message,
       confirmButtonColor: '#f1c40f',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
     });
   },
 
-  info: (message, title = 'Información') => {
+  info(message, title = 'Información') {
     Swal.fire({
       icon: 'info',
-      title: title,
+      title,
       text: message,
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Ok'
+      confirmButtonText: 'Ok',
     });
   },
 
-  confirm: async (message, title = '¿Estás seguro?') => {
+  async confirm(message, title = '¿Estás seguro?', options = {}) {
     const result = await Swal.fire({
-      title: title,
+      title,
       text: message,
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Sí',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
+      ...options,
     });
     return result.isConfirmed;
-  }
+  },
+
+  loading(message = 'Procesando...') {
+    Swal.fire({
+      title: message,
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+  },
+
+  close() {
+    Swal.close();
+  },
+
+  // --- Auto-gestión de botones con confirmación y formularios con loader ---
+  handleConfirmables() {
+    // Botones o enlaces con data-confirm
+    document.querySelectorAll('[data-confirm]').forEach(el => {
+      el.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const url = el.getAttribute('href');
+        const msg = el.dataset.confirm || '¿Estás seguro de continuar?';
+
+        const confirmed = await Alerts.confirm(msg);
+        if (confirmed) {
+          Alerts.loading();
+          setTimeout(() => (window.location.href = url), 600);
+        }
+      });
+    });
+
+    // Formularios con data-loader
+    document.querySelectorAll('form[data-loader]').forEach(form => {
+      form.addEventListener('submit', () => Alerts.loading());
+    });
+  },
 };
+
+// Inicializar automáticamente en cada carga
+document.addEventListener('DOMContentLoaded', Alerts.handleConfirmables);
