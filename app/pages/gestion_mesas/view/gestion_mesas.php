@@ -1,12 +1,12 @@
 <?php
-include __DIR__ . '/../../config/supabase.php';
+include __DIR__ . '/../../../config/supabase.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Gestión de Mesas</title>
-  <link rel="stylesheet" href="../../CSS/gestion_mesas.css">
+  <link rel="stylesheet" href="../css/gestion_mesas.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -29,7 +29,7 @@ include __DIR__ . '/../../config/supabase.php';
 
   <section class="add-section">
     <h2><i class="fa-solid fa-plus"></i> Nueva área</h2>
-    <form action="crud_areas.php" method="POST" class="add-form">
+    <form action="../php/area/AreaController.php" method="POST">
       <input type="hidden" name="accion" value="crear">
       <input type="text" name="nombre_area" placeholder="Nombre del área" required class="input-text">
       <button type="submit" class="btn-primary">
@@ -50,7 +50,7 @@ include __DIR__ . '/../../config/supabase.php';
     <div class="area-header">
       <h3><i class="fa-solid fa-layer-group"></i> <?= htmlspecialchars($area['nombre']) ?></h3>
       <div class="area-actions">
-        <form action="crud_areas.php" method="POST" class="inline-form">
+        <form action="../php/area/AreaController.php" method="POST">
           <input type="hidden" name="accion" value="editar">
           <input type="hidden" name="id_area" value="<?= $area['id_area'] ?>">
             <div>
@@ -64,7 +64,7 @@ include __DIR__ . '/../../config/supabase.php';
       </div>
     </div>
 
-    <form action="crud_mesas.php" method="POST" class="add-form mesa-form">
+    <form action="./php/area/AreaController.php" method="POST" class="add-form mesa-form">
       <input type="hidden" name="accion" value="crear">
       <input type="hidden" name="id_area" value="<?= $area['id_area'] ?>">
       <input type="text" name="nombre_mesa" placeholder="Nombre de la mesa" required class="input-text-small">
@@ -84,7 +84,7 @@ include __DIR__ . '/../../config/supabase.php';
         <div class="mesa-actions">
           
 
-          <form action="crud_mesas.php" method="POST" class="inline-form">
+          <form action="./crud_mesas.php" method="POST" class="inline-form">
             <input type="hidden" name="accion" value="editar">
             <input type="hidden" name="id_mesa" value="<?= $mesa['id_mesa'] ?>">
             <input type="hidden" name="id_area" value="<?= $area['id_area'] ?>">
