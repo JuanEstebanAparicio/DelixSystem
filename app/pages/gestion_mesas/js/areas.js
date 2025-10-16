@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const formCrearArea = document.querySelector('form[action="../php/area/AreaController.php"][data-loader]');
   const container = document.querySelector('.container');
 
-  // 🟢 CREAR ÁREA
+  // 🟢 CREAR ÁREA (NO TOCAR — FUNCIONA BIEN)
   if (formCrearArea) {
     formCrearArea.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 🟠 EDITAR ÁREA (delegación de eventos)
+  // 🟠 EDITAR ÁREA (AHORA ACTUALIZA DOM INMEDIATAMENTE)
   container.addEventListener('submit', async (e) => {
     const form = e.target.closest('form[action="../php/area/AreaController.php"]');
     if (!form || form.querySelector('input[name="accion"]').value !== 'editar') return;
@@ -35,23 +35,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const formData = new FormData(form);
     formData.append('accion', 'editar');
 
-    const res = await fetch(form.action, {
-      method: 'POST',
-      body: formData,
-      headers: { 'X-Requested-With': 'XMLHttpRequest' },
-    });
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
 
-    const data = await res.json();
-    if (data.status === 'success') {
-      Alerts.success(data.message);
-      actualizarNombreAreaDOM(data.data.id_area, data.data.nombre);
-      form.reset();
-    } else {
-      Alerts.warning(data.message);
+      const data = await res.json();
+      if (data.status === 'success') {
+        Alerts.success(data.message);
+        actualizarNombreAreaDOM(data.data.id_area, data.data.nombre);
+        const inputNombre = form.querySelector('input[name="nombre_area"]');
+        if (inputNombre) inputNombre.value = '';
+      } else {
+        Alerts.warning(data.message);
+      }
+    } catch (error) {
+      Alerts.error('Error al editar el área');
+      console.error(error);
     }
   });
 
-  // 🔴 ELIMINAR ÁREA (delegación)
+  // 🔴 ELIMINAR ÁREA (AHORA REMUEVE INSTANTÁNEAMENTE)
   container.addEventListener('click', async (e) => {
     const btn = e.target.closest('a[data-confirm][href*="AreaController.php"]');
     if (!btn) return;
@@ -63,24 +69,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!confirmed) return;
 
     Alerts.loading();
+
     const formData = new FormData();
     formData.append('accion', 'eliminar');
     formData.append('id_area', id_area);
 
-    const res = await fetch('../php/area/AreaController.php', {
-      method: 'POST',
-      body: formData,
-      headers: { 'X-Requested-With': 'XMLHttpRequest' },
-    });
+    try {
+      const res = await fetch('../php/area/AreaController.php', {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
 
-    const data = await res.json();
-    Alerts.close();
+      const data = await res.json();
+      Alerts.close();
 
-    if (data.status === 'success') {
-      eliminarAreaDOM(id_area);
-      Alerts.success('Área eliminada correctamente');
-    } else {
-      Alerts.error(data.message);
+      if (data.status === 'success') {
+        eliminarAreaDOM(id_area);
+        Alerts.success('Área eliminada correctamente');
+      } else {
+        Alerts.error(data.message);
+      }
+    } catch (error) {
+      Alerts.error('Error al eliminar el área');
+      console.error(error);
     }
   });
 
@@ -126,11 +138,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (areaCard) {
       const title = areaCard.querySelector('h3');
       if (title) title.innerHTML = `<i class="fa-solid fa-layer-group"></i> ${nuevoNombre}`;
+    } else {
+      console.warn('Área no encontrada para actualizar:', id);
     }
   }
 
   function eliminarAreaDOM(id) {
     const areaCard = document.querySelector(`.area-card[data-id="${id}"]`);
-    if (areaCard) areaCard.remove();
+    if (areaCard) {
+      areaCard.style.transition = 'opacity 0.3s ease';
+      areaCard.style.opacity = '0';
+      setTimeout(() => areaCard.remove(), 300);
+    } else {
+      console.warn('Área no encontrada para eliminar:', id);
+    }
   }
 });

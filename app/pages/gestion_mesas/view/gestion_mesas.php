@@ -46,7 +46,7 @@ $areas = $areasStmt->fetchAll(PDO::FETCH_ASSOC);
 
 foreach ($areas as $area):
 ?>
-<div class="area-card">
+<div class="area-card" data-id="<?= $area['id_area'] ?>">
   <div class="area-header">
     <h3><i class="fa-solid fa-layer-group"></i> <?= htmlspecialchars($area['nombre']) ?></h3>
     <div class="area-actions">
