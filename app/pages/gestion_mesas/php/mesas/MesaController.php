@@ -9,9 +9,10 @@ $mesaModel = new MesaModel($conexion);
 $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
 try {
-    // 🔹 Eliminar mesa
+    // 🔹 ELIMINAR MESA
     if (($_POST['accion'] ?? '') === 'eliminar') {
         $id_mesa = $_POST['id_mesa'] ?? null;
+
         if ($id_mesa) {
             $mesaModel->eliminarMesa($id_mesa);
             $response = ['status' => 'success', 'message' => 'Mesa eliminada correctamente'];
@@ -25,50 +26,73 @@ try {
         }
     }
 
-    // 🔹 Crear o editar mesa
+    // 🔹 CREAR o EDITAR MESA
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $accion = $_POST['accion'] ?? '';
         $id_area = $_POST['id_area'] ?? null;
         $nombre = trim($_POST['nombre_mesa'] ?? '');
         $id_mesa = $_POST['id_mesa'] ?? null;
 
+        // Validación básica
         if (empty($nombre) || empty($id_area)) {
             $response = ['status' => 'error', 'message' => 'Datos incompletos'];
             echo json_encode($response);
             exit;
         }
 
+        // Evitar duplicados
         if ($mesaModel->mesaExiste($nombre, $id_area, $accion === 'editar' ? $id_mesa : null)) {
             $response = ['status' => 'warning', 'message' => 'Ya existe una mesa con ese nombre en esta área'];
             echo json_encode($response);
             exit;
         }
 
+        // Crear
         if ($accion === 'crear') {
             $nuevaMesa = $mesaModel->crearMesa($id_area, $nombre);
-            $response = ['status' => 'success', 'message' => 'Mesa creada correctamente', 'data' => $nuevaMesa];
-        } elseif ($accion === 'editar' && $id_mesa) {
-            $mesaModel->editarMesa($id_mesa, $id_area, $nombre);
-            $response = ['status' => 'success', 'message' => 'Mesa actualizada correctamente', 'data' => ['id_mesa' => $id_mesa, 'nombre' => $nombre]];
-        } else {
-            $response = ['status' => 'error', 'message' => 'Acción no válida'];
-        }
 
-        if ($isAjax) {
+            if ($nuevaMesa) {
+                $response = [
+                    'status' => 'success',
+                    'message' => 'Mesa creada correctamente',
+                    'data' => $nuevaMesa
+                ];
+            } else {
+                $response = ['status' => 'error', 'message' => 'No se pudo crear la mesa'];
+            }
+
             echo json_encode($response);
             exit;
-        } else {
-            header("Location: ../../view/gestion_mesas.php");
+        }
+
+        // Editar
+        if ($accion === 'editar' && $id_mesa) {
+            $mesaModel->editarMesa($id_mesa, $id_area, $nombre);
+            $response = [
+                'status' => 'success',
+                'message' => 'Mesa actualizada correctamente',
+                'data' => [
+                    'id_mesa' => $id_mesa,
+                    'id_area' => $id_area,
+                    'nombre' => $nombre
+                ]
+            ];
+
+            echo json_encode($response);
             exit;
         }
+
+        // Acción inválida
+        echo json_encode(['status' => 'error', 'message' => 'Acción no válida']);
+        exit;
     }
 
-    // 🔹 Acción no válida
-    if (!$isAjax) {
-        header("Location: ../../view/gestion_mesas.php");
+    // 🔹 Si llega aquí, no hay acción válida
+    if ($isAjax) {
+        echo json_encode(['status' => 'error', 'message' => 'Acción no reconocida']);
         exit;
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'Acción no reconocida']);
+        header("Location: ../../view/gestion_mesas.php");
         exit;
     }
 } catch (Exception $e) {
