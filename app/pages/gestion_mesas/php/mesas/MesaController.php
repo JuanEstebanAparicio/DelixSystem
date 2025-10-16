@@ -69,7 +69,7 @@ try {
             exit;
         }
 
-        // Editar
+        // 🔹 Editar
         if ($accion === 'editar' && $id_mesa) {
             $mesaModel->editarMesa($id_mesa, $id_area, $nombre);
             $response = [
@@ -82,12 +82,22 @@ try {
                 ]
             ];
 
-            echo json_encode($response);
+            if ($isAjax) {
+                echo json_encode($response);
+            } else {
+                header("Location: ../../view/gestion_mesas.php?success=mesa_editada");
+            }
             exit;
         }
 
         // Acción inválida
-        echo json_encode(['status' => 'error', 'message' => 'Acción no válida']);
+        $response = ['status' => 'error', 'message' => 'Acción no válida'];
+
+        if ($isAjax) {
+            echo json_encode($response);
+        } else {
+            header("Location: ../../view/gestion_mesas.php?error=accion_invalida");
+        }
         exit;
     }
 
@@ -104,7 +114,8 @@ try {
         echo json_encode(['status' => 'error', 'message' => 'Error interno: ' . $e->getMessage()]);
         exit;
     } else {
-        die("Error: " . $e->getMessage());
+        header("Location: ../../view/gestion_mesas.php?error=excepcion");
+        exit;
     }
 }
 ?>
