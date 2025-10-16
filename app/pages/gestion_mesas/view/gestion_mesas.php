@@ -54,8 +54,7 @@ foreach ($areas as $area):
         <input type="hidden" name="accion" value="editar">
         <input type="hidden" name="id_area" value="<?= $area['id_area'] ?>">
         <div>
-          <input type="text" name="nombre_area" placeholder="Nuevo nombre" required class="input-text-small">
-          <button type="submit" class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
+          <button type="button" class="btn-icon edit" data-modal-target="#editAreaModal" data-id-area="<?= $area['id_area'] ?>" data-nombre-area="<?= htmlspecialchars($area['nombre']) ?>" title="Editar área"><i class="fa-solid fa-pen"></i></button>
           <a href="../php/area/AreaController.php?accion=eliminar&id_area=<?= $area['id_area'] ?>"
          data-confirm="¿Eliminar esta área y sus mesas?"
          class="btn-icon delete">
@@ -130,13 +129,36 @@ foreach ($areas as $area):
   </div>
 </div>
 
-<script src="/ProjectDelix/public/js/modal.js"></script>
+<!-- Modal Editar Área -->
+<div id="editAreaModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <button class="close">&times;</button>
+    <h3><i class="fa-solid fa-pen-to-square"></i> Editar área</h3>
 
+    <form id="formEditArea" action="../php/area/AreaController.php" method="POST" data-loader>
+      <input type="hidden" name="accion" value="editar">
+      <input type="hidden" name="id_area" id="editAreaId">
+
+      <label for="editAreaName">Nuevo nombre del área</label>
+      <input type="text" name="nombre_area" id="editAreaName" required class="input-text">
+      <br><br>
+      <div class="modal-actions">
+
+        <button type="submit" class="btn-primary">
+          <i class="fa-solid fa-save"></i> Guardar cambios
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<script src="../js/edit.js"></script>
+<script src="/ProjectDelix/public/js/modal.js"></script>
 <script src="../js/qr_modal.js"></script>
 <script src="../js/mesas.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/ProjectDelix/public/js/alert.js"></script>
-
 <script src="../js/areas.js"></script>
 
 </body>
