@@ -83,7 +83,7 @@ foreach ($areas as $area):
     $stmt->execute([$area['id_area']]);
     while ($mesa = $stmt->fetch(PDO::FETCH_ASSOC)):
     ?>
-    <div class="mesa-card">
+    <div class="mesa-card" data-id="<?= $mesa['id_mesa'] ?>">
       <h4><i class="fa-solid fa-chair"></i> <?= htmlspecialchars($mesa['nombre']) ?></h4>
       <div class="mesa-actions">
         <!-- Editar mesa -->
@@ -133,6 +133,7 @@ foreach ($areas as $area):
 <script src="/ProjectDelix/public/js/modal.js"></script>
 
 <script src="../js/qr_modal.js"></script>
+<script src="../js/mesas.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/ProjectDelix/public/js/alert.js"></script>
 
