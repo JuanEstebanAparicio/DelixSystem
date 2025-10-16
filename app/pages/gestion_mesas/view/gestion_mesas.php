@@ -66,8 +66,8 @@ foreach ($areas as $area):
     </div>
   </div>
 
-  <!-- FORMULARIO DE MESAS (sin modificar aún) -->
-  <form action="./php/area/AreaController.php" method="POST" class="add-form mesa-form">
+<!-- 🟩 FORMULARIO PARA CREAR MESAS -->
+  <form action="../php/mesa/MesaController.php" method="POST" class="add-form mesa-form" data-loader>
     <input type="hidden" name="accion" value="crear">
     <input type="hidden" name="id_area" value="<?= $area['id_area'] ?>">
     <input type="text" name="nombre_mesa" placeholder="Nombre de la mesa" required class="input-text-small">
@@ -76,6 +76,7 @@ foreach ($areas as $area):
     </button>
   </form>
 
+  <!-- 🟩 LISTADO DE MESAS -->
   <div class="mesas-grid">
     <?php
     $stmt = $conexion->prepare("SELECT * FROM mesas WHERE id_area = ?");
@@ -85,18 +86,23 @@ foreach ($areas as $area):
     <div class="mesa-card">
       <h4><i class="fa-solid fa-chair"></i> <?= htmlspecialchars($mesa['nombre']) ?></h4>
       <div class="mesa-actions">
-        <form action="./crud_mesas.php" method="POST" class="inline-form">
+        <!-- Editar mesa -->
+        <form action="../php/mesa/MesaController.php" method="POST" class="inline-form" data-loader>
           <input type="hidden" name="accion" value="editar">
           <input type="hidden" name="id_mesa" value="<?= $mesa['id_mesa'] ?>">
           <input type="hidden" name="id_area" value="<?= $area['id_area'] ?>">
           <input type="text" name="nombre_mesa" placeholder="Nuevo nombre" required class="input-text-small">
           <button type="submit" class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
         </form>
-        <a href="crud_mesas.php?accion=eliminar&id_mesa=<?= $mesa['id_mesa'] ?>"
+
+        <!-- Eliminar mesa -->
+        <a href="../php/mesa/MesaController.php?accion=eliminar&id_mesa=<?= $mesa['id_mesa'] ?>"
            data-confirm="¿Eliminar esta mesa?"
            class="btn-icon delete">
            <i class="fa-solid fa-trash"></i>
         </a>
+
+        <!-- Ver QR -->
         <button type="button" class="btn-icon qr"
                 data-modal-target="#qrModal"
                 data-id-mesa="<?= htmlspecialchars($mesa['id_mesa']) ?>"
@@ -109,6 +115,8 @@ foreach ($areas as $area):
   </div>
 </div>
 <?php endforeach; ?>
+
+</div>
 
 
 </div>
