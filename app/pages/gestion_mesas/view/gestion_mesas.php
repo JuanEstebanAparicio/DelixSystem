@@ -135,5 +135,8 @@ foreach ($areas as $area):
 <script src="../js/qr_modal.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/ProjectDelix/public/js/alert.js"></script>
+
+<script src="../js/areas.js"></script>
+
 </body>
 </html>
