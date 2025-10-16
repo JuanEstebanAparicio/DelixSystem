@@ -56,14 +56,13 @@ foreach ($areas as $area):
         <div>
           <input type="text" name="nombre_area" placeholder="Nuevo nombre" required class="input-text-small">
           <button type="submit" class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
-        </div>
-      </form>
-
-      <a href="../php/area/AreaController.php?accion=eliminar&id_area=<?= $area['id_area'] ?>"
+          <a href="../php/area/AreaController.php?accion=eliminar&id_area=<?= $area['id_area'] ?>"
          data-confirm="¿Eliminar esta área y sus mesas?"
          class="btn-icon delete">
          <i class="fa-solid fa-trash"></i>
-      </a>
+        </a>
+        </div>
+      </form>
     </div>
   </div>
 
