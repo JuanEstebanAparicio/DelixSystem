@@ -90,8 +90,17 @@ foreach ($areas as $area):
           <input type="hidden" name="accion" value="editar">
           <input type="hidden" name="id_mesa" value="<?= $mesa['id_mesa'] ?>">
           <input type="hidden" name="id_area" value="<?= $area['id_area'] ?>">
-          <input type="text" name="nombre_mesa" placeholder="Nuevo nombre" required class="input-text-small">
-          <button type="submit" class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
+          <!-- Botón para abrir modal de edición de mesa -->
+<button type="button"
+        class="btn-icon edit"
+        data-modal-target="#editMesaModal"
+        data-id-mesa="<?= $mesa['id_mesa'] ?>"
+        data-id-area="<?= $area['id_area'] ?>"
+        data-nombre-mesa="<?= htmlspecialchars($mesa['nombre']) ?>"
+        title="Editar mesa">
+  <i class="fa-solid fa-pen"></i>
+</button>
+
         </form>
 
         <!-- Eliminar mesa -->
@@ -151,6 +160,30 @@ foreach ($areas as $area):
     </form>
   </div>
 </div>
+
+<!-- Modal Editar Mesa -->
+<div id="editMesaModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <button class="close">&times;</button>
+    <h3><i class="fa-solid fa-pen-to-square"></i> Editar Mesa</h3>
+
+    <form id="formEditMesa" action="../php/mesas/MesaController.php" method="POST" data-loader>
+      <input type="hidden" name="accion" value="editar">
+      <input type="hidden" name="id_mesa" id="editMesaId">
+      <input type="hidden" name="id_area" id="editMesaAreaId">
+
+      <label for="editMesaName">Nuevo nombre de la mesa</label>
+      <input type="text" name="nombre_mesa" id="editMesaName" required class="input-text">
+
+      <div class="modal-actions">
+        <button type="submit" class="btn-primary">
+          <i class="fa-solid fa-save"></i> Guardar cambios
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
 
 <script src="../js/edit.js"></script>
