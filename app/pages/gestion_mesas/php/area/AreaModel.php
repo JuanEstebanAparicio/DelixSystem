@@ -12,25 +12,25 @@ class AreaModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /** Crear área */
+    /** Crear nueva área */
     public function crearArea($nombre) {
         $stmt = $this->db->prepare("INSERT INTO areas (nombre) VALUES (?)");
         return $stmt->execute([$nombre]);
     }
 
-    /** Editar área */
+    /** Editar área existente */
     public function editarArea($id_area, $nombre) {
         $stmt = $this->db->prepare("UPDATE areas SET nombre = ? WHERE id_area = ?");
         return $stmt->execute([$nombre, $id_area]);
     }
 
-    /** Eliminar área (y sus mesas en cascada si aplica) */
+    /** Eliminar área (y sus mesas si hay FK en cascada) */
     public function eliminarArea($id_area) {
         $stmt = $this->db->prepare("DELETE FROM areas WHERE id_area = ?");
         return $stmt->execute([$id_area]);
     }
 
-    /** Verificar si el área ya existe */
+    /** Verificar si un área ya existe */
     public function areaExiste($nombre, $id_area = null) {
         $sql = "SELECT COUNT(*) FROM areas WHERE LOWER(nombre) = LOWER(?)";
         $params = [$nombre];
