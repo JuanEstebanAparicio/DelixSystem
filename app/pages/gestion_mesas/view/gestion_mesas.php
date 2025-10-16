@@ -104,10 +104,10 @@ foreach ($areas as $area):
 
         <!-- Ver QR -->
         <button type="button" class="btn-icon qr"
-                data-modal-target="#qrModal"
-                data-id-mesa="<?= htmlspecialchars($mesa['id_mesa']) ?>"
-                title="Ver QR">
-          <i class="fa-solid fa-qrcode"></i>
+        data-modal-target="#qrModal"
+        data-id-mesa="<?= $mesa['id_mesa'] ?>"
+        title="Ver QR">
+        <i class="fa-solid fa-qrcode"></i>
         </button>
       </div>
     </div>

@@ -47,15 +47,19 @@ try {
             exit;
         }
 
-        // Crear
+        // 🔹 Crear
         if ($accion === 'crear') {
             $nuevaMesa = $mesaModel->crearMesa($id_area, $nombre);
 
-            if ($nuevaMesa) {
+            if ($nuevaMesa && isset($nuevaMesa['id_mesa'])) {
                 $response = [
                     'status' => 'success',
                     'message' => 'Mesa creada correctamente',
-                    'data' => $nuevaMesa
+                    'data' => [
+                        'id_mesa' => $nuevaMesa['id_mesa'],
+                        'id_area' => $id_area,
+                        'nombre' => $nombre
+                    ]
                 ];
             } else {
                 $response = ['status' => 'error', 'message' => 'No se pudo crear la mesa'];
