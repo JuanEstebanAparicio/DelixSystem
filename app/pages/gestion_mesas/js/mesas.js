@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
       Alerts.success(data.message);
       agregarMesaDOM(form.closest('.area-card').querySelector('.mesas-grid'), data.data);
       form.reset();
+      limpiarInputsResiduos();
     } else {
       Alerts.warning(data.message);
     }
@@ -87,30 +88,56 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 📦 FUNCIONES AUXILIARES DOM
-  function agregarMesaDOM(contenedor, mesa) {
-    const div = document.createElement('div');
-    div.classList.add('mesa-card');
-    div.dataset.id = mesa.id_mesa;
-    div.innerHTML = `
-      <h4><i class="fa-solid fa-chair"></i> ${mesa.nombre}</h4>
-      <div class="mesa-actions">
-        <form action="../php/mesas/MesaController.php" method="POST" class="inline-form" data-loader>
-          <input type="hidden" name="accion" value="editar">
-          <input type="hidden" name="id_mesa" value="${mesa.id_mesa}">
-          <input type="hidden" name="id_area" value="${mesa.id_area}">
-          <input type="text" name="nombre_mesa" placeholder="Nuevo nombre" required class="input-text-small">
-          <button type="submit" class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
-        </form>
-        <a href="../php/mesas/MesaController.php?accion=eliminar&id_mesa=${mesa.id_mesa}" data-confirm="¿Eliminar esta mesa?" class="btn-icon delete">
-          <i class="fa-solid fa-trash"></i>
-        </a>
-        <button type="button" class="btn-icon qr" data-id-mesa="${mesa.id_mesa}" title="Ver QR">
-          <i class="fa-solid fa-qrcode"></i>
-        </button>
-      </div>
-    `;
-    contenedor.appendChild(div);
-  }
+function agregarMesaDOM(contenedor, mesa) {
+  const div = document.createElement('div');
+  div.classList.add('mesa-card');
+  div.dataset.id = mesa.id_mesa;
+
+  div.innerHTML = `
+    <h4><i class="fa-solid fa-chair"></i> ${mesa.nombre}</h4>
+    <div class="mesa-actions">
+      <!-- Botón editar (abre modal) -->
+      <button type="button"
+        class="btn-icon edit"
+        data-modal-target="#editMesaModal"
+        data-id-mesa="${mesa.id_mesa}"
+        data-id-area="${mesa.id_area}"
+        data-nombre-mesa="${mesa.nombre}"
+        title="Editar mesa">
+        <i class="fa-solid fa-pen"></i>
+      </button>
+
+      <!-- Eliminar -->
+      <a href="../php/mesas/MesaController.php?accion=eliminar&id_mesa=${mesa.id_mesa}"
+         data-confirm="¿Eliminar esta mesa?"
+         class="btn-icon delete">
+         <i class="fa-solid fa-trash"></i>
+      </a>
+
+      <!-- Ver QR -->
+      <button type="button" class="btn-icon qr"
+        data-modal-target="#qrModal"
+        data-id-mesa="${mesa.id_mesa}"
+        title="Ver QR">
+        <i class="fa-solid fa-qrcode"></i>
+      </button>
+    </div>
+  `;
+
+  contenedor.appendChild(div);
+
+  // 🟢 Reenlazar evento para abrir el modal de edición
+  const editButton = div.querySelector('.btn-icon.edit');
+  editButton.addEventListener('click', () => {
+    const modal = document.querySelector('#editMesaModal');
+    if (!modal) return;
+    document.getElementById('editMesaId').value = mesa.id_mesa;
+    document.getElementById('editMesaAreaId').value = mesa.id_area;
+    document.getElementById('editMesaName').value = mesa.nombre;
+    modal.style.display = 'block';
+  });
+}
+
 
   function actualizarMesaDOM(id, nuevoNombre) {
     const mesaCard = document.querySelector(`.mesa-card[data-id="${id}"]`);
@@ -123,5 +150,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function eliminarMesaDOM(id) {
     const mesaCard = document.querySelector(`.mesa-card[data-id="${id}"]`);
     if (mesaCard) mesaCard.remove();
+  }
+
+  // 🧹 Evita errores de inputs ocultos requeridos
+  function limpiarInputsResiduos() {
+    document.querySelectorAll('.mesa-card input[name="nombre_mesa"]').forEach(input => {
+      if (input.offsetParent === null) input.disabled = true;
+    });
   }
 });

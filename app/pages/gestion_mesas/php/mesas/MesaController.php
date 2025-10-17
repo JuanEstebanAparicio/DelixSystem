@@ -2,10 +2,19 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// 🔹 CARGAMOS DEPENDENCIAS
 include __DIR__ . '/../../../../config/supabase.php';
-include __DIR__ . '/MesaModel.php';
+include __DIR__ . '/MesaConstructor.php'; // ✅ nuevo include para usar el constructor
 
-$mesaModel = new MesaModel($conexion);
+// 🔹 CREAMOS EL MODELO A TRAVÉS DEL CONSTRUCTOR
+try {
+    $mesaConstructor = new MesaConstructor(); // ✅ se encarga de instanciar correctamente
+    $mesaModel = $mesaConstructor->getModel();
+} catch (Exception $e) {
+    die("Error al inicializar MesaModel: " . $e->getMessage());
+}
+
+// 🔹 DETECTAR SI ES UNA PETICIÓN AJAX
 $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
 try {
