@@ -12,17 +12,22 @@ document.addEventListener('DOMContentLoaded', () => {
         body: formData
       });
 
-      const result = await response.json();
+      // Para depuración
+      const rawText = await response.text();
+      console.log("Respuesta del servidor:");
+      console.log(rawText);
+
+      const result = JSON.parse(rawText); // Intentamos convertir a JSON
 
       if (result.status === 'success') {
-        Alerts.success(result.message);
+        Swal.fire('Registro exitoso', result.message, 'success');
         form.reset();
       } else {
-        Alerts.error(result.message);
+        Swal.fire('Error', result.message, 'error');
       }
     } catch (err) {
-      Alerts.error('No se pudo conectar con el servidor.');
+      Swal.fire('Error de conexión', 'No se pudo conectar con el servidor.', 'error');
+      console.error(err);
     }
   });
 });
-
