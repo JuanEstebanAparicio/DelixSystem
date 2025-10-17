@@ -144,6 +144,16 @@ function agregarAreaDOM(area) {
   `;
 
   container.insertBefore(div, hr.nextSibling);
+
+   // 🟢 Reenlazar evento para abrir el modal de edición del área recién creada
+  const editButton = div.querySelector('.btn-icon.edit');
+  editButton.addEventListener('click', () => {
+    const modal = document.querySelector('#editAreaModal');
+    if (!modal) return;
+    document.getElementById('editAreaId').value = area.id_area;
+    document.getElementById('editAreaName').value = area.nombre;
+    modal.style.display = 'block';
+  });
 }
 
 

@@ -1,16 +1,18 @@
 
-document.addEventListener("DOMContentLoaded", () => {
-  const editButtons = document.querySelectorAll("button[data-modal-target='#editAreaModal']");
+// edit.js
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-modal-target='#editAreaModal']");
+  if (!btn) return; // No es un botón de edición de área
+
+  // 🔹 Obtener campos del modal
   const idInput = document.getElementById("editAreaId");
   const nameInput = document.getElementById("editAreaName");
 
-  editButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      idInput.value = btn.dataset.idArea;
-      nameInput.value = btn.dataset.nombreArea;
-    });
-  });
+  // 🔹 Asignar valores
+  idInput.value = btn.dataset.idArea;
+  nameInput.value = btn.dataset.nombreArea;
 });
+
 // === Modal Editar Mesa ===
 document.addEventListener("DOMContentLoaded", () => {
   const mesaEditButtons = document.querySelectorAll("button[data-modal-target='#editMesaModal']");
