@@ -1,9 +1,5 @@
 <?php
 require_once __DIR__ . '/constants.php';
-
-/**
- * Realiza una petición a la API REST de Supabase.
- */
 function supabase(string $table, string $method = 'GET', array $data = null, string $query = '', bool $useService = true): array {
     $url = rtrim(SUPABASE_URL, '/') . '/rest/v1/' . ltrim($table, '/') . $query;
     $key = $useService ? SUPABASE_SERVICE_KEY : SUPABASE_ANON_KEY;
