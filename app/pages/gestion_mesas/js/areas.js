@@ -97,41 +97,55 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 📦 FUNCIONES AUXILIARES DOM
-  function agregarAreaDOM(area) {
-    const hr = document.querySelector('.divider');
-    const div = document.createElement('div');
-    div.classList.add('area-card');
-    div.dataset.id = area.id_area;
-    div.innerHTML = `
-      <div class="area-header">
-        <h3><i class="fa-solid fa-layer-group"></i> ${area.nombre}</h3>
-        <div class="area-actions">
-          <form action="../php/area/AreaController.php" method="POST" data-loader>
-            <input type="hidden" name="accion" value="editar">
-            <input type="hidden" name="id_area" value="${area.id_area}">
-            <div>
-              <input type="text" name="nombre_area" placeholder="Nuevo nombre" required class="input-text-small">
-              <button type="submit" class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
-              <a href="../php/area/AreaController.php?accion=eliminar&id_area=${area.id_area}"
-                 data-confirm="¿Eliminar esta área y sus mesas?" class="btn-icon delete">
-                <i class="fa-solid fa-trash"></i>
-              </a>
-            </div>
-          </form>
-        </div>
+function agregarAreaDOM(area) {
+  const hr = document.querySelector('.divider');
+  const div = document.createElement('div');
+  div.classList.add('area-card');
+  div.dataset.id = area.id_area;
+
+  div.innerHTML = `
+    <div class="area-header">
+      <h3><i class="fa-solid fa-layer-group"></i> ${area.nombre}</h3>
+      <div class="area-actions">
+        <form action="../php/area/AreaController.php" method="POST" data-loader>
+          <input type="hidden" name="accion" value="editar">
+          <input type="hidden" name="id_area" value="${area.id_area}">
+          <div>
+            <button 
+              type="button" 
+              class="btn-icon edit" 
+              data-modal-target="#editAreaModal"
+              data-id-area="${area.id_area}"
+              data-nombre-area="${area.nombre}"
+              title="Editar área">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+
+            <a href="../php/area/AreaController.php?accion=eliminar&id_area=${area.id_area}"
+               data-confirm="¿Eliminar esta área y sus mesas?" 
+               class="btn-icon delete">
+               <i class="fa-solid fa-trash"></i>
+            </a>
+          </div>
+        </form>
       </div>
-      <form action="../php/mesa/MesaController.php" method="POST" class="add-form mesa-form">
-        <input type="hidden" name="accion" value="crear">
-        <input type="hidden" name="id_area" value="${area.id_area}">
-        <input type="text" name="nombre_mesa" placeholder="Nombre de la mesa" required class="input-text-small">
-        <button type="submit" class="btn-secondary">
-          <i class="fa-solid fa-plus"></i> Añadir mesa
-        </button>
-      </form>
-      <div class="mesas-grid"></div>
-    `;
-    container.insertBefore(div, hr.nextSibling);
-  }
+    </div>
+
+    <form action="../php/mesa/MesaController.php" method="POST" class="add-form mesa-form">
+      <input type="hidden" name="accion" value="crear">
+      <input type="hidden" name="id_area" value="${area.id_area}">
+      <input type="text" name="nombre_mesa" placeholder="Nombre de la mesa" required class="input-text-small">
+      <button type="submit" class="btn-secondary">
+        <i class="fa-solid fa-plus"></i> Añadir mesa
+      </button>
+    </form>
+
+    <div class="mesas-grid"></div>
+  `;
+
+  container.insertBefore(div, hr.nextSibling);
+}
+
 
   function actualizarNombreAreaDOM(id, nuevoNombre) {
     const areaCard = document.querySelector(`.area-card[data-id="${id}"]`);
