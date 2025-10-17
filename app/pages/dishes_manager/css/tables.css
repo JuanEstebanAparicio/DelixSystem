@@ -1,0 +1,90 @@
+/* Contenedor general */
+.content {
+    max-width: 90%;
+    margin: auto;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+/* Mensaje de éxito */
+.success-msg {
+    color: green;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Contenedor scrollable */
+.table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+    max-width: 100%;
+}
+
+/* Tabla principal */
+.styled-table {
+    border-collapse: collapse;
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    animation: fadeIn 0.5s ease-in-out;
+    font-size: 14px;
+}
+
+/* Encabezado */
+.styled-table thead {
+    background: linear-gradient(135deg, #4a90e2, #357abd);
+    color: white;
+    text-align: left;
+    padding: 8px 10px; 
+}
+
+/* Celdas */
+.styled-table th, .styled-table td {
+    padding: 12px 15px;
+    transition: background 0.3s ease;
+}
+
+/* Filas alternas */
+.styled-table tbody tr:nth-child(even) {
+    background-color: #f3f3f3;
+}
+
+/* Hover fila */
+.styled-table tbody tr:hover {
+    background-color: #dbeafe;
+}
+
+/* Botones */
+.btn {
+    padding: 6px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+.btn:hover {
+    transform: scale(1.05);
+}
+.btn-edit {
+    background-color: #4cafef;
+    color: white;
+}
+.btn-delete {
+    background-color: #e74c3c;
+    color: white;
+}
+
+/* Animación inicial */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive: pantallas pequeñas */
+@media (max-width: 600px) {
+    .styled-table th, .styled-table td {
+        font-size: 13px;
+        padding: 8px;
+    }
+}

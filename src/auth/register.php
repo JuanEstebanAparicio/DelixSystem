@@ -13,7 +13,6 @@ $email = $_POST['email'];
 $password = $_POST['password'];
 $restaurant_name = $_POST['restaurant_name'];
 
-// 1️⃣ Crear usuario en Supabase Auth
 $auth_url = SUPABASE_URL . '/auth/v1/signup';
 
 $auth_payload = [
@@ -46,7 +45,7 @@ curl_close($ch);
 $auth_data = json_decode($response, true);
 
 if ($http_code >= 200 && $http_code < 300) {
-    // 2️⃣ Insertar usuario en tu tabla 'usuarios'
+
     $insert = supabase('usuarios', 'POST', [
         'nombre' => $first_name,
         'apellido' => $last_name,
