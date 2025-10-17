@@ -94,7 +94,7 @@ include __DIR__ . '/../../../config/supabase.php';
         <!-- 🔸 LISTADO DE MESAS -->
         <div class="mesas-grid">
           <?php
-          $stmt = $conexion->prepare("SELECT * FROM mesas WHERE id_area = ?");
+          $stmt = $conexion->prepare("SELECT * FROM mesas WHERE id_area = ? ORDER BY nombre ASC");
           $stmt->execute([$area['id_area']]);
           while ($mesa = $stmt->fetch(PDO::FETCH_ASSOC)):
           ?>
