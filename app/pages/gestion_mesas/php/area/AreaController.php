@@ -71,31 +71,24 @@ switch ($accion) {
 
     // ✅ Ordenar áreas (Drag & Drop)
     case 'ordenar':
-        if (!isset($_POST['orden']) || !is_array($_POST['orden'])) {
-            echo json_encode(['status' => 'error', 'message' => 'Datos inválidos']);
-            exit;
-        }
+    if (!isset($_POST['orden']) || !is_array($_POST['orden'])) {
+        echo json_encode(['status' => 'error', 'message' => 'Datos inválidos']);
+        exit;
+    }
 
-        try {
-            $conexion->beginTransaction();
-            $stmt = $conexion->prepare("UPDATE areas SET orden = :orden WHERE id_area = :id");
-            foreach ($_POST['orden'] as $index => $id_area) {
-                $stmt->execute([':orden' => $index + 1, ':id' => $id_area]);
-            }
-            $conexion->commit();
-
-            echo json_encode(['status' => 'success', 'message' => 'Orden actualizado correctamente']);
-        } catch (Exception $e) {
-            $conexion->rollBack();
-            echo json_encode(['status' => 'error', 'message' => 'Error al guardar el orden']);
+    if ($areaModel->actualizarOrden($_POST['orden'])) {
+        echo json_encode(['status' => 'success', 'message' => 'Orden actualizado']);
+        } else {
+        echo json_encode(['status' => 'error', 'message' => 'Error al guardar el orden']);
         }
         exit;
 
+
     // 🚫 Acción no válida
-    default:
+        default:
         returnJson($isAjax, 'error', 'Acción no válida.');
         break;
-}
+        }
 
 // --- Función auxiliar para respuestas JSON ---
 function returnJson($ajax, $status, $message, $data = [])

@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('accion', 'ordenar');
       nuevoOrden.forEach((id, i) => formData.append(`orden[${i}]`, id));
 
-      const res = await fetch('../php/areas/AreaController.php', {
+      const res = await fetch('../php/area/AreaController.php', {
         method: 'POST',
         body: formData,
         headers: { 'X-Requested-With': 'XMLHttpRequest' },
