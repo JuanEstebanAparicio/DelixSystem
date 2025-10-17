@@ -10,7 +10,8 @@ $accion = $_REQUEST['accion'] ?? '';
 $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
 switch ($accion) {
-    // ✅ Crear
+
+    // ✅ Crear área
     case 'crear':
         $nombre = trim($_POST['nombre_area'] ?? '');
 
@@ -25,13 +26,18 @@ switch ($accion) {
         $areaModel->crearArea($nombre);
         $id_area = $conexion->lastInsertId();
 
+        // 🟢 Asignar un valor de orden automáticamente (solo si no existe)
+        $stmt = $conexion->query("SELECT COALESCE(MAX(orden), 0) + 1 AS nuevo_orden FROM areas");
+        $nuevoOrden = $stmt->fetchColumn();
+        $conexion->prepare("UPDATE areas SET orden = ? WHERE id_area = ?")->execute([$nuevoOrden, $id_area]);
+
         returnJson($isAjax, 'success', 'Área creada correctamente.', [
             'id_area' => $id_area,
             'nombre' => $nombre
         ]);
         break;
 
-    // ✅ Editar
+    // ✅ Editar área
     case 'editar':
         $id_area = $_POST['id_area'] ?? null;
         $nombre = trim($_POST['nombre_area'] ?? '');
@@ -52,10 +58,9 @@ switch ($accion) {
         ]);
         break;
 
-    // ✅ Eliminar
+    // ✅ Eliminar área
     case 'eliminar':
-        $id_area = $_POST['id_area'] ?? null;
-
+        $id_area = $_POST['id_area'] ?? $_GET['id_area'] ?? null; // 🟢 permite ambas formas (seguro)
         if (!$id_area) {
             returnJson($isAjax, 'error', 'ID de área no válido.');
         }
@@ -64,6 +69,29 @@ switch ($accion) {
         returnJson($isAjax, 'success', 'Área eliminada correctamente.', ['id_area' => $id_area]);
         break;
 
+    // ✅ Ordenar áreas (Drag & Drop)
+    case 'ordenar':
+        if (!isset($_POST['orden']) || !is_array($_POST['orden'])) {
+            echo json_encode(['status' => 'error', 'message' => 'Datos inválidos']);
+            exit;
+        }
+
+        try {
+            $conexion->beginTransaction();
+            $stmt = $conexion->prepare("UPDATE areas SET orden = :orden WHERE id_area = :id");
+            foreach ($_POST['orden'] as $index => $id_area) {
+                $stmt->execute([':orden' => $index + 1, ':id' => $id_area]);
+            }
+            $conexion->commit();
+
+            echo json_encode(['status' => 'success', 'message' => 'Orden actualizado correctamente']);
+        } catch (Exception $e) {
+            $conexion->rollBack();
+            echo json_encode(['status' => 'error', 'message' => 'Error al guardar el orden']);
+        }
+        exit;
+
+    // 🚫 Acción no válida
     default:
         returnJson($isAjax, 'error', 'Acción no válida.');
         break;

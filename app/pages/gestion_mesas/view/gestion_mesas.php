@@ -45,7 +45,8 @@ include __DIR__ . '/../../../config/supabase.php';
 
     <!-- 🔹 LISTADO DE ÁREAS -->
     <?php
-    $areasStmt = $conexion->query("SELECT * FROM areas ORDER BY id_area");
+    $areasStmt = $conexion->query("SELECT * FROM areas ORDER BY orden ASC, id_area ASC");
+
     $areas = $areasStmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($areas as $area):

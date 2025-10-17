@@ -7,10 +7,11 @@ class AreaModel {
     }
 
     /** Obtener todas las áreas */
-    public function obtenerAreas() {
-        $stmt = $this->db->query("SELECT * FROM areas ORDER BY id_area");
+        public function obtenerAreas() {
+        $stmt = $this->conexion->query("SELECT * FROM areas ORDER BY orden ASC, id_area ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+        }
+
 
     /** Crear nueva área */
     public function crearArea($nombre) {

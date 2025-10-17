@@ -272,3 +272,9 @@ body {
     justify-content: center;
   }
 }
+.area-card.dragging {
+  opacity: 0.5;
+  transform: scale(0.98);
+  border: 2px dashed #9b59b6;
+}
+

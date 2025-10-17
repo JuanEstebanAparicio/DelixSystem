@@ -155,3 +155,69 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// === Drag & Drop para áreas ===
+document.addEventListener('DOMContentLoaded', () => {
+  const areaContainer = document.querySelector('.container');
+  const areas = document.querySelectorAll('.area-card');
+  let draggedItem = null;
+
+  areas.forEach(area => {
+    area.setAttribute('draggable', 'true');
+
+    area.addEventListener('dragstart', (e) => {
+      draggedItem = area;
+      setTimeout(() => area.classList.add('dragging'), 0);
+    });
+
+    area.addEventListener('dragend', async () => {
+      area.classList.remove('dragging');
+      draggedItem = null;
+
+      // ✅ Obtener el nuevo orden de las áreas
+      const nuevoOrden = [...document.querySelectorAll('.area-card')].map(a => a.dataset.id);
+
+      // ✅ Enviar al backend
+      const formData = new FormData();
+      formData.append('accion', 'ordenar');
+      nuevoOrden.forEach((id, i) => formData.append(`orden[${i}]`, id));
+
+      const res = await fetch('../php/areas/AreaController.php', {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
+
+      const data = await res.json().catch(() => null);
+      if (data?.status === 'success') {
+        console.log('✅ Orden de áreas actualizado');
+      } else {
+        console.warn('⚠️ Error al guardar orden:', data?.message);
+      }
+    });
+  });
+
+  // 🔹 Permitir arrastrar visualmente
+  areaContainer.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    const dragging = document.querySelector('.dragging');
+    const afterElement = getDragAfterElement(areaContainer, e.clientY);
+    if (afterElement == null) {
+      areaContainer.appendChild(dragging);
+    } else {
+      areaContainer.insertBefore(dragging, afterElement);
+    }
+  });
+
+  function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.area-card:not(.dragging)')];
+    return draggableElements.reduce((closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+      if (offset < 0 && offset > closest.offset) {
+        return { offset: offset, element: child };
+      } else {
+        return closest;
+      }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+  }
+});
