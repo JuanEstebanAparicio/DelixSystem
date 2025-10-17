@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- public/index.php -->
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -187,10 +188,13 @@
     </footer>
 
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="./js/alert.js"></script>
-<script src="./js/modal.js"></script>
-<script src="./js/register.js"></script>
+
+
+<!-- Otros scripts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+<script src="./js/alert.js" defer></script>
+<script src="./js/modal.js" defer></script>
+<script src="./js/register.js" defer></script>
 
 </body>
 </html>

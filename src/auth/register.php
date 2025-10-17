@@ -1,58 +1,75 @@
 <?php
-// PROJECTDELIX/src/auth/register.php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+header('Content-Type: application/json');
+
 require_once __DIR__ . '/../../app/config/database.php';
+require_once __DIR__ . '/../../app/config/constants.php';
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['status' => 'error', 'message' => 'Método no permitido']);
-    exit;
-}
+$first_name = $_POST['first_name'];
+$last_name = $_POST['last_name'];
+$email = $_POST['email'];
+$password = $_POST['password'];
+$restaurant_name = $_POST['restaurant_name'];
 
-// --- Sanitizar datos ---
-$nombre       = trim($_POST['first_name'] ?? '');
-$apellido     = trim($_POST['last_name'] ?? '');
-$correo       = trim($_POST['email'] ?? '');
-$restaurante  = trim($_POST['restaurant_name'] ?? '');
-$contrasena   = $_POST['password'] ?? '';
-$confirmacion = $_POST['confirm_password'] ?? '';
+// 1️⃣ Crear usuario en Supabase Auth
+$auth_url = SUPABASE_URL . '/auth/v1/signup';
 
-// --- Validaciones básicas ---
-if ($contrasena !== $confirmacion) {
-    echo json_encode(['status' => 'error', 'message' => 'Las contraseñas no coinciden.']);
-    exit;
-}
-
-if (!$nombre || !$apellido || !$correo || !$restaurante || !$contrasena) {
-    echo json_encode(['status' => 'error', 'message' => 'Por favor completa todos los campos.']);
-    exit;
-}
-
-// --- Verificar si el correo ya existe ---
-$check = supabase('admins?correo=eq.' . urlencode($correo), 'GET');
-
-if (!empty($check['data'])) {
-    echo json_encode(['status' => 'error', 'message' => 'El correo ya está registrado.']);
-    exit;
-}
-
-// --- Insertar nuevo admin ---
-$hash = password_hash($contrasena, PASSWORD_BCRYPT);
-
-$data = [
-    'nombre'      => $nombre,
-    'apellido'    => $apellido,
-    'correo'      => $correo,
-    'restaurante' => $restaurante,
-    'contrasena'  => $hash,
-    'verificado'  => false
+$auth_payload = [
+  'email' => $email,
+  'password' => $password,
+  'data' => [
+    'first_name' => $first_name,
+    'last_name' => $last_name,
+    'restaurant_name' => $restaurant_name
+  ]
 ];
 
-$response = supabase('admins', 'POST', [$data]);
+file_put_contents(__DIR__ . '/debug_supabase.txt', json_encode($auth_payload, JSON_PRETTY_PRINT));
+$ch = curl_init($auth_url);
+curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        'Content-Type: application/json',
+        'apikey: ' . SUPABASE_SERVICE_KEY,
+        'Authorization: Bearer ' . SUPABASE_SERVICE_KEY
+    ],
+    CURLOPT_POSTFIELDS => json_encode($auth_payload)
+]);
+$response = curl_exec($ch);
+$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$error = curl_error($ch);
+curl_close($ch);
 
-if ($response['status'] >= 200 && $response['status'] < 300) {
-    echo json_encode(['status' => 'success', 'message' => 'Registro exitoso']);
+$auth_data = json_decode($response, true);
+
+if ($http_code >= 200 && $http_code < 300) {
+    // 2️⃣ Insertar usuario en tu tabla 'usuarios'
+    $insert = supabase('usuarios', 'POST', [
+        'nombre' => $first_name,
+        'apellido' => $last_name,
+        'email' => $email,
+        'restaurante' => $restaurant_name,
+        'password' => password_hash($password, PASSWORD_DEFAULT)
+    ]);
+
+    if ($insert['status'] >= 200 && $insert['status'] < 300) {
+        echo json_encode([
+            'status' => 'success',
+            'message' => '✅ Registro exitoso'
+        ]);
+    } else {
+        echo json_encode([
+            'status' => 'error',
+            'message' => '⚠️ Error al guardar en la tabla usuarios'
+        ]);
+    }
+
 } else {
     echo json_encode([
-        'status'  => 'error',
-        'message' => 'Error al registrar: ' . ($response['error'] ?: json_encode($response['data']))
+        'status' => 'error',
+        'message' => '❌ Error al registrar en Supabase Auth: ' . json_encode($auth_data)
     ]);
 }

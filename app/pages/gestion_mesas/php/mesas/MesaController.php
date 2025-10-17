@@ -2,10 +2,19 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// 🔹 CARGAMOS DEPENDENCIAS
 include __DIR__ . '/../../../../config/supabase.php';
-include __DIR__ . '/MesaModel.php';
+include __DIR__ . '/MesaConstructor.php'; // ✅ nuevo include para usar el constructor
 
-$mesaModel = new MesaModel($conexion);
+// 🔹 CREAMOS EL MODELO A TRAVÉS DEL CONSTRUCTOR
+try {
+    $mesaConstructor = new MesaConstructor(); // ✅ se encarga de instanciar correctamente
+    $mesaModel = $mesaConstructor->getModel();
+} catch (Exception $e) {
+    die("Error al inicializar MesaModel: " . $e->getMessage());
+}
+
+// 🔹 DETECTAR SI ES UNA PETICIÓN AJAX
 $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
 try {
@@ -69,7 +78,7 @@ try {
             exit;
         }
 
-        // Editar
+        // 🔹 Editar
         if ($accion === 'editar' && $id_mesa) {
             $mesaModel->editarMesa($id_mesa, $id_area, $nombre);
             $response = [
@@ -82,12 +91,22 @@ try {
                 ]
             ];
 
-            echo json_encode($response);
+            if ($isAjax) {
+                echo json_encode($response);
+            } else {
+                header("Location: ../../view/gestion_mesas.php?success=mesa_editada");
+            }
             exit;
         }
 
         // Acción inválida
-        echo json_encode(['status' => 'error', 'message' => 'Acción no válida']);
+        $response = ['status' => 'error', 'message' => 'Acción no válida'];
+
+        if ($isAjax) {
+            echo json_encode($response);
+        } else {
+            header("Location: ../../view/gestion_mesas.php?error=accion_invalida");
+        }
         exit;
     }
 
@@ -104,7 +123,8 @@ try {
         echo json_encode(['status' => 'error', 'message' => 'Error interno: ' . $e->getMessage()]);
         exit;
     } else {
-        die("Error: " . $e->getMessage());
+        header("Location: ../../view/gestion_mesas.php?error=excepcion");
+        exit;
     }
 }
 ?>

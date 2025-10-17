@@ -97,41 +97,65 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 📦 FUNCIONES AUXILIARES DOM
-  function agregarAreaDOM(area) {
-    const hr = document.querySelector('.divider');
-    const div = document.createElement('div');
-    div.classList.add('area-card');
-    div.dataset.id = area.id_area;
-    div.innerHTML = `
-      <div class="area-header">
-        <h3><i class="fa-solid fa-layer-group"></i> ${area.nombre}</h3>
-        <div class="area-actions">
-          <form action="../php/area/AreaController.php" method="POST" data-loader>
-            <input type="hidden" name="accion" value="editar">
-            <input type="hidden" name="id_area" value="${area.id_area}">
-            <div>
-              <input type="text" name="nombre_area" placeholder="Nuevo nombre" required class="input-text-small">
-              <button type="submit" class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
-              <a href="../php/area/AreaController.php?accion=eliminar&id_area=${area.id_area}"
-                 data-confirm="¿Eliminar esta área y sus mesas?" class="btn-icon delete">
-                <i class="fa-solid fa-trash"></i>
-              </a>
-            </div>
-          </form>
-        </div>
+function agregarAreaDOM(area) {
+  const hr = document.querySelector('.divider');
+  const div = document.createElement('div');
+  div.classList.add('area-card');
+  div.dataset.id = area.id_area;
+
+  div.innerHTML = `
+    <div class="area-header">
+      <h3><i class="fa-solid fa-layer-group"></i> ${area.nombre}</h3>
+      <div class="area-actions">
+        <form action="../php/area/AreaController.php" method="POST" data-loader>
+          <input type="hidden" name="accion" value="editar">
+          <input type="hidden" name="id_area" value="${area.id_area}">
+          <div>
+            <button 
+              type="button" 
+              class="btn-icon edit" 
+              data-modal-target="#editAreaModal"
+              data-id-area="${area.id_area}"
+              data-nombre-area="${area.nombre}"
+              title="Editar área">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+
+            <a href="../php/area/AreaController.php?accion=eliminar&id_area=${area.id_area}"
+               data-confirm="¿Eliminar esta área y sus mesas?" 
+               class="btn-icon delete">
+               <i class="fa-solid fa-trash"></i>
+            </a>
+          </div>
+        </form>
       </div>
-      <form action="../php/mesa/MesaController.php" method="POST" class="add-form mesa-form">
-        <input type="hidden" name="accion" value="crear">
-        <input type="hidden" name="id_area" value="${area.id_area}">
-        <input type="text" name="nombre_mesa" placeholder="Nombre de la mesa" required class="input-text-small">
-        <button type="submit" class="btn-secondary">
-          <i class="fa-solid fa-plus"></i> Añadir mesa
-        </button>
-      </form>
-      <div class="mesas-grid"></div>
-    `;
-    container.insertBefore(div, hr.nextSibling);
-  }
+    </div>
+
+    <form action="../php/mesa/MesaController.php" method="POST" class="add-form mesa-form">
+      <input type="hidden" name="accion" value="crear">
+      <input type="hidden" name="id_area" value="${area.id_area}">
+      <input type="text" name="nombre_mesa" placeholder="Nombre de la mesa" required class="input-text-small">
+      <button type="submit" class="btn-secondary">
+        <i class="fa-solid fa-plus"></i> Añadir mesa
+      </button>
+    </form>
+
+    <div class="mesas-grid"></div>
+  `;
+
+  container.insertBefore(div, hr.nextSibling);
+
+   // 🟢 Reenlazar evento para abrir el modal de edición del área recién creada
+  const editButton = div.querySelector('.btn-icon.edit');
+  editButton.addEventListener('click', () => {
+    const modal = document.querySelector('#editAreaModal');
+    if (!modal) return;
+    document.getElementById('editAreaId').value = area.id_area;
+    document.getElementById('editAreaName').value = area.nombre;
+    modal.style.display = 'block';
+  });
+}
+
 
   function actualizarNombreAreaDOM(id, nuevoNombre) {
     const areaCard = document.querySelector(`.area-card[data-id="${id}"]`);
@@ -155,3 +179,72 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// === Drag & Drop para áreas ===
+document.addEventListener('DOMContentLoaded', () => {
+  const areaContainer = document.querySelector('.container');
+  const areas = document.querySelectorAll('.area-card');
+  let draggedItem = null;
+
+  areas.forEach(area => {
+    area.setAttribute('draggable', 'true');
+
+    area.addEventListener('dragstart', (e) => {
+      draggedItem = area;
+      setTimeout(() => area.classList.add('dragging'), 0);
+      area.style.transition = 'none'; // evita saltos al iniciar arrastre
+
+    });
+
+    area.addEventListener('dragend', async () => {
+      area.classList.remove('dragging');
+      area.style.transition = ''; // restaura transición al soltar
+      draggedItem = null;
+
+      // ✅ Obtener el nuevo orden de las áreas
+      const nuevoOrden = [...document.querySelectorAll('.area-card')].map(a => a.dataset.id);
+
+      // ✅ Enviar al backend
+      const formData = new FormData();
+      formData.append('accion', 'ordenar');
+      nuevoOrden.forEach((id, i) => formData.append(`orden[${i}]`, id));
+
+      const res = await fetch('../php/area/AreaController.php', {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
+
+      const data = await res.json().catch(() => null);
+      if (data?.status === 'success') {
+        console.log('✅ Orden de áreas actualizado');
+      } else {
+        console.warn('⚠️ Error al guardar orden:', data?.message);
+      }
+    });
+  });
+
+  // 🔹 Permitir arrastrar visualmente
+  areaContainer.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    const dragging = document.querySelector('.dragging');
+    const afterElement = getDragAfterElement(areaContainer, e.clientY);
+    if (afterElement == null) {
+      areaContainer.appendChild(dragging);
+    } else {
+      areaContainer.insertBefore(dragging, afterElement);
+    }
+  });
+
+  function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.area-card:not(.dragging)')];
+    return draggableElements.reduce((closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+      if (offset < 0 && offset > closest.offset) {
+        return { offset: offset, element: child };
+      } else {
+        return closest;
+      }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+  }
+});
