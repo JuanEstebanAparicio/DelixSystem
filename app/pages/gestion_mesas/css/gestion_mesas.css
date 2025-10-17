@@ -272,9 +272,26 @@ body {
     justify-content: center;
   }
 }
-.area-card.dragging {
-  opacity: 0.5;
-  transform: scale(0.98);
-  border: 2px dashed #9b59b6;
+/* 🔹 Suaviza el movimiento de las áreas al reordenar */
+/* 🔹 Suaviza el movimiento de las áreas al reordenar */
+.area-card {
+  cursor: grab;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
 }
+
+.area-card.dragging {
+  opacity: 0.7;
+  transform: scale(1.03);
+  cursor: grabbing;
+  background: #fafafa;
+  border: 2px dashed #cfcfcf;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+}
+.area-card:not(.dragging) {
+  transition: transform 0.25s ease-in-out;
+}
+
 

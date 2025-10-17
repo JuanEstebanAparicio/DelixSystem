@@ -167,10 +167,13 @@ document.addEventListener('DOMContentLoaded', () => {
     area.addEventListener('dragstart', (e) => {
       draggedItem = area;
       setTimeout(() => area.classList.add('dragging'), 0);
+      area.style.transition = 'none'; // evita saltos al iniciar arrastre
+
     });
 
     area.addEventListener('dragend', async () => {
       area.classList.remove('dragging');
+      area.style.transition = ''; // restaura transición al soltar
       draggedItem = null;
 
       // ✅ Obtener el nuevo orden de las áreas
