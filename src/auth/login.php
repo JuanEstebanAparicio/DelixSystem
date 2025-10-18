@@ -12,17 +12,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $response['data'][0];
 
         if (password_verify($password, $user['password'])) {
-            session_start();
+            // Start session BEFORE sending any output
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
             $_SESSION['usuario'] = [
                 'id' => $user['id'],
-                'nombre' => $user['first_name'],
-                'restaurante' => $user['restaurant_name']
+                'nombre' => $user['first_name'] ?? $user['nombre'] ?? null,
+                'restaurante' => $user['restaurant_name'] ?? $user['restaurante'] ?? null
             ];
-            echo "<script>alert('✅ Bienvenido {$user['first_name']}'); window.location.href='../../app/views/dashboard.php';</script>";
+
+            // Use HTTP redirect instead of printing a <script> tag
+            header('Location: ../../app/pages/dashboard_propietario/view/index.php');
+            exit;
         } else {
-            echo "<script>alert('❌ Contraseña incorrecta'); history.back();</script>";
+            // Incorrect password: redirect back to login with an error code
+            header('Location: ../../public/login.php?error=invalid_password');
+            exit;
         }
     } else {
-        echo "<script>alert('❌ Usuario no encontrado'); history.back();</script>";
+        // User not found
+        header('Location: ../../public/login.php?error=user_not_found');
+        exit;
     }
 }
