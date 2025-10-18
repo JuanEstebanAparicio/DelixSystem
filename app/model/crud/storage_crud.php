@@ -86,7 +86,6 @@ class StorageCRUD {
         return true;
     }
 
-    // Delete
     public function deleteProduct($id) {
         $sql = "DELETE FROM insumos WHERE id = ?";
         $stmt = $this->pdo->prepare($sql);

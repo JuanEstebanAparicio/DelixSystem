@@ -12,7 +12,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $created_at = date('Y-m-d H:i:s');
     $photo = '';
 
-    // Manejo de foto
     if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
         $targetDir = '../../Media/platos/';
         if (!is_dir($targetDir)) {

@@ -19,7 +19,6 @@ $resultado = $conexion->query($query);
 </head>
 <body>
 
-<!-- MODAL para registrar y editar -->
 <div id="formModal" class="modal hidden">
   <div class="modal-content">
     <span class="close" onclick="hideModal('formModal')">&times;</span>
@@ -143,7 +142,6 @@ $resultado = $conexion->query($query);
   </table>
 </div>
 
-<!-- Scripts -->
 <script src="../JS/animations/modales.js"></script>
 <script src="../JS/ingredient/form_handler.js"></script>
 

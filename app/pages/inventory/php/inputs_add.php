@@ -18,7 +18,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // Crear objeto Product
     $product = new Product(
         $_POST['nombre'],
         $_POST['cantidad'],

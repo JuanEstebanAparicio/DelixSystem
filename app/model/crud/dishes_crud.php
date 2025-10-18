@@ -13,7 +13,6 @@ class dishes_crud {
         }
     }
 
-	// Create
 	public function createDish(dishes $dish) {
 		if (empty($dish->getNameDish()) || empty($dish->getPrice()) || empty($dish->getCategory())) {
 			throw new Exception("Los campos obligatorios no pueden estar vacíos.");
@@ -37,7 +36,6 @@ class dishes_crud {
 		return true;
 	}
 
-	// Update
 	public function updateDish(dishes $dish, $id) {
 		$sql = "UPDATE dishes SET 
 			name_dish = ?, 
@@ -64,7 +62,6 @@ class dishes_crud {
 		return true;
 	}
 
-	// Delete
 	public function deleteDish($id) {
 		$sql = "DELETE FROM dishes WHERE id = ?";
 		$stmt = $this->pdo->prepare($sql);

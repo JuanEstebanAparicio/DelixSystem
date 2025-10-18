@@ -21,7 +21,6 @@ class dishes {
         $this->photo = $photo;
     }
 
-    // Getters
     public function getId() { return $this->id; }
     public function getNameDish() { return $this->name_dish; }
     public function getPrice() { return $this->price; }
@@ -31,7 +30,6 @@ class dishes {
     public function getCreatedAt() { return $this->created_at; }
     public function getPhoto() { return $this->photo; }
 
-    // Setters
     public function setId($id) { $this->id = $id; }
     public function setNameDish($name_dish) { $this->name_dish = $name_dish; }
     public function setPrice($price) { $this->price = $price; }
