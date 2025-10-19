@@ -1,14 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
-  /* ========== CLAVE DINÁMICA ========== */
   const codigoEl = document.getElementById("codigoDinamico");
   const copiarBtn = document.getElementById("copiarCodigo");
   const nuevoBtn = document.getElementById("nuevoCodigo");
   const timerText = document.getElementById("timerText");
-  const ring = document.querySelector(".ring-progress");
+  const ring = document.querySelector(".progress");
   const estado = document.getElementById("estadoCodigo");
 
   let tiempo = 60;
-  const circunferencia = 213.628;
+  const circ = 283;
   let timer;
 
   const generarCodigo = () => {
@@ -24,11 +23,12 @@ document.addEventListener("DOMContentLoaded", () => {
     tiempo = 60;
     ring.style.strokeDashoffset = 0;
     estado.textContent = "Código activo";
-    estado.style.color = "#10b981";
+    estado.classList.remove("expirado");
+    estado.classList.add("activo");
 
     timer = setInterval(() => {
       tiempo--;
-      const offset = circunferencia * (1 - tiempo / 60);
+      const offset = circ * (1 - tiempo / 60);
       ring.style.strokeDashoffset = offset;
       timerText.textContent = `${tiempo}s`;
 
@@ -36,7 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
         clearInterval(timer);
         codigoEl.textContent = "••••••••";
         estado.textContent = "Código expirado";
-        estado.style.color = "#ef4444";
+        estado.classList.remove("activo");
+        estado.classList.add("expirado");
       }
     }, 1000);
   };
@@ -55,6 +56,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   nuevoBtn.addEventListener("click", nuevoCodigo);
 
-  // Inicializar
   nuevoCodigo();
 });

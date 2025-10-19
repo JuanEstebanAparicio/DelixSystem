@@ -8,44 +8,45 @@
   <script defer src="../js/empleados.js"></script>
 </head>
 <body>
-  <section class="container">
-
-    <!-- ✅ TARJETA DEL CÓDIGO DINÁMICO -->
-    <section class="codigo-dinamico-card">
-      <div class="codigo-header">
-        <h2>🔐 Clave Dinámica de Acceso</h2>
-        <p>Comparte esta clave con tus empleados para que puedan unirse a tu cuenta.</p>
-      </div>
-
-      <div class="codigo-body">
-        <div class="codigo-display">
-          <span id="codigoDinamico" class="codigo">••••••••</span>
-          <button id="copiarCodigo" class="btn btn-copiar">📋 Copiar</button>
-        </div>
-
-        <div class="codigo-timer">
-          <svg class="countdown-ring" width="80" height="80">
-            <circle class="ring-bg" cx="40" cy="40" r="34" />
-            <circle class="ring-progress" cx="40" cy="40" r="34" />
-          </svg>
-          <div class="timer-text" id="timerText">60s</div>
-        </div>
-      </div>
-
-      <div class="codigo-footer">
-        <button id="nuevoCodigo" class="btn btn-nuevo">🔄 Generar nuevo código</button>
-        <p id="estadoCodigo" class="estado">Código activo</p>
-      </div>
-    </section>
-    <!-- FIN TARJETA -->
-
-    <!-- 🧍 GESTOR DE EMPLEADOS -->
-    <header class="header">
+  <div class="page-wrapper">
+    <header class="main-header">
       <h1>👥 Gestor de Empleados</h1>
       <button id="btnAddEmpleado" class="btn btn-primary">+ Agregar Empleado</button>
     </header>
 
-    <section class="table-container">
+    <!-- 🌟 BLOQUE DE CÓDIGO DINÁMICO -->
+    <section class="codigo-dinamico">
+      <div class="codigo-card">
+        <div class="card-header">
+          <div>
+            <h2>🔐 Código Dinámico</h2>
+            <p>Compártelo con tus empleados para que puedan acceder a tu restaurante.</p>
+          </div>
+          <button id="nuevoCodigo" class="btn btn-nuevo">🔄 Regenerar</button>
+        </div>
+
+        <div class="codigo-body">
+          <div class="codigo-box">
+            <span id="codigoDinamico">••••••••</span>
+            <button id="copiarCodigo" class="btn btn-copiar">📋 Copiar</button>
+          </div>
+
+          <div class="timer-box">
+            <div class="ring">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" class="bg" />
+                <circle cx="50" cy="50" r="45" class="progress" />
+              </svg>
+              <div id="timerText" class="timer-text">60s</div>
+            </div>
+            <p id="estadoCodigo" class="estado activo">Código activo</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 🧾 TABLA DE EMPLEADOS -->
+    <section class="tabla-empleados-wrapper">
       <table id="tablaEmpleados" class="tabla-empleados">
         <thead>
           <tr>
@@ -57,28 +58,26 @@
             <th>Acciones</th>
           </tr>
         </thead>
-        <tbody>
-          <!-- JS insertará empleados aquí -->
-        </tbody>
+        <tbody></tbody>
       </table>
     </section>
-  </section>
+  </div>
 
-  <!-- Modal CRUD de empleado -->
+  <!-- Modal CRUD -->
   <div id="modalEmpleado" class="modal hidden">
     <div class="modal-content">
       <h2 id="modalTitle">Nuevo Empleado</h2>
       <form id="formEmpleado">
-        <input type="hidden" name="id" id="empleadoId" />
+        <input type="hidden" name="id" id="empleadoId">
 
         <label>Nombre Completo</label>
-        <input type="text" name="nombre" id="nombre" required />
+        <input type="text" name="nombre" id="nombre" required>
 
         <label>Correo</label>
-        <input type="email" name="correo" id="correo" required />
+        <input type="email" name="correo" id="correo" required>
 
         <label>Documento</label>
-        <input type="text" name="documento" id="documento" required />
+        <input type="text" name="documento" id="documento" required>
 
         <label>Rol</label>
         <select name="rol" id="rol" required>
