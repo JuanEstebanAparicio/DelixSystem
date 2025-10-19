@@ -115,105 +115,68 @@
     </section>
 
     <!-- MODALES -->
-    <!-- MODAL DE LOGIN MEJORADO -->
-<div id="loginModal" class="modal">
-  <div class="modal-dialog">
-    <div class="modal-header">
+     <!-- MODAL DE LOGIN -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
       <span class="close" id="closeLogin">&times;</span>
-      <h3>Bienvenido de nuevo</h3>
-      <p class="subtitle">Inicia sesión para continuar con tu cuenta</p>
-    </div>
-
-    <div class="modal-body">
-      <form id="loginForm" method="POST" action="../src/auth/login.php">
+      <h3>Iniciar Sesión</h3>
+      <form method="POST" action="../src/auth/login.php">
         <div class="form-group">
-          <label for="login_email">Correo electrónico</label>
-          <input type="email" id="login_email" name="email" placeholder="ejemplo@correo.com" required>
+          <input type="email" name="email" placeholder="Correo electrónico" required>
         </div>
 
         <div class="form-group">
-          <label for="login_password">Contraseña</label>
-          <input type="password" id="login_password" name="password" placeholder="********" required>
+          <input type="password" name="password" placeholder="Contraseña" required>
         </div>
-
-        <div class="form-options">
-          <label class="remember">
-            <input type="checkbox" name="remember"> Recordarme
-          </label>
-          <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
-        </div>
-
+        <br>
         <button type="submit" class="btn-primary">Entrar</button>
-        <div id="loginMessage"></div>
+        
       </form>
     </div>
-
-    <div class="modal-footer">
-      <p>¿No tienes una cuenta? <a href="#">Regístrate</a></p>
-    </div>
   </div>
-</div>
 
-
-    <!-- MODAL DE REGISTRO MEJORADO -->
-<div id="registerModal" class="modal">
-  <div class="modal-dialog">
-    <div class="modal-header">
+     <!-- MODAL DE REGISTRO -->
+  <div id="registerModal" class="modal">
+    <div class="modal-content">
       <span class="close" id="closeRegister">&times;</span>
       <h3>Crear una cuenta</h3>
-      <p class="subtitle">Únete y empieza a gestionar tu restaurante fácilmente</p>
-    </div>
-
-    <div class="modal-body">
       <form id="registerForm" method="POST" action="../src/auth/register.php">
         <div class="form-group">
-          <label for="first_name">Nombre</label>
-          <input type="text" id="first_name" name="first_name" placeholder="Tu nombre" required>
+          <input type="text" name="first_name" placeholder="Nombre" required>
         </div>
 
         <div class="form-group">
-          <label for="last_name">Apellido</label>
-          <input type="text" id="last_name" name="last_name" placeholder="Tu apellido" required>
+          <input type="text" name="last_name" placeholder="Apellido" required>
         </div>
 
         <div class="form-group">
-          <label for="email">Correo electrónico</label>
-          <input type="email" id="email" name="email" placeholder="ejemplo@correo.com" required>
+          <input type="email" name="email" placeholder="Correo electrónico" required>
         </div>
 
         <div class="form-group">
-          <label for="restaurant_name">Nombre del restaurante</label>
-          <input type="text" id="restaurant_name" name="restaurant_name" placeholder="Mi Restaurante" required>
+          <input type="text" name="restaurant_name" placeholder="Nombre del restaurante" required>
         </div>
 
         <div class="form-group">
-          <label for="password">Contraseña</label>
-          <input type="password" id="password" name="password" placeholder="********" required minlength="8">
+          <input type="password" name="password" placeholder="Contraseña" required minlength="8">
         </div>
 
         <div class="form-group">
-          <label for="confirm_password">Confirmar contraseña</label>
-          <input type="password" id="confirm_password" name="confirm_password" placeholder="********" required minlength="8">
+          <input type="password" name="confirm_password" placeholder="Confirmar contraseña" required minlength="8">
         </div>
 
-        <div class="form-group terms">
+        <div class="form-group">
           <label>
             <input type="checkbox" name="accept_terms" required>
             Acepto los <a href="#">términos</a> y la <a href="#">política de privacidad</a>
           </label>
         </div>
 
-        <button type="submit" class="btn-primary">Crear cuenta</button>
-        <div id="registerMessage"></div>
+        <button type="submit" class="btn-primary">Registrarse</button>
+        <div id="registerMessage" style="margin-top:10px; font-weight:bold;"></div>
       </form>
     </div>
-
-    <div class="modal-footer">
-      <p>¿Ya tienes una cuenta? <a href="#">Inicia sesión</a></p>
-    </div>
   </div>
-</div>
-
 
 
 
