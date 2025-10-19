@@ -1,5 +1,7 @@
 <?php
-require_once('../Model/Entity/Connection.php');
+// Ajuste de ruta: desde /app/pages/inventory/view/ hasta /app/config/
+require_once('../../../config/Connection.php');
+
 $conexion = Connection::getConnection();
 $query = "SELECT *, (cantidad * costo_unitario) AS valor_total FROM insumos";
 $resultado = $conexion->query($query);
@@ -9,10 +11,11 @@ $resultado = $conexion->query($query);
 <head>
     <meta charset="UTF-8">
     <title>Gestor de Ingredientes</title>
-    <link rel="stylesheet" href="../CSS/insumos.css">
-    <link rel="stylesheet" href="../CSS/modales.css">
-    <link rel="stylesheet" href="../CSS/registroInsumo.css">
-    <link rel="stylesheet" href="../CSS/tables.css">
+    <link rel="stylesheet" href="../css/insumos.css">
+    <link rel="stylesheet" href="../css/modales.css">
+    <link rel="stylesheet" href="../css/registroInsumo.css">
+    <link rel="stylesheet" href="../css/tables.css">
+
     <style>
         .modal-content { max-height: 90vh; overflow-y: auto; }
     </style>
@@ -24,9 +27,9 @@ $resultado = $conexion->query($query);
     <span class="close" onclick="hideModal('formModal')">&times;</span>
     <h2 id="modalTitle">Registrar Ingrediente</h2>
     <form id="ingredientForm" 
-          action="/Proyecto_de_aula/Controller/store/inputs_add.php" 
+          action="../php/inputs_add.php" 
           method="POST" enctype="multipart/form-data"
-          onsubmit="return validarFechas()}">
+          onsubmit="return validarFechas()">
 
       <input type="hidden" name="id" id="ingredient_id">
 
@@ -120,21 +123,21 @@ $resultado = $conexion->query($query);
     <tbody>
       <?php while ($row = $resultado->fetch()): ?>
         <tr>
-          <td><?= $row['nombre']; ?></td>
-          <td><?= $row['estado']; ?></td>
-          <td><?= $row['cantidad']; ?></td>
-          <td><?= $row['unidad']; ?></td>
-          <td><?= $row['cantidad_minima']; ?></td>
-          <td><?= $row['costo_unitario']; ?></td>
-          <td><?= $row['valor_total']; ?></td>
-          <td><?= $row['proveedor']; ?></td>
+          <td><?= htmlspecialchars($row['nombre']); ?></td>
+          <td><?= htmlspecialchars($row['estado']); ?></td>
+          <td><?= htmlspecialchars($row['cantidad']); ?></td>
+          <td><?= htmlspecialchars($row['unidad']); ?></td>
+          <td><?= htmlspecialchars($row['cantidad_minima']); ?></td>
+          <td><?= htmlspecialchars($row['costo_unitario']); ?></td>
+          <td><?= htmlspecialchars($row['valor_total']); ?></td>
+          <td><?= htmlspecialchars($row['proveedor']); ?></td>
           <td>
             <a href="javascript:void(0)" 
                onclick='editIngredient(<?= json_encode($row); ?>)' 
                class="btn btn-edit">✏️ Editar</a>
-            <a href="/Proyecto_de_aula/Controller/store/inputs_delete.php?id=<?= $row['id']; ?>" 
-              onclick="return confirm('¿Eliminar ingrediente?');"
-              class="btn btn-delete">🗑️ Eliminar</a>
+            <a href="../php/inputs_delete.php?id=<?= $row['id']; ?>" 
+               onclick="return confirm('¿Eliminar ingrediente?');"
+               class="btn btn-delete">🗑️ Eliminar</a>
           </td>
         </tr>
       <?php endwhile; ?>
@@ -142,8 +145,8 @@ $resultado = $conexion->query($query);
   </table>
 </div>
 
-<script src="../JS/animations/modales.js"></script>
-<script src="../JS/ingredient/form_handler.js"></script>
+<script src="../js/form_handler.js"></script>
+<script src="../js/modales.js"></script>
 
 </body>
 </html>
