@@ -10,48 +10,46 @@
 <body>
   <div class="page-wrapper">
     <header class="main-header">
-      <h1>👥 Gestor de Empleados</h1>
-      <button id="btnAddEmpleado" class="btn btn-primary">+ Agregar Empleado</button>
+      <h1>Gestor de Empleados</h1>
+      <button id="btnAddEmpleado" class="btn btn-primary">+ Nuevo Empleado</button>
     </header>
 
-    <!-- 🌟 BLOQUE DE CÓDIGO DINÁMICO -->
+    <!-- 🔐 Bloque de código dinámico -->
     <section class="codigo-dinamico">
       <div class="codigo-card">
-        <div class="card-header">
-          <div>
-            <h2>🔐 Código Dinámico</h2>
-            <p>Compártelo con tus empleados para que puedan acceder a tu restaurante.</p>
-          </div>
-          <button id="nuevoCodigo" class="btn btn-nuevo">🔄 Regenerar</button>
+        <div class="codigo-top">
+          <h2>Código Dinámico de Acceso</h2>
+          <button id="nuevoCodigo" class="btn btn-outline">Regenerar</button>
         </div>
 
         <div class="codigo-body">
-          <div class="codigo-box">
-            <span id="codigoDinamico">••••••••</span>
-            <button id="copiarCodigo" class="btn btn-copiar">📋 Copiar</button>
-          </div>
-
-          <div class="timer-box">
-            <div class="ring">
-              <svg viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" class="bg" />
-                <circle cx="50" cy="50" r="45" class="progress" />
-              </svg>
-              <div id="timerText" class="timer-text">60s</div>
+          <div class="codigo-left">
+            <p class="codigo-label">Código actual</p>
+            <div class="codigo-box">
+              <span id="codigoDinamico">••••••••</span>
+              <button id="copiarCodigo" class="btn btn-copy">Copiar</button>
             </div>
             <p id="estadoCodigo" class="estado activo">Código activo</p>
+          </div>
+
+          <div class="codigo-timer">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="45" class="bg" />
+              <circle cx="50" cy="50" r="45" class="progress" />
+            </svg>
+            <div id="timerText" class="timer-text">60s</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 🧾 TABLA DE EMPLEADOS -->
-    <section class="tabla-empleados-wrapper">
+    <!-- 📋 Tabla de empleados -->
+    <section class="tabla-wrapper">
       <table id="tablaEmpleados" class="tabla-empleados">
         <thead>
           <tr>
             <th>ID</th>
-            <th>Nombre Completo</th>
+            <th>Nombre</th>
             <th>Correo</th>
             <th>Rol</th>
             <th>Fecha de Registro</th>
@@ -68,20 +66,20 @@
     <div class="modal-content">
       <h2 id="modalTitle">Nuevo Empleado</h2>
       <form id="formEmpleado">
-        <input type="hidden" name="id" id="empleadoId">
+        <input type="hidden" id="empleadoId">
 
         <label>Nombre Completo</label>
-        <input type="text" name="nombre" id="nombre" required>
+        <input type="text" id="nombre" required>
 
         <label>Correo</label>
-        <input type="email" name="correo" id="correo" required>
+        <input type="email" id="correo" required>
 
         <label>Documento</label>
-        <input type="text" name="documento" id="documento" required>
+        <input type="text" id="documento" required>
 
         <label>Rol</label>
-        <select name="rol" id="rol" required>
-          <option value="">Seleccionar rol...</option>
+        <select id="rol" required>
+          <option value="">Seleccionar...</option>
           <option value="Cocinero">Cocinero</option>
           <option value="Mesero">Mesero</option>
           <option value="Cajero">Cajero</option>
@@ -90,7 +88,7 @@
 
         <div class="modal-actions">
           <button type="submit" class="btn btn-primary">Guardar</button>
-          <button type="button" id="btnCancelar" class="btn btn-secondary">Cancelar</button>
+          <button type="button" id="btnCancelar" class="btn btn-outline">Cancelar</button>
         </div>
       </form>
     </div>
