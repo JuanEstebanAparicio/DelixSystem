@@ -2,12 +2,12 @@
 
 class Product {
     private $name;
-    private $quantity;
+    private $amount;
     private $minimum_quantity;
     private $unit;
     private $unit_cost;
     private $category;
-    private $entry_date;
+    private $entrance_date;
     private $expiration_date;
     private $batch;
     private $description;
@@ -16,14 +16,14 @@ class Product {
     private $supplier;
     private $photo;
 
-    public function __construct($name, $quantity, $minimum_quantity, $unit, $unit_cost, $category, $entry_date, $expiration_date, $batch, $description, $location, $status, $supplier, $photo) {
+    public function __construct($name, $amount, $minimum_quantity, $unit, $unit_cost, $category, $entrance_date, $expiration_date, $batch, $description, $location, $status, $supplier, $photo) {
         $this->name = $name;
-        $this->quantity = $quantity;
+        $this->amount = $amount;
         $this->minimum_quantity = $minimum_quantity;
         $this->unit = $unit;
         $this->unit_cost = $unit_cost;
         $this->category = $category;
-        $this->entry_date = $entry_date;
+        $this->entrance_date = $entrance_date;
         $this->expiration_date = $expiration_date;
         $this->batch = $batch;
         $this->description = $description;
@@ -33,12 +33,12 @@ class Product {
         $this->photo = $photo;
     }
     public function getName() { return $this->name; }
-    public function getQuantity() { return $this->quantity; }
+    public function getAmount() { return $this->amount; }
     public function getMinimumQuantity() { return $this->minimum_quantity; }
     public function getUnit() { return $this->unit; }
     public function getUnitCost() { return $this->unit_cost; }
     public function getCategory() { return $this->category; }
-    public function getEntryDate() { return $this->entry_date; }
+    public function getEntranceDate() { return $this->entrance_date; }
     public function getExpirationDate() { return $this->expiration_date; }
     public function getBatch() { return $this->batch; }
     public function getDescription() { return $this->description; }
@@ -48,12 +48,12 @@ class Product {
     public function getPhoto() { return $this->photo; }
 
     public function setName($name) { $this->name = $name; }
-    public function setQuantity($quantity) { $this->quantity = $quantity; }
+    public function setAmount($amount) { $this->amount = $amount; }
     public function setMinimumQuantity($minimum_quantity) { $this->minimum_quantity = $minimum_quantity; }
     public function setUnit($unit) { $this->unit = $unit; }
     public function setUnitCost($unit_cost) { $this->unit_cost = $unit_cost; }
     public function setCategory($category) { $this->category = $category; }
-    public function setEntryDate($entry_date) { $this->entry_date = $entry_date; }
+    public function setEntranceDate($entrance_date) { $this->entrance_date = $entrance_date; }
     public function setExpirationDate($expiration_date) { $this->expiration_date = $expiration_date; }
     public function setBatch($batch) { $this->batch = $batch; }
     public function setDescription($description) { $this->description = $description; }

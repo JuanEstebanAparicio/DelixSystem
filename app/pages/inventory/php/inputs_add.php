@@ -1,17 +1,18 @@
 <?php
-$baseDir = dirname(dirname(__DIR__));
-require_once($baseDir . '/Model/Entity/products.php');
-require_once($baseDir . '/Model/Crud/storage_crud.php');
-require_once($baseDir . '/Model/Entity/connection.php');
+$baseDir = dirname(__DIR__, 2);
 
-$pdo = Connection::getConnection();
+require_once($baseDir . '/config/supabase.php');
+require_once(__DIR__ . '/products.php');
+require_once(__DIR__ . '/storage_crud.php');
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+$pdo = $conexion ?? null;
 
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $photoName = null;
-    if (isset($_FILES["foto"]) && $_FILES["foto"]["error"] == 0) {
+
+    if (isset($_FILES["foto"]) && $_FILES["foto"]["error"] === 0) {
         $photoName = uniqid() . "_" . $_FILES["foto"]["name"];
-        $targetPath = $baseDir . '/Media/' . $photoName;
+        $targetPath = $baseDir . '/media/' . $photoName;
 
         if (!move_uploaded_file($_FILES["foto"]["tmp_name"], $targetPath)) {
             die("Error al subir la imagen.");
@@ -38,7 +39,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         $crud = new StorageCRUD($pdo);
         $crud->createProduct($product);
-        header("Location: http://localhost/Proyecto_de_aula/View/ingredient_manager.php?success=1");
+
+        header("Location: ../view/ingredient_manager.php?success=1");
         exit();
     } catch (Exception $e) {
         die("Error al registrar: " . $e->getMessage());

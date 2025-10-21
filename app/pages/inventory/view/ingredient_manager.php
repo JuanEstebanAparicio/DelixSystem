@@ -1,152 +1,149 @@
 <?php
-// Ajuste de ruta: desde /app/pages/inventory/view/ hasta /app/config/
-require_once('../../../config/Connection.php');
+require_once __DIR__ . '/../../../config/supabase.php';
 
-$conexion = Connection::getConnection();
-$query = "SELECT *, (cantidad * costo_unitario) AS valor_total FROM insumos";
-$resultado = $conexion->query($query);
+try {
+    $query = $conexion->query("SELECT * FROM storage");
+    $insumos = $query->fetchAll(PDO::FETCH_ASSOC);
+    $categorias = [];
+    foreach ($insumos as $ing) {
+        $cat = $ing['category'] ?: 'Sin categoría';
+        $categorias[$cat][] = $ing;
+    }
+} catch (PDOException $e) {
+    die("<p>Error al obtener datos desde Supabase: " . $e->getMessage() . "</p>");
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Gestor de Ingredientes</title>
-    <link rel="stylesheet" href="../css/insumos.css">
-    <link rel="stylesheet" href="../css/modales.css">
-    <link rel="stylesheet" href="../css/registroInsumo.css">
-    <link rel="stylesheet" href="../css/tables.css">
-
-    <style>
-        .modal-content { max-height: 90vh; overflow-y: auto; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Gestor de Ingredientes</title>
+  <link rel="stylesheet" href="../css/ingredient_manager.css">
+  <link rel="stylesheet" href="../css/modales.css">
+  <link rel="stylesheet" href="../css/registroInsumo.css">
 </head>
 <body>
 
+<!-- Sidebar -->
+<nav class="sidebar">
+  <h3>Categorías</h3>
+  <ul>
+    <?php foreach ($categorias as $categoria => $items): ?>
+      <li onclick="mostrarCategoria('<?= htmlspecialchars($categoria) ?>')">
+        <?= htmlspecialchars($categoria) ?>
+      </li>
+    <?php endforeach; ?>
+  </ul>
+  <button class="create-btn" onclick="newIngredient()">+ Registrar Ingrediente</button>
+</nav>
+
+<!-- Main content -->
+<main class="main-content">
+  <h2>Gestor de Ingredientes</h2>
+
+  <?php foreach ($categorias as $categoria => $items): ?>
+    <section class="categoria" id="<?= htmlspecialchars($categoria) ?>">
+      <h3><?= htmlspecialchars($categoria) ?></h3>
+      <div class="card-container">
+        <?php foreach ($items as $ing): ?>
+          <div class="ingredient-card">
+            <img src="<?= htmlspecialchars($ing['photo'] ?: '../img/default.png') ?>" 
+                 alt="<?= htmlspecialchars($ing['name']) ?>">
+            <h4><?= htmlspecialchars($ing['name']) ?></h4>
+            <p><strong>$<?= number_format($ing['unit_cost'], 0, ',', '.') ?></strong></p>
+            <p class="estado <?= strtolower($ing['state']) ?>">
+              <?= htmlspecialchars($ing['state']) ?>
+            </p>
+            <p class="cantidad"><?= htmlspecialchars($ing['amount']) ?> <?= htmlspecialchars($ing['unit']) ?></p>
+            <p class="desc"><?= htmlspecialchars($ing['description'] ?: '') ?></p>
+
+            <div class="card-actions">
+              <button class="btn-edit" onclick='editIngredient(<?= json_encode($ing) ?>)'>✏️</button>
+              <a href="../php/inputs_delete.php?id=<?= $ing['id'] ?>" 
+                 class="btn-delete" onclick="return confirm('¿Eliminar ingrediente?')">🗑️</a>
+            </div>
+          </div>
+        <?php endforeach; ?>
+
+        <!-- Crear nuevo -->
+        <div class="ingredient-card create-card" onclick="newIngredient()">
+          + Crear Ingrediente
+        </div>
+      </div>
+    </section>
+  <?php endforeach; ?>
+</main>
+
+<!-- Modal -->
 <div id="formModal" class="modal hidden">
   <div class="modal-content">
     <span class="close" onclick="hideModal('formModal')">&times;</span>
     <h2 id="modalTitle">Registrar Ingrediente</h2>
+
     <form id="ingredientForm" 
           action="../php/inputs_add.php" 
-          method="POST" enctype="multipart/form-data"
+          method="POST" 
+          enctype="multipart/form-data"
           onsubmit="return validarFechas()">
 
       <input type="hidden" name="id" id="ingredient_id">
 
-      <label>Nombre:</label>
-      <input type="text" name="nombre" id="nombre" required>
+      <label for="name">Nombre:</label>
+      <input type="text" name="name" id="name" required>
 
-      <label>Cantidad:</label>
-      <input type="number" name="cantidad" id="cantidad" required>
+      <label for="amount">Cantidad:</label>
+      <input type="number" name="amount" id="amount" required>
 
-      <label>Cantidad mínima:</label>
-      <input type="number" name="cantidad_minima" id="cantidad_minima" required>
+      <label for="minimum_quantity">Cantidad mínima:</label>
+      <input type="number" name="minimum_quantity" id="minimum_quantity" required>
 
-      <label>Unidad:</label>
-      <select name="unidad" id="unidad" required>
-        <option value="">Seleccione</option>
+      <label for="unit">Unidad:</label>
+      <select name="unit" id="unit" required>
         <option value="Kg">Kg</option>
         <option value="Litro">Litro</option>
         <option value="Unidad">Unidad</option>
       </select>
 
-      <label>Costo unitario:</label>
-      <input type="number" step="0.01" name="costo_unitario" id="costo_unitario" required>
+      <label for="unit_cost">Costo unitario:</label>
+      <input type="number" step="0.01" name="unit_cost" id="unit_cost" required>
 
-      <label>Categoría:</label>
-      <select name="categoria" id="categoria" required>
-        <option value="">Seleccione</option>
-        <option value="Vegetal">Vegetal</option>
-        <option value="Carne">Carne</option>
-        <option value="Bebida">Bebida</option>
-        <option value="Otro">Otro</option>
-      </select>
+      <label for="category">Categoría:</label>
+      <input type="text" name="category" id="category" required>
 
-      <label>Fecha ingreso:</label>
-      <input type="date" name="fecha_ingreso" id="fecha_ingreso" required>
+      <label for="batch">Lote:</label>
+      <input type="text" name="batch" id="batch" placeholder="Ej: Lote-2025-A">
 
-      <label>Fecha vencimiento:</label>
-      <input type="date" name="fecha_vencimiento" id="fecha_vencimiento" required>
+      <label for="description">Descripción:</label>
+      <textarea name="description" id="description" rows="3" placeholder="Breve descripción del insumo..."></textarea>
 
-      <label>Lote:</label>
-      <input type="text" name="lote" id="lote" required>
+      <label for="location">Ubicación en almacén:</label>
+      <input type="text" name="location" id="location" placeholder="Ej: Estante A3 - Nivel 2">
 
-      <label>Descripción:</label>
-      <textarea name="descripcion" id="descripcion"></textarea>
-
-      <label>Ubicación:</label>
-      <input type="text" name="ubicacion" id="ubicacion" required>
-
-      <label>Estado:</label>
-      <select name="estado" id="estado" required>
+      <label for="status">Estado:</label>
+      <select name="status" id="status">
         <option value="Activo">Activo</option>
         <option value="Agotado">Agotado</option>
       </select>
 
-      <label>Proveedor:</label>
-      <input type="text" name="proveedor" id="proveedor" required>
+      <label for="supplier">Proveedor:</label>
+      <input type="text" name="supplier" id="supplier" required>
 
-      <label>Foto:</label>
-      <input type="file" name="foto" id="foto" accept="image/*">
+      <label for="fecha_ingreso">Fecha ingreso:</label>
+      <input type="date" name="fecha_ingreso" id="fecha_ingreso">
 
-      <button type="submit" class="modal-btn" id="submitBtn">Registrar Ingrediente</button>
+      <label for="fecha_vencimiento">Fecha vencimiento:</label>
+      <input type="date" name="fecha_vencimiento" id="fecha_vencimiento">
+
+      <label for="photo">Foto:</label>
+      <input type="file" name="photo" id="photo" accept="image/*">
+
+      <button type="submit" id="submitBtn" class="modal-btn">Registrar Ingrediente</button>
     </form>
   </div>
 </div>
 
-<div class="content">
-  <h2>Gestor de Ingredientes</h2>
-  <button onclick="newIngredient()" class="modal-btn">+ Registrar Ingrediente</button>
-</div>
-
-<div class="content">
-  <?php if (isset($_GET['success'])): ?>
-    <?php if ($_GET['success'] == 1): ?>
-      <p class="success-msg">✅ Ingrediente registrado correctamente.</p>
-    <?php elseif ($_GET['success'] == 2): ?>
-      <p class="success-msg">✏️ Ingrediente actualizado correctamente.</p>
-    <?php elseif ($_GET['success'] == 3): ?>
-      <p class="success-msg">🗑️ Ingrediente eliminado correctamente.</p>
-    <?php endif; ?>
-  <?php endif; ?>
-</div>
-
-<div class="table-container">
-  <table class="styled-table">
-    <thead>
-      <tr>
-        <th>Nombre</th><th>Estado</th><th>Cantidad</th><th>Medida</th>
-        <th>Cantidad Min</th><th>Costo Unitario</th><th>Valor Total</th>
-        <th>Proveedor</th><th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php while ($row = $resultado->fetch()): ?>
-        <tr>
-          <td><?= htmlspecialchars($row['nombre']); ?></td>
-          <td><?= htmlspecialchars($row['estado']); ?></td>
-          <td><?= htmlspecialchars($row['cantidad']); ?></td>
-          <td><?= htmlspecialchars($row['unidad']); ?></td>
-          <td><?= htmlspecialchars($row['cantidad_minima']); ?></td>
-          <td><?= htmlspecialchars($row['costo_unitario']); ?></td>
-          <td><?= htmlspecialchars($row['valor_total']); ?></td>
-          <td><?= htmlspecialchars($row['proveedor']); ?></td>
-          <td>
-            <a href="javascript:void(0)" 
-               onclick='editIngredient(<?= json_encode($row); ?>)' 
-               class="btn btn-edit">✏️ Editar</a>
-            <a href="../php/inputs_delete.php?id=<?= $row['id']; ?>" 
-               onclick="return confirm('¿Eliminar ingrediente?');"
-               class="btn btn-delete">🗑️ Eliminar</a>
-          </td>
-        </tr>
-      <?php endwhile; ?>
-    </tbody>
-  </table>
-</div>
 
 <script src="../js/form_handler.js"></script>
-<script src="../js/modales.js"></script>
-
 </body>
 </html>

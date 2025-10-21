@@ -1,10 +1,10 @@
 <?php
-$baseDir = dirname(dirname(__DIR__));
-require_once($baseDir . '/Model/Entity/products.php');
-require_once($baseDir . '/Model/Crud/storage_crud.php');
-require_once($baseDir . '/Model/Entity/connection.php');
+$baseDir = dirname(__DIR__, 2);
+require_once($baseDir . '/config/supabase.php');
+require_once(__DIR__ . '/products.php');
+require_once(__DIR__ . '/storage_crud.php');
 
-$pdo = Connection::getConnection();
+$pdo = $conexion;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
 
@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
     try {
         $crud = new StorageCRUD($pdo);
         $crud->updateProduct($product, $id);
-        header("Location: http://localhost/Proyecto_de_aula/View/ingredient_manager.php?success=2");
+        header("Location: ../view/ingredient_manager.php?success=2");
         exit();
     } catch (Exception $e) {
         die("Error al actualizar: " . $e->getMessage());

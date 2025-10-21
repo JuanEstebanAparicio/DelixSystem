@@ -1,97 +1,123 @@
 <?php
+$baseDir = dirname(__DIR__, 2);
+require_once($baseDir . '/config/supabase.php');
+require_once($baseDir . '/products.php');
 
-$baseDir = dirname(dirname(__DIR__));
-require_once($baseDir . '../Model/Entity/products.php');
-
-class StorageCRUD {
+class Storage_crud {
     private $pdo;
 
     public function __construct($pdo = null) {
-        if ($pdo === null) {
-            $this->pdo = Connection::getConnection();
-        } else {
-            $this->pdo = $pdo;
-        }
+        global $conexion;
+        $this->pdo = $pdo ?? $conexion;
     }
 
+    /** Crear un producto (INSERT en Supabase) */
     public function createProduct(Product $product) {
-        if (empty($product->getName()) || empty($product->getQuantity()) || empty($product->getUnit())) {
-            throw new Exception("Los campos obligatorios no pueden estar vacíos.");
+        try {
+            $sql = "INSERT INTO storage 
+                (name, amount, minimum_quantity, unit, unit_cost, category, entrance_date, expiration_date, batch, description, location, status, supplier, photo)
+                VALUES (:name, :amount, :minimum_quantity, :unit, :unit_cost, :category, :entrance_date, :expiration_date, :batch, :description, :location, :status, :supplier, :photo)";
+            
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                ':name' => $product->getName(),
+                ':amount' => $product->getAmount(),
+                ':minimum_quantity' => $product->getMinimumQuantity(),
+                ':unit' => $product->getUnit(),
+                ':unit_cost' => $product->getUnitCost(),
+                ':category' => $product->getCategory(),
+                ':entrance_date' => $product->getEntranceDate(),
+                ':expiration_date' => $product->getExpirationDate(),
+                ':batch' => $product->getBatch(),
+                ':description' => $product->getDescription(),
+                ':location' => $product->getLocation(),
+                ':status' => $product->getStatus(),
+                ':supplier' => $product->getSupplier(),
+                ':photo' => $product->getPhoto()
+            ]);
+            return true;
+        } catch (PDOException $e) {
+            die("Error al crear producto: " . $e->getMessage());
         }
-
-        $sql = "INSERT INTO insumos 
-            (nombre, cantidad, cantidad_minima, unidad, costo_unitario, categoria, fecha_ingreso, fecha_vencimiento, lote, descripcion, ubicacion, estado, proveedor, foto)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $stmt->execute([
-            $product->getName(),
-            $product->getQuantity(),
-            $product->getMinimumQuantity(),
-            $product->getUnit(),
-            $product->getUnitCost(),
-            $product->getCategory(),
-            $product->getEntryDate(),
-            $product->getExpirationDate(),
-            $product->getBatch(),
-            $product->getDescription(),
-            $product->getLocation(),
-            $product->getStatus(),
-            $product->getSupplier(),
-            $product->getPhoto()
-        ]);
-
-        return true;
     }
 
+    /** Actualizar producto existente */
     public function updateProduct(Product $product, $id) {
-        $sql = "UPDATE insumos SET 
-            nombre = ?, 
-            cantidad = ?, 
-            cantidad_minima = ?, 
-            unidad = ?, 
-            costo_unitario = ?, 
-            categoria = ?, 
-            fecha_ingreso = ?, 
-            fecha_vencimiento = ?, 
-            lote = ?, 
-            descripcion = ?, 
-            ubicacion = ?, 
-            estado = ?, 
-            proveedor = ?, 
-            foto = ?
-            WHERE id = ?";
+        try {
+            $sql = "UPDATE storage SET 
+                name = :name,
+                amount = :amount,
+                minimum_quantity = :minimum_quantity,
+                unit = :unit,
+                unit_cost = :unit_cost,
+                category = :category,
+                entrance_date = :entrance_date,
+                expiration_date = :expiration_date,
+                batch = :batch,
+                description = :description,
+                location = :location,
+                status = :status,
+                supplier = :supplier,
+                photo = :photo
+                WHERE id = :id";
 
-        $stmt = $this->pdo->prepare($sql);
-
-        $stmt->execute([
-            $product->getName(),
-            $product->getQuantity(),
-            $product->getMinimumQuantity(),
-            $product->getUnit(),
-            $product->getUnitCost(),
-            $product->getCategory(),
-            $product->getEntryDate(),
-            $product->getExpirationDate(),
-            $product->getBatch(),
-            $product->getDescription(),
-            $product->getLocation(),
-            $product->getStatus(),
-            $product->getSupplier(),
-            $product->getPhoto(),
-            $id
-        ]);
-
-        return true;
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                ':name' => $product->getName(),
+                ':amount' => $product->getAmount(),
+                ':minimum_quantity' => $product->getMinimumQuantity(),
+                ':unit' => $product->getUnit(),
+                ':unit_cost' => $product->getUnitCost(),
+                ':category' => $product->getCategory(),
+                ':entrance_date' => $product->getEntranceDate(),
+                ':expiration_date' => $product->getExpirationDate(),
+                ':batch' => $product->getBatch(),
+                ':description' => $product->getDescription(),
+                ':location' => $product->getLocation(),
+                ':status' => $product->getStatus(),
+                ':supplier' => $product->getSupplier(),
+                ':photo' => $product->getPhoto(),
+                ':id' => $id
+            ]);
+            return true;
+        } catch (PDOException $e) {
+            die("Error al actualizar producto: " . $e->getMessage());
+        }
     }
 
+    /** Eliminar producto */
     public function deleteProduct($id) {
-        $sql = "DELETE FROM insumos WHERE id = ?";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([$id]);
+        try {
+            $sql = "DELETE FROM storage WHERE id = :id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':id' => $id]);
+            return true;
+        } catch (PDOException $e) {
+            die("Error al eliminar producto: " . $e->getMessage());
+        }
+    }
 
-        return true;
+    /** Obtener todos los productos */
+    public function getAllProducts() {
+        try {
+            $sql = "SELECT * FROM storage ORDER BY id ASC";
+            $stmt = $this->pdo->query($sql);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            die("Error al obtener productos: " . $e->getMessage());
+        }
+    }
+
+    /** Obtener producto por ID */
+    public function getProductById($id) {
+        try {
+            $sql = "SELECT * FROM storage WHERE id = :id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':id' => $id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            die("Error al obtener producto: " . $e->getMessage());
+        }
     }
 }
 ?>
