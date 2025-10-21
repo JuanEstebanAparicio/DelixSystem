@@ -16,6 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const startTimer = (exp) => {
     clearInterval(timer);
     const expireTime = new Date(exp).getTime();
+    console.log("🕒 Expira en:", exp, " → ", new Date(exp));
+
 
     timer = setInterval(() => {
       const now = Date.now();

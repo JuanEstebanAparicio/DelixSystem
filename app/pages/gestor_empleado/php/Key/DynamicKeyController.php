@@ -8,6 +8,8 @@ require_once __DIR__ . '/../../../../config/supabase.php';
 // ✅ Include the model
 require_once __DIR__ . '/DynamicKeyModel.php';
 
+$conexion->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
+
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         throw new Exception("Invalid request method");
@@ -41,18 +43,22 @@ try {
             break;
 
         case 'generate':
-            $model->deactivateOldKeys($userId);
+                $model->deactivateOldKeys($userId);
 
-            $code = strtoupper(implode('-', str_split(bin2hex(random_bytes(4)), 4)));
-            $expiresAt = date("Y-m-d H:i:s", strtotime("+1 minute"));
-            $model->createKey($userId, $code, $expiresAt);
+                $code = strtoupper(implode('-', str_split(bin2hex(random_bytes(4)), 4)));
 
-            echo json_encode([
+                // ✅ ISO 8601 timestamp (with timezone)
+                $expiresAt = (new DateTime('+1 minute'))->format(DateTime::ATOM);
+
+                $model->createKey($userId, $code, $expiresAt);
+
+                echo json_encode([
                 "status" => "success",
                 "code" => $code,
                 "expires_at" => $expiresAt
-            ]);
-            break;
+                ]);
+                break;
+
 
         default:
             throw new Exception("Invalid action");
