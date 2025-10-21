@@ -1,4 +1,6 @@
 <?php
+// DelixSystem/src/auth/login.php
+
 require_once __DIR__ . '/../../app/config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -23,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
 
             // Use HTTP redirect instead of printing a <script> tag
-            header('Location: /Proyecto_aula/app/pages/dashboard_propietario/view/index.php');
+           header('Location: ../../app/pages/dashboard_propietario/view/index.php');
             exit;
         } else {
             // Incorrect password: redirect back to login with an error code

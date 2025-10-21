@@ -1,5 +1,5 @@
 <?php
-// Proyecto_aula/src/auth/logout.php
+// DelixSystem/src/auth/logout.php
 
 session_start();
 

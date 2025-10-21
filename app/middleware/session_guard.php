@@ -1,5 +1,6 @@
 <?php
 // Inicia sesión solo si no está activa
+// DelixSystem/app/middleware/session_guard.php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -21,7 +22,7 @@ function protectPage() {
  */
 function checkIfLoggedIn() {
     if (isset($_SESSION['usuario']['id'])) {
-        header('Location: ../app/pages/dashboard_propietario/view/index.php');
+        header('Location: ../../DelixSystem/app/pages/dashboard_propietario/view/index.php');
         exit();
     }
 }

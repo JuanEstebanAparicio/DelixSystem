@@ -1,4 +1,4 @@
-<!-- -- Proyecto_aula/app/pages/dashboard_propietario/view/index.php -->
+<!-- -- DelixSystem/app/pages/dashboard_propietario/view/index.php -->
 <?php
 require_once __DIR__ . '/../../../middleware/session_guard.php';
 protectPage(); // Evita que accedan al dashboard sin login

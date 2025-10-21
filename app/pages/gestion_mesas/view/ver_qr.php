@@ -22,7 +22,7 @@ if (!$mesa) {
 }
 
 // Texto que contendrá el QR
-$ngrok_url = "https://uncatered-thomasina-arousingly.ngrok-free.dev/Proyecto_aula";
+$ngrok_url = "https://uncatered-thomasina-arousingly.ngrok-free.dev/DelixSystem";
 $contenido = "$ngrok_url/app/views/mesas/mesa.php?id={$id_mesa}";
 
 // Genera la URL del QR
