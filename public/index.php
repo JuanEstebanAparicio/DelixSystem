@@ -1,3 +1,9 @@
+<?php
+require_once __DIR__ . '/../app/config/path.php';
+echo "<!-- BASE_URL = " . BASE_URL . " -->";
+?>
+
+
 <!DOCTYPE html>
 <!-- public/index.php -->
 <html lang="es">
@@ -183,8 +189,9 @@
   <div class="modal-content">
     <span class="close" id="closeLogin">&times;</span>
     <h3>Acceso de Empleado</h3>
-
-    <form method="POST" action="../gestor_empleado/php/empleados/EmpleadoController.php" id="empleadoAccessForm">
+    <form method="POST" 
+      action="/ProjectDelix/app/pages/gestor_empleado/php/employee/EmpleadoController.php" 
+      id="empleadoAccessForm">
       <div class="form-group">
         <input 
           type="text" 
@@ -194,7 +201,7 @@
           maxlength="20"
         >
       </div>
-
+       <br>
       <div class="form-group">
         <input 
           type="text" 
@@ -203,7 +210,7 @@
           required
         >
       </div>
-
+      <br>
       <div class="form-group">
         <input 
           type="email" 
@@ -212,7 +219,7 @@
           required
         >
       </div>
-
+      <br>
       <div class="form-group">
         <input 
           type="text" 
@@ -248,6 +255,10 @@
 <script src="./js/alert.js" defer></script>
 <script src="./js/modal.js" defer></script>
 <script src="./js/register.js" defer></script>
+<script src="/ProjectDelix/app/pages/gestor_empleado/js/empleadoAccess.js" defer></script>
+
+
+
 
 </body>
 </html>

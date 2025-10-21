@@ -6,6 +6,9 @@ header("Content-Type: application/json");
 require_once __DIR__ . '/../../../../config/supabase.php';
 require_once __DIR__ . '/EmpleadoModel.php';
 
+$conexion = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $user, $password);
+$conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         throw new Exception("Invalid request method");

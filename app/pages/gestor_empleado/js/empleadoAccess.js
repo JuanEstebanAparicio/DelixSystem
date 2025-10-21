@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = new FormData(form);
 
     try {
-      const res = await fetch("../php/employee/EmpleadoController.php", {
+      const res = await fetch("/ProjectDelix/app/pages/gestor_empleado/php/employee/EmpleadoController.php", {
         method: "POST",
         body: data,
       });
