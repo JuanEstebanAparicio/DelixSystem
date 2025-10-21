@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let timer = null;
   let tiempo = 60;
 
-  console.log("👤 Logged Admin ID:", userId);
+
 
   // 🔄 Timer circular
   const startTimer = (exp) => {

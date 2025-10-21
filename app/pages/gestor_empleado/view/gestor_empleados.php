@@ -108,7 +108,7 @@ if (!isset($_SESSION['user_id'])) {
   <script>
     // Safe PHP → JS transfer
     const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
-    console.log("👤 Logged Admin ID:", userId);
+    
   </script>
 
   <!-- 📜 JS logic -->
