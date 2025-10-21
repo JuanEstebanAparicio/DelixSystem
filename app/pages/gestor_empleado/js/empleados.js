@@ -15,7 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // 🔄 Timer circular
   const startTimer = (exp) => {
     clearInterval(timer);
-    const expireTime = new Date(exp).getTime();
+    const expireTime = new Date(exp + " UTC").getTime();
+
     console.log("🕒 Expira en:", exp, " → ", new Date(exp));
 
 

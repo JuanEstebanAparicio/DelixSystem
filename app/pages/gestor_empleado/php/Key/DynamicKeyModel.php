@@ -48,5 +48,15 @@ class DynamicKeyModel {
         ");
         $stmt->execute(["user_id" => $userId]);
     }
+
+    public function cleanOldKeys($userId) {
+        $stmt = $this->db->prepare("
+        DELETE FROM dynamic_keys
+        WHERE user_id = :user_id
+        AND (active = FALSE OR expires_at < NOW())
+        ");
+        $stmt->execute(["user_id" => $userId]);
+}
+
 }
 ?>

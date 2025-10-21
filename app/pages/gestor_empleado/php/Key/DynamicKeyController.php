@@ -43,21 +43,24 @@ try {
             break;
 
         case 'generate':
+    // 1️⃣ Desactiva cualquier clave activa anterior
                 $model->deactivateOldKeys($userId);
 
+    // 2️⃣ Limpia claves viejas e inactivas
+                $model->cleanOldKeys($userId);
+
+    // 3️⃣ Genera el nuevo código
                 $code = strtoupper(implode('-', str_split(bin2hex(random_bytes(4)), 4)));
-
-                // ✅ ISO 8601 timestamp (with timezone)
-                $expiresAt = (new DateTime('+1 minute'))->format(DateTime::ATOM);
-
+                $expiresAt = gmdate("Y-m-d H:i:s", strtotime("+1 minute"));
                 $model->createKey($userId, $code, $expiresAt);
 
-                echo json_encode([
-                "status" => "success",
-                "code" => $code,
-                "expires_at" => $expiresAt
-                ]);
-                break;
+            echo json_encode([
+            "status" => "success",
+            "code" => $code,
+            "expires_at" => $expiresAt
+        ]);
+        break;
+
 
 
         default:
