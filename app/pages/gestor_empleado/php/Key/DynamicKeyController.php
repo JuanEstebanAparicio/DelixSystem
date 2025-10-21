@@ -3,20 +3,18 @@ require_once __DIR__ . '/DynamicKeyModel.php';
 header("Content-Type: application/json; charset=utf-8");
 
 try {
-    $accion = $_POST['accion'] ?? null;
-    $adminId = $_POST['admin_id'] ?? null;
+    $action = $_POST['action'] ?? null;
+    $userId = $_POST['user_id'] ?? null;
 
-    if (!$accion || !$adminId) {
-        echo json_encode(["status" => "error", "message" => "Faltan parámetros"]);
-        exit;
+    if (!$action || !$userId) {
+        throw new Exception("Missing parameters");
     }
 
     $model = new DynamicKeyModel();
 
-    switch ($accion) {
-        // 🔹 Consultar si existe un código activo
-        case 'consultar':
-            $key = $model->getActiveKey($adminId);
+    switch ($action) {
+        case 'get':
+            $key = $model->getActiveKey($userId);
             if ($key) {
                 echo json_encode([
                     "status" => "ok",
@@ -28,32 +26,32 @@ try {
             }
             break;
 
-        // 🔹 Generar un nuevo código
-        case 'generar':
-            // Expirar los anteriores primero ✅
-            $model->expireOldKeys($adminId);
+        case 'generate':
+            $model->expireOldKeys($userId);
 
-            // Generar nuevo código
-            $bytes = random_bytes(8);
-            $code = strtoupper(implode('-', str_split(bin2hex($bytes), 4)));
+            // Generate secure random code (example: A7F2-B9K1-Z5L8)
+            $bytes = strtoupper(bin2hex(random_bytes(6)));
+            $formatted = implode('-', str_split(substr($bytes, 0, 12), 4));
 
-            // Definir expiración 1 minuto desde ahora
             $expiresAt = date("Y-m-d H:i:sP", strtotime("+1 minute"));
-
-            $model->createNewKey($adminId, $code, $expiresAt);
+            $model->createNewKey($userId, $formatted, $expiresAt);
 
             echo json_encode([
                 "status" => "ok",
-                "code" => $code,
+                "code" => $formatted,
                 "expires_at" => $expiresAt
             ]);
             break;
 
         default:
-            echo json_encode(["status" => "error", "message" => "Acción no reconocida"]);
+            throw new Exception("Unknown action");
     }
+
 } catch (Throwable $e) {
     http_response_code(500);
-    echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+    echo json_encode([
+        "status" => "error",
+        "message" => $e->getMessage()
+    ]);
 }
 ?>
