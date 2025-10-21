@@ -138,3 +138,21 @@ th, td {
 .badge.entregado {
   background-color: #4caf50;
 }
+
+.logout-btn {
+  margin-left: 15px;
+  padding: 8px 16px;
+  background-color: #e74c3c;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: inline-block;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b;
+}

@@ -1,3 +1,9 @@
+<!-- -- Proyecto_aula/app/pages/dashboard_propietario/view/index.php -->
+<?php
+require_once __DIR__ . '/../../../middleware/session_guard.php';
+protectPage(); // Evita que accedan al dashboard sin login
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -31,6 +37,7 @@
       <div class="user-info">
         <img src="https://cdn-icons-png.flaticon.com/512/2202/2202112.png" alt="Admin">
         <span>Admin</span>
+       <a href="../../../../src/auth/logout.php" class="logout-btn">Cerrar sesión</a>
       </div>
     </header>
 

@@ -193,11 +193,11 @@ include __DIR__ . '/../../../config/supabase.php';
 
   <!-- 🔹 SCRIPTS -->
   <script src="../js/edit.js"></script>
-  <script src="/ProjectDelix/public/js/modal.js"></script>
+  <script src="/Proyecto_aula/public/js/modal.js"></script>
   <script src="../js/qr_modal.js"></script>
   <script src="../js/mesas.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="/ProjectDelix/public/js/alert.js"></script>
+  <script src="/Proyecto_aula/public/js/alert.js"></script>
   <script src="../js/areas.js"></script>
 
 </body>

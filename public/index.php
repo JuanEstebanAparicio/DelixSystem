@@ -1,3 +1,9 @@
+<!-- Proyecto_aula/public/index.php -->
+<?php
+require_once __DIR__ . '/../app/middleware/session_guard.php';
+checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
+?>
+
 <!DOCTYPE html>
 <!-- public/index.php -->
 <html lang="es">
