@@ -12,11 +12,11 @@ class Product {
     private $batch;
     private $description;
     private $location;
-    private $status;
+    private $state;
     private $supplier;
     private $photo;
 
-    public function __construct($name, $amount, $minimum_quantity, $unit, $unit_cost, $category, $entrance_date, $expiration_date, $batch, $description, $location, $status, $supplier, $photo) {
+    public function __construct($name, $amount, $minimum_quantity, $unit, $unit_cost, $category, $entrance_date, $expiration_date, $batch, $description, $location, $state, $supplier, $photo) {
         $this->name = $name;
         $this->amount = $amount;
         $this->minimum_quantity = $minimum_quantity;
@@ -28,7 +28,7 @@ class Product {
         $this->batch = $batch;
         $this->description = $description;
         $this->location = $location;
-        $this->status = $status;
+        $this->state = $state;
         $this->supplier = $supplier;
         $this->photo = $photo;
     }
@@ -43,7 +43,7 @@ class Product {
     public function getBatch() { return $this->batch; }
     public function getDescription() { return $this->description; }
     public function getLocation() { return $this->location; }
-    public function getStatus() { return $this->status; }
+    public function getState() { return $this->state; }
     public function getSupplier() { return $this->supplier; }
     public function getPhoto() { return $this->photo; }
 
@@ -58,7 +58,7 @@ class Product {
     public function setBatch($batch) { $this->batch = $batch; }
     public function setDescription($description) { $this->description = $description; }
     public function setLocation($location) { $this->location = $location; }
-    public function setStatus($status) { $this->status = $status; }
+    public function setState($state) { $this->state = $state; }
     public function setSupplier($supplier) { $this->supplier = $supplier; }
     public function setPhoto($photo) { $this->photo = $photo; }
 }

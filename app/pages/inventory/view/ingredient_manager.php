@@ -2,9 +2,10 @@
 require_once __DIR__ . '/../../../config/supabase.php';
 
 try {
-    $query = $conexion->query("SELECT * FROM storage");
+    $query = $conexion->query("SELECT * FROM storage ORDER BY category, name ASC");
     $insumos = $query->fetchAll(PDO::FETCH_ASSOC);
     $categorias = [];
+
     foreach ($insumos as $ing) {
         $cat = $ing['category'] ?: 'Sin categoría';
         $categorias[$cat][] = $ing;
@@ -46,10 +47,21 @@ try {
     <section class="categoria" id="<?= htmlspecialchars($categoria) ?>">
       <h3><?= htmlspecialchars($categoria) ?></h3>
       <div class="card-container">
+
         <?php foreach ($items as $ing): ?>
+          <?php
+            // ✅ Construir ruta segura de la imagen
+            $imgPath = !empty($ing['photo'])
+              ? "../" . htmlspecialchars($ing['photo'])
+              : "../img/default.png";
+
+            // Si el archivo no existe localmente, usar imagen por defecto
+            if (!file_exists(__DIR__ . "/../" . $ing['photo'])) {
+              $imgPath = "../img/default.png";
+            }
+          ?>
           <div class="ingredient-card">
-            <img src="<?= htmlspecialchars($ing['photo'] ?: '../img/default.png') ?>" 
-                 alt="<?= htmlspecialchars($ing['name']) ?>">
+            <img src="<?= $imgPath ?>" alt="<?= htmlspecialchars($ing['name']) ?>">
             <h4><?= htmlspecialchars($ing['name']) ?></h4>
             <p><strong>$<?= number_format($ing['unit_cost'], 0, ',', '.') ?></strong></p>
             <p class="estado <?= strtolower($ing['state']) ?>">
@@ -142,7 +154,6 @@ try {
     </form>
   </div>
 </div>
-
 
 <script src="../js/form_handler.js"></script>
 </body>

@@ -1,9 +1,8 @@
 <?php
-$baseDir = dirname(__DIR__, 2);
-require_once($baseDir . '/config/supabase.php');
-require_once($baseDir . '/products.php');
+require_once(dirname(__DIR__, 3) . '/config/supabase.php');
+require_once(__DIR__ . '/products.php');
 
-class Storage_crud {
+class storage_crud {
     private $pdo;
 
     public function __construct($pdo = null) {
@@ -15,9 +14,9 @@ class Storage_crud {
     public function createProduct(Product $product) {
         try {
             $sql = "INSERT INTO storage 
-                (name, amount, minimum_quantity, unit, unit_cost, category, entrance_date, expiration_date, batch, description, location, status, supplier, photo)
-                VALUES (:name, :amount, :minimum_quantity, :unit, :unit_cost, :category, :entrance_date, :expiration_date, :batch, :description, :location, :status, :supplier, :photo)";
-            
+                (name, amount, minimum_quantity, unit, unit_cost, category, entrance_date, expiration_date, batch, description, location, state, supplier, photo)
+                VALUES (:name, :amount, :minimum_quantity, :unit, :unit_cost, :category, :entrance_date, :expiration_date, :batch, :description, :location, :state, :supplier, :photo)";
+
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([
                 ':name' => $product->getName(),
@@ -31,7 +30,7 @@ class Storage_crud {
                 ':batch' => $product->getBatch(),
                 ':description' => $product->getDescription(),
                 ':location' => $product->getLocation(),
-                ':status' => $product->getStatus(),
+                ':state' => $product->getState(),
                 ':supplier' => $product->getSupplier(),
                 ':photo' => $product->getPhoto()
             ]);
@@ -56,7 +55,7 @@ class Storage_crud {
                 batch = :batch,
                 description = :description,
                 location = :location,
-                status = :status,
+                state = :state,
                 supplier = :supplier,
                 photo = :photo
                 WHERE id = :id";
@@ -74,7 +73,7 @@ class Storage_crud {
                 ':batch' => $product->getBatch(),
                 ':description' => $product->getDescription(),
                 ':location' => $product->getLocation(),
-                ':status' => $product->getStatus(),
+                ':state' => $product->getState(),
                 ':supplier' => $product->getSupplier(),
                 ':photo' => $product->getPhoto(),
                 ':id' => $id
