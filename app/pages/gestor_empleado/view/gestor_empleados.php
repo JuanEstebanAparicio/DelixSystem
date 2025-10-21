@@ -1,3 +1,12 @@
+<?php
+session_start();
+
+// ⚙️ Temporary session for testing
+if (!isset($_SESSION['user_id'])) {
+  $_SESSION['user_id'] = 1; // Replace with logged admin ID later
+}
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,16 +14,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestor de Empleados | Delix</title>
   <link rel="stylesheet" href="../css/gestor_empleados.css" />
-  <script defer src="../js/empleados.js"></script>
 </head>
 <body>
   <div class="page-wrapper">
+    <!-- 🔹 Header -->
     <header class="main-header">
       <h1>Gestor de Empleados</h1>
       <button id="btnAddEmpleado" class="btn btn-primary">+ Nuevo Empleado</button>
     </header>
 
-    <!-- 🔐 Bloque de código dinámico -->
+    <!-- 🔐 Código dinámico -->
     <section class="codigo-dinamico">
       <div class="codigo-card">
         <div class="codigo-top">
@@ -32,6 +41,7 @@
             <p id="estadoCodigo" class="estado activo">Código activo</p>
           </div>
 
+          <!-- ⏱️ Timer circular -->
           <div class="codigo-timer">
             <svg viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="45" class="bg" />
@@ -61,7 +71,7 @@
     </section>
   </div>
 
-  <!-- Modal CRUD -->
+  <!-- 💼 Modal de empleado -->
   <div id="modalEmpleado" class="modal hidden">
     <div class="modal-content">
       <h2 id="modalTitle">Nuevo Empleado</h2>
@@ -93,5 +103,15 @@
       </form>
     </div>
   </div>
+
+  <!-- 🔧 Variables globales -->
+  <script>
+    // Safe PHP → JS transfer
+    const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
+    console.log("👤 Logged Admin ID:", userId);
+  </script>
+
+  <!-- 📜 JS logic -->
+  <script defer src="../js/empleados.js"></script>
 </body>
 </html>
