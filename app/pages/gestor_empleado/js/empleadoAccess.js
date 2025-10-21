@@ -1,29 +1,29 @@
-// 📂 gestor_empleado/js/empleado_login.js
+// empleadosAccess.js
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("empleadoAccessForm");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const formData = new FormData(form);
+    const data = new FormData(form);
 
     try {
       const res = await fetch("../php/employee/EmpleadoController.php", {
         method: "POST",
-        body: formData,
+        body: data,
       });
 
       const result = await res.json();
-      console.log(result);
 
-      if (result.status === "ok") {
-        alert("✅ Welcome to the restaurant!");
-        window.location.href = "../dashboard_employee.php";
+      if (result.status === "success") {
+        alert("✅ Employee registered successfully!");
+        form.reset();
       } else {
-        alert("⚠️ " + result.message);
+        alert("❌ " + result.message);
       }
     } catch (err) {
-      alert("❌ Could not connect to the server");
+      console.error(err);
+      alert("⚠️ Server error, please try again later.");
     }
   });
 });
