@@ -1,5 +1,11 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 header("Content-Type: application/json");
+
+// ✅ Include DB connection
+require_once __DIR__ . '/../../../../config/supabase.php';
+// ✅ Include the model
 require_once __DIR__ . '/DynamicKeyModel.php';
 
 try {
@@ -14,7 +20,8 @@ try {
         throw new Exception("Missing parameters");
     }
 
-    $model = new DynamicKeyModel();
+    // ✅ Create model (connection comes from supabase.php)
+    $model = new DynamicKeyModel($conexion);
 
     switch ($action) {
         case 'get':
@@ -28,8 +35,8 @@ try {
 
             echo json_encode([
                 "status" => "success",
-                "code" => $key->code,
-                "expires_at" => $key->expires_at
+                "code" => $key['code'],
+                "expires_at" => $key['expires_at']
             ]);
             break;
 
