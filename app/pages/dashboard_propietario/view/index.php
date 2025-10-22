@@ -2,6 +2,14 @@
 <?php
 require_once __DIR__ . '/../../../middleware/session_guard.php';
 protectPage(); // Evita que accedan al dashboard sin login
+
+// Iniciamos sesión solo si no está activa (por seguridad extra)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Obtenemos el nombre del usuario desde la sesión
+$nombreUsuario = $_SESSION['usuario']['nombre'] ?? 'Usuario';
 ?>
 
 <!DOCTYPE html>
@@ -11,7 +19,6 @@ protectPage(); // Evita que accedan al dashboard sin login
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Restaurante</title>
   <link rel="stylesheet" href="../css/style.css">
-  <script defer src="../js/script.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
@@ -19,27 +26,32 @@ protectPage(); // Evita que accedan al dashboard sin login
 <body>
 
   <aside class="sidebar">
-    <h2>🍴 MiRestaurante</h2>
-    <ul>
-      <li class="active"><i>🏠</i> Dashboard</li>
-      <li><i>🧾</i> Pedidos</li>
-      <li><i>🍔</i> Menú</li>
-      <li><i>🪑</i> Mesas</li>
-      <li><i>👥</i> Clientes</li>
-      <li><i>📊</i> Reportes</li>
-      <li><i>⚙️</i> Configuración</li>
-    </ul>
+  <h2>
+    <span class="logo-full">🍴 MiRestaurante</span>
+    <span class="logo-mini">DELIX</span>
+  </h2>
+  <ul>
+    <li class="active"><i>🏠</i><span>Dashboard</span></li>
+    <li><i>🧾</i><span>Pedidos</span></li>
+    <li><i>🍔</i><span>Menú</span></li>
+    <li><i>🪑</i><span>Mesas</span></li>
+    <li><i>👥</i><span>Clientes</span></li>
+    <li><i>📊</i><span>Reportes</span></li>
+    <li><i>⚙️</i><span>Configuración</span></li>
+  </ul>
   </aside>
 
+
   <main class="main">
-    <header>
-      <h1>Panel de Control</h1>
-      <div class="user-info">
-        <img src="https://cdn-icons-png.flaticon.com/512/2202/2202112.png" alt="Admin">
-        <span>Admin</span>
-       <a href="../../../../src/auth/logout.php" class="logout-btn">Cerrar sesión</a>
-      </div>
-    </header>
+   <header>
+  <button id="toggleSidebar" class="toggle-btn">☰</button>
+  <h1>Panel de Control</h1>
+  <div class="user-info">
+    <img src="https://cdn-icons-png.flaticon.com/512/2202/2202112.png" alt="Usuario" id="openProfileModal">
+    <span><?= htmlspecialchars($_SESSION['usuario']['first_name'] ?? 'Usuario') ?></span>
+    <a href="../../../../src/auth/logout.php" class="logout-btn">Cerrar sesión</a>
+  </div>
+</header>
 
     <section class="stats">
       <div class="stat">
@@ -93,7 +105,46 @@ protectPage(); // Evita que accedan al dashboard sin login
         </tbody>
       </table>
     </section>
+    <!-- Modal Editar Perfil -->
+<div id="profileModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>Editar Perfil</h2>
+  <form id="profileForm" method="POST" action="../php/profile.php">
+  <div class="form-group">
+    <label for="first_name">Nombre:</label>
+    <input type="text" id="first_name" name="first_name" 
+           value="<?= htmlspecialchars($_SESSION['usuario']['first_name'] ?? '') ?>" required>
+  </div>
+
+  <div class="form-group">
+    <label for="last_name">Apellido:</label>
+    <input type="text" id="last_name" name="last_name" 
+           value="<?= htmlspecialchars($_SESSION['usuario']['last_name'] ?? '') ?>" required>
+  </div>
+
+  <div class="form-group">
+    <label for="email">Correo:</label>
+    <input type="email" id="email" name="email" 
+           value="<?= htmlspecialchars($_SESSION['usuario']['email'] ?? '') ?>" required>
+  </div>
+
+  <div class="form-group">
+    <label for="restaurant_name">Restaurante:</label>
+    <input type="text" id="restaurant_name" name="restaurant_name" 
+           value="<?= htmlspecialchars($_SESSION['usuario']['restaurant_name'] ?? '') ?>" required>
+  </div>
+
+  <button type="submit" class="btn-save">Guardar Cambios</button>
+</form>
+  </div>
+</div>
+
   </main>
 
+
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="../js/script.js"></script>
 </body>
 </html>

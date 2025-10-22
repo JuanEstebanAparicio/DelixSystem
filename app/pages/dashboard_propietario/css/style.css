@@ -156,3 +156,171 @@ th, td {
 .logout-btn:hover {
   background-color: #c0392b;
 }
+
+/* ===== MODAL DE PERFIL ===== */
+.modal {
+  display: none; /* Oculto por defecto */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 10px;
+  padding: 25px;
+  width: 400px;
+  position: relative;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+.modal-content h2 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.btn-save {
+  background-color: #2a9d8f;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn-save:hover {
+  background-color: #21867a;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.swal2-container {
+  z-index: 99999 !important;
+}
+/* ============================= */
+/* 🧭 Sidebar con modo cerrado   */
+/* ============================= */
+.sidebar {
+  width: 250px;
+  background-color: #222;
+  color: white;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+  overflow: hidden;
+}
+
+.sidebar.closed {
+  width: 80px;
+}
+
+/* Logo principal */
+.sidebar h2 {
+  font-size: 1.3rem;
+  text-align: center;
+  margin: 20px 0;
+  transition: all 0.3s ease;
+}
+
+.sidebar .logo-mini {
+  display: none;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.sidebar.closed .logo-full {
+  display: none;
+}
+
+.sidebar.closed .logo-mini {
+  display: inline;
+}
+
+/* Ítems del menú */
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar ul li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  white-space: nowrap;
+}
+
+.sidebar ul li:hover,
+.sidebar ul li.active {
+  background: #444;
+}
+
+.sidebar ul li i {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.sidebar ul li span {
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.sidebar.closed ul li span {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Ajustar contenido principal */
+.main {
+  margin-left: 250px;
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar.closed ~ .main {
+  margin-left: 80px;
+}
+
+/* Botón de menú */
+.toggle-btn {
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  color: rgb(0, 0, 0);
+  cursor: pointer;
+}

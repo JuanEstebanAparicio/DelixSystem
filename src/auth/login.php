@@ -19,11 +19,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 session_start();
             }
             $_SESSION['usuario'] = [
-                'id' => $user['id'],
-                'nombre' => $user['first_name'] ?? $user['nombre'] ?? null,
-                'restaurante' => $user['restaurant_name'] ?? $user['restaurante'] ?? null
+              'id' => $user['id'],
+              'first_name' => $user['first_name'] ?? $user['nombre'] ?? '',
+               'last_name' => $user['last_name'] ?? '',
+               'email' => $user['email'] ?? '',
+               'restaurant_name' => $user['restaurant_name'] ?? $user['restaurante'] ?? ''
             ];
-
+            
             // Use HTTP redirect instead of printing a <script> tag
            header('Location: ../../app/pages/dashboard_propietario/view/index.php');
             exit;

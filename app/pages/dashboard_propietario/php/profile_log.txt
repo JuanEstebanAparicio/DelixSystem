@@ -1,0 +1,38 @@
+[2025-10-22 02:51:25] GET perfil usuario ID 5 OK
+[2025-10-22 02:51:26] GET perfil usuario ID 5 OK
+[2025-10-22 02:51:29] PATCH perfil usuario ID 5 actualizado correctamente
+[2025-10-22 02:52:02] GET perfil usuario ID 5 OK
+[2025-10-22 02:52:06] GET perfil usuario ID 5 OK
+[2025-10-22 02:52:11] PATCH perfil usuario ID 5 actualizado correctamente
+[2025-10-22 02:52:23] GET perfil usuario ID 5 OK
+[2025-10-22 02:52:24] GET perfil usuario ID 5 OK
+[2025-10-22 02:52:27] PATCH perfil usuario ID 5 actualizado correctamente
+[2025-10-22 14:59:48] GET perfil usuario ID 5 OK
+[2025-10-22 14:59:48] GET perfil usuario ID 5 OK
+[2025-10-22 14:59:53] PATCH perfil usuario ID 5 actualizado correctamente
+[2025-10-22 15:00:09] GET perfil usuario ID 5 OK
+[2025-10-22 15:00:09] GET perfil usuario ID 5 OK
+[2025-10-22 15:00:12] GET perfil usuario ID 5 OK
+[2025-10-22 15:00:13] GET perfil usuario ID 5 OK
+[2025-10-22 15:00:17] PATCH perfil usuario ID 5 actualizado correctamente
+[2025-10-22 15:06:53] GET perfil usuario ID 5 OK
+[2025-10-22 15:06:54] GET perfil usuario ID 5 OK
+[2025-10-22 15:06:57] PATCH perfil usuario ID 5 actualizado correctamente
+[2025-10-22 15:07:04] GET perfil usuario ID 5 OK
+[2025-10-22 15:07:05] GET perfil usuario ID 5 OK
+[2025-10-22 15:10:22] GET perfil usuario ID 5 OK
+[2025-10-22 15:10:22] GET perfil usuario ID 5 OK
+[2025-10-22 15:10:24] GET perfil usuario ID 5 OK
+[2025-10-22 15:10:25] GET perfil usuario ID 5 OK
+[2025-10-22 15:10:29] GET perfil usuario ID 5 OK
+[2025-10-22 15:10:29] GET perfil usuario ID 5 OK
+[2025-10-22 15:10:31] PATCH perfil usuario ID 5 actualizado correctamente
+[2025-10-22 15:10:55] GET perfil usuario ID 5 OK
+[2025-10-22 15:10:55] GET perfil usuario ID 5 OK
+[2025-10-22 15:14:01] GET perfil usuario ID 5 OK
+[2025-10-22 15:14:01] GET perfil usuario ID 5 OK
+[2025-10-22 15:14:15] GET perfil usuario ID 5 OK
+[2025-10-22 15:14:15] GET perfil usuario ID 5 OK
+[2025-10-22 15:14:19] PATCH perfil usuario ID 5 actualizado correctamente
+[2025-10-22 15:21:54] GET perfil usuario ID 5 OK
+[2025-10-22 15:21:57] PATCH perfil usuario ID 5 actualizado correctamente
