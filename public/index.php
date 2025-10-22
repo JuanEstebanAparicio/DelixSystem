@@ -196,7 +196,7 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
     <span class="close" id="closeLogin">&times;</span>
     <h3>Acceso de Empleado</h3>
     <form method="POST" 
-      action="/ProjectDelix/app/pages/gestor_empleado/php/employee/EmpleadoController.php" 
+      action="/DelixSystem/app/pages/gestor_empleado/php/employee/EmpleadoController.php" 
       id="empleadoAccessForm">
       <div class="form-group">
         <input 
@@ -261,7 +261,7 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
 <script src="./js/alert.js" defer></script>
 <script src="./js/modal.js" defer></script>
 <script src="./js/register.js" defer></script>
-<script src="/ProjectDelix/app/pages/gestor_empleado/js/empleadoAccess.js" defer></script>
+<script src="/DelixSystem/app/pages/gestor_empleado/js/empleadoAccess.js" defer></script>
 
 
 
