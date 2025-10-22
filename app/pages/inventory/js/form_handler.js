@@ -1,4 +1,3 @@
-// --- Mostrar y ocultar modal ---
 function showModal(id) {
   document.getElementById(id).classList.remove("hidden");
 }
@@ -7,14 +6,12 @@ function hideModal(id) {
   document.getElementById(id).classList.add("hidden");
 }
 
-// --- Asignar fecha actual automáticamente ---
 document.addEventListener("DOMContentLoaded", () => {
   const hoy = new Date().toISOString().split("T")[0];
   const fechaIngreso = document.getElementById("fecha_ingreso");
   if (fechaIngreso) fechaIngreso.value = hoy;
 });
 
-// --- Validar fechas ---
 function validarFechas() {
   const ingreso = document.getElementById("fecha_ingreso").value;
   const vencimiento = document.getElementById("fecha_vencimiento").value;
@@ -25,7 +22,6 @@ function validarFechas() {
   return true;
 }
 
-// --- Crear nuevo ingrediente ---
 function newIngredient() {
   document.getElementById("ingredientForm").reset();
   document.getElementById("ingredient_id").value = "";
@@ -39,7 +35,6 @@ function newIngredient() {
   showModal("formModal");
 }
 
-// --- Editar ingrediente existente ---
 function editIngredient(data) {
   document.getElementById("ingredient_id").value = data.id;
   document.getElementById("name").value = data.name;

@@ -9,8 +9,6 @@ class storage_crud {
         global $conexion;
         $this->pdo = $pdo ?? $conexion;
     }
-
-    /** Crear un producto (INSERT en Supabase) */
     public function createProduct(Product $product) {
         try {
             $sql = "INSERT INTO storage 
@@ -39,8 +37,6 @@ class storage_crud {
             die("Error al crear producto: " . $e->getMessage());
         }
     }
-
-    /** Actualizar producto existente */
     public function updateProduct(Product $product, $id) {
         try {
             $sql = "UPDATE storage SET 
@@ -84,7 +80,6 @@ class storage_crud {
         }
     }
 
-    /** Eliminar producto */
     public function deleteProduct($id) {
         try {
             $sql = "DELETE FROM storage WHERE id = :id";
@@ -95,8 +90,6 @@ class storage_crud {
             die("Error al eliminar producto: " . $e->getMessage());
         }
     }
-
-    /** Obtener todos los productos */
     public function getAllProducts() {
         try {
             $sql = "SELECT * FROM storage ORDER BY id ASC";
@@ -107,7 +100,6 @@ class storage_crud {
         }
     }
 
-    /** Obtener producto por ID */
     public function getProductById($id) {
         try {
             $sql = "SELECT * FROM storage WHERE id = :id";

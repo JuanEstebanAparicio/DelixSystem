@@ -1,7 +1,5 @@
 <?php
-
 require_once __DIR__ . '/../../../config/supabase.php';
-
 try {
     $query = $conexion->query("SELECT * FROM storage ORDER BY category, name ASC");
     $insumos = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -15,7 +13,6 @@ try {
     die("<p class='error-msg'>Error al obtener datos desde Supabase: " . $e->getMessage() . "</p>");
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -27,15 +24,12 @@ try {
 </head>
 
 <body>
-
-  <!-- === NAVBAR SUPERIOR === -->
   <header class="navbar">
     <button class="hamburger" onclick="toggleSidebar()">☰</button>
     <h1 class="navbar-title">Gestor de Ingredientes</h1>
     <button class="create-btn" onclick="newIngredient()">+ Crear Ingrediente</button>
   </header>
 
-  <!-- === SIDEBAR === -->
   <nav class="sidebar hidden" id="sidebarMenu">
     <h3 class="sidebar-title">Categorías</h3>
     <ul class="sidebar-list">
@@ -48,11 +42,9 @@ try {
     </ul>
   </nav>
 
-  <!-- === CONTENIDO PRINCIPAL === -->
   <main class="main-content container">
     <h2 class="page-title">Gestor de Ingredientes</h2>
 
-    <!-- 🔹 Contenedor general de todas las tarjetas -->
     <div class="card-container" id="ingredientGrid">
 
       <?php foreach ($categorias as $categoria => $items): ?>
@@ -91,7 +83,6 @@ try {
         <?php endforeach; ?>
       <?php endforeach; ?>
 
-      <!-- 🔹 Botón único global (siempre visible al lado) -->
       <div class="ingredient-card card create-card" id="globalCreateCard" onclick="newIngredient()">
         <div class="card-body text-center">
           <span class="plus-icon">+</span>
@@ -101,7 +92,6 @@ try {
     </div>
   </main>
 
-  <!-- === MODAL FORM === -->
   <div id="formModal" class="modal hidden">
     <div class="modal-content">
       <span class="close" onclick="hideModal('formModal')">&times;</span>
@@ -199,7 +189,6 @@ try {
     </div>
   </div>
 
-  <!-- === SCRIPTS === -->
   <script src="../js/form_handler.js"></script>
   <script>
     function toggleSidebar() {
@@ -223,7 +212,6 @@ try {
       }
     }
 
-    // Cerrar sidebar si se hace clic fuera (modo móvil)
     document.addEventListener('click', function(e) {
       const sidebar = document.getElementById('sidebarMenu');
       const hamburger = document.querySelector('.hamburger');
