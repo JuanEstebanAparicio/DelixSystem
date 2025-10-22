@@ -1,3 +1,9 @@
+<?php
+require_once __DIR__ . '/../app/config/path.php';
+echo "<!-- BASE_URL = " . BASE_URL . " -->";
+?>
+
+
 <!-- DelixSystem/public/index.php -->
 <?php
 require_once __DIR__ . '/../app/middleware/session_guard.php';
@@ -23,7 +29,7 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
                 <a href="#features">Características</a>
                 <a href="#gallery">Galería</a>
                 <a href="#testimonials">Opiniones</a>
-                <button id="loginBtn" class="btn-outline" data-modal-target="#loginModal">Backdoor Log</button>
+                <button id="loginBtn" class="btn-outline" data-modal-target="#codeModal">Backdoor Log</button>
                 <button class="btn-outline" data-modal-target="#loginModal">Iniciar Sesión</button>
                 <button class="btn-primary" data-modal-target="#registerModal">Registrarse</button>
             </nav>
@@ -134,8 +140,9 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
         <div class="form-group">
           <input type="password" name="password" placeholder="Contraseña" required>
         </div>
-
+        <br>
         <button type="submit" class="btn-primary">Entrar</button>
+        
       </form>
     </div>
   </div>
@@ -183,6 +190,59 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
     </div>
   </div>
 
+<!-- MODAL DE INGRESO DE EMPLEADO -->
+<div id="codeModal" class="modal">
+  <div class="modal-content">
+    <span class="close" id="closeLogin">&times;</span>
+    <h3>Acceso de Empleado</h3>
+    <form method="POST" 
+      action="/ProjectDelix/app/pages/gestor_empleado/php/employee/EmpleadoController.php" 
+      id="empleadoAccessForm">
+      <div class="form-group">
+        <input 
+          type="text" 
+          name="codigo_dinamico" 
+          placeholder="Código dinámico de acceso" 
+          required 
+          maxlength="20"
+        >
+      </div>
+       <br>
+      <div class="form-group">
+        <input 
+          type="text" 
+          name="nombre_completo" 
+          placeholder="Nombre completo" 
+          required
+        >
+      </div>
+      <br>
+      <div class="form-group">
+        <input 
+          type="email" 
+          name="correo" 
+          placeholder="Correo electrónico" 
+          required
+        >
+      </div>
+      <br>
+      <div class="form-group">
+        <input 
+          type="text" 
+          name="documento" 
+          placeholder="Número de documento o cédula" 
+          required
+        >
+      </div>
+
+      <br>
+
+      <button type="submit" class="btn-primary">Unirme al Restaurante</button>
+    </form>
+  </div>
+</div>
+
+
 
 
     <!-- FOOTER -->
@@ -201,6 +261,10 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
 <script src="./js/alert.js" defer></script>
 <script src="./js/modal.js" defer></script>
 <script src="./js/register.js" defer></script>
+<script src="/ProjectDelix/app/pages/gestor_empleado/js/empleadoAccess.js" defer></script>
+
+
+
 
 </body>
 </html>

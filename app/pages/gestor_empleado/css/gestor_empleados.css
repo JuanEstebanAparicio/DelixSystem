@@ -1,0 +1,233 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --color-primary: #005a8d;
+  --color-accent: #0091c2;
+  --color-bg: #f5f6f8;
+  --color-surface: #ffffff;
+  --color-text: #1a1a1a;
+  --color-muted: #7a7a7a;
+  --color-success: #1a936f;
+  --color-danger: #d64545;
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  margin: 0;
+  padding: 40px;
+}
+
+.page-wrapper {
+  max-width: 1100px;
+  margin: auto;
+}
+
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.main-header h1 {
+  font-weight: 600;
+  font-size: 1.7rem;
+  color: var(--color-primary);
+}
+
+/* ===== Botones ===== */
+.btn {
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+}
+.btn-primary:hover {
+  background: var(--color-accent);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--color-muted);
+  color: var(--color-muted);
+}
+.btn-outline:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn-copy {
+  background: #e9eef2;
+  border: none;
+  color: var(--color-text);
+}
+.btn-copy:hover {
+  background: #dce3e8;
+}
+
+/* ===== Código Dinámico ===== */
+.codigo-card {
+  background: var(--color-surface);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 25px 30px;
+  margin-bottom: 40px;
+}
+
+.codigo-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.codigo-top h2 {
+  font-weight: 600;
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.codigo-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.codigo-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#codigoDinamico {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  background: #f1f4f6;
+  padding: 10px 20px;
+  border-radius: 8px;
+}
+
+.codigo-label {
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  margin-bottom: 5px;
+}
+
+.estado {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.estado.activo { color: var(--color-success); }
+.estado.expirado { color: var(--color-danger); }
+
+/* ===== Temporizador ===== */
+.codigo-timer {
+  position: relative;
+  width: 90px;
+  height: 90px;
+}
+
+.codigo-timer svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.codigo-timer circle {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.bg {
+  stroke: #dcdfe2;
+}
+.progress {
+  stroke: var(--color-primary);
+  stroke-dasharray: 283;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear;
+}
+
+.timer-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-primary);
+}
+
+/* ===== Tabla ===== */
+.tabla-empleados {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.tabla-empleados th {
+  text-align: left;
+  background: var(--color-primary);
+  color: white;
+  padding: 12px;
+  font-weight: 500;
+}
+
+.tabla-empleados td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.95rem;
+}
+.tabla-empleados tr:hover {
+  background: #f7f9fb;
+}
+
+/* ===== Modal ===== */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.modal.hidden { display: none; }
+
+.modal-content {
+  background: var(--color-surface);
+  padding: 25px;
+  border-radius: 8px;
+  width: 400px;
+  box-shadow: var(--shadow);
+  animation: fadeIn 0.25s ease;
+}
+.modal-content h2 {
+  margin-top: 0;
+  font-weight: 600;
+}
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
