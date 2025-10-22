@@ -10,67 +10,69 @@ $pdo = $conexion ?? null;
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['id'])) {
 
     $id = $_POST['id'];
-    $photoPath = $_POST['foto_actual'] ?? null;
+    $photoPath = $_POST['photo_actual'] ?? null; // nombre del campo para la foto actual (ajusta si usas otro)
 
-    // Sanitizar datos
-    $category = trim($_POST['categoria']);
-    $productName = trim($_POST['nombre']);
+    // Sanitizar entradas (usar los mismos nombres que en el form)
+    $category = trim($_POST['category'] ?? '');
+    $productName = trim($_POST['name'] ?? '');
 
-    // Asegurar nombres válidos de carpetas
+    // Rutas seguras para carpetas
     $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', $category);
     $safeProduct = preg_replace('/[^a-zA-Z0-9_-]/', '_', $productName);
 
-    // Crear estructura de carpetas
+    // Estructura de carpetas
     $categoryDir = $baseDir . "/pages/inventory/media/$safeCategory";
     $productDir = "$categoryDir/$safeProduct";
 
     if (!is_dir($categoryDir)) mkdir($categoryDir, 0777, true);
     if (!is_dir($productDir)) mkdir($productDir, 0777, true);
 
-    // Procesar imagen (si se sube una nueva)
-    if (isset($_FILES["foto"]) && $_FILES["foto"]["error"] === 0) {
-        $photoName = uniqid() . "_" . basename($_FILES["foto"]["name"]);
+    // --- PROCESAR FOTO NUEVA ---
+    if (isset($_FILES["photo"]) && $_FILES["photo"]["error"] === 0) {
+        $photoName = uniqid() . "_" . basename($_FILES["photo"]["name"]);
         $targetPath = "$productDir/$photoName";
 
-        // Subir nueva imagen
-        if (move_uploaded_file($_FILES["foto"]["tmp_name"], $targetPath)) {
-            // Eliminar imagen anterior (si existe)
-            if (!empty($_POST['foto_actual']) && file_exists($baseDir . '/pages/inventory/' . $_POST['foto_actual'])) {
-                unlink($baseDir . '/pages/inventory/' . $_POST['foto_actual']);
+        if (move_uploaded_file($_FILES["photo"]["tmp_name"], $targetPath)) {
+            // eliminar foto vieja si existe (ruta absoluta)
+            if (!empty($_POST['photo_actual'])) {
+                $oldPhotoAbs = $baseDir . '/pages/inventory/' . ltrim($_POST['photo_actual'], '/');
+                if (file_exists($oldPhotoAbs)) {
+                    @unlink($oldPhotoAbs); // @ para evitar warning si falla
+                }
             }
-
-            // Nueva ruta relativa
+            // nueva ruta relativa para BD (igual que en create)
             $photoPath = "media/$safeCategory/$safeProduct/$photoName";
         } else {
             die("❌ Error al mover la nueva imagen al destino.");
         }
     }
 
-    // Crear objeto producto actualizado
+    // --- INSTANCIAR OBJETO CON LOS MISMOS CAMPOS QUE CREATE.PHP ---
     $product = new Product(
         $productName,
-        $_POST['cantidad'],
-        $_POST['cantidad_minima'],
-        $_POST['unidad'],
-        $_POST['costo_unitario'],
+        $_POST['amount'] ?? 0,
+        $_POST['minimum_quantity'] ?? 0,
+        $_POST['unit'] ?? '',
+        $_POST['unit_cost'] ?? 0,
         $category,
-        $_POST['fecha_ingreso'],
-        $_POST['fecha_vencimiento'],
-        $_POST['lote'],
-        $_POST['descripcion'],
-        $_POST['ubicacion'],
-        $_POST['estado'],
-        $_POST['proveedor'],
+        $_POST['entrance_date'] ?? null,
+        $_POST['expiration_date'] ?? null,
+        $_POST['batch'] ?? null,
+        $_POST['description'] ?? null,
+        $_POST['location'] ?? null,
+        $_POST['state'] ?? 'Activo',
+        $_POST['supplier'] ?? null,
         $photoPath
     );
 
+    // --- GUARDAR CAMBIOS ---
     try {
         $crud = new storage_crud($pdo);
         $crud->updateProduct($product, $id);
         header("Location: ../view/ingredient_manager.php?success=2");
         exit();
     } catch (Exception $e) {
-        die("❌ Error al actualizar: " . $e->getMessage());
+        die("❌ Error al actualizar producto: " . $e->getMessage());
     }
 
 } else {
