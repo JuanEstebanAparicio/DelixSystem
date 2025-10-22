@@ -9,6 +9,8 @@ try {
         $cat = $ing['category'] ?: 'Sin categoría';
         $categorias[$cat][] = $ing;
     }
+
+    $listaCategorias = array_keys($categorias);
 } catch (PDOException $e) {
     die("<p class='error-msg'>Error al obtener datos desde Supabase: " . $e->getMessage() . "</p>");
 }
@@ -136,7 +138,14 @@ try {
 
         <div class="form-group">
           <label for="category">Categoría:</label>
-          <input type="text" name="category" id="category" required>
+          <select name="category" id="category" required>
+            <option value="" disabled selected>Seleccione o cree una categoría</option>
+            <?php foreach ($listaCategorias as $cat): ?>
+              <option value="<?= htmlspecialchars($cat) ?>"><?= htmlspecialchars($cat) ?></option>
+            <?php endforeach; ?>
+            <option value="__new__">+ Nueva categoría...</option>
+          </select>
+          <input type="text" id="newCategoryInput" name="new_category" placeholder="Nueva categoría" class="hidden">
         </div>
 
         <div class="form-group">
@@ -180,6 +189,11 @@ try {
         <div class="form-group">
           <label for="photo">Foto:</label>
           <input type="file" name="photo" id="photo" accept="image/*">
+
+          <div id="currentPhotoContainer" class="photo-preview hidden">
+            <p>Foto actual:</p>
+            <img id="currentPhoto" src="" alt="Foto actual del ingrediente" class="preview-img">
+          </div>
         </div>
 
         <div class="modal-footer">
@@ -190,35 +204,7 @@ try {
   </div>
 
   <script src="../js/form_handler.js"></script>
-  <script>
-    function toggleSidebar() {
-      document.getElementById('sidebarMenu').classList.toggle('hidden');
-    }
-
-    function mostrarCategoria(cat) {
-      const cards = document.querySelectorAll('.ingredient-card');
-      const createCard = document.getElementById('globalCreateCard');
-
-      if (cat === 'Todos') {
-        cards.forEach(card => card.style.display = 'flex');
-      } else {
-        cards.forEach(card => {
-          if (card.dataset.category === cat || card.id === 'globalCreateCard') {
-            card.style.display = 'flex';
-          } else {
-            card.style.display = 'none';
-          }
-        });
-      }
-    }
-
-    document.addEventListener('click', function(e) {
-      const sidebar = document.getElementById('sidebarMenu');
-      const hamburger = document.querySelector('.hamburger');
-      if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
-        sidebar.classList.add('hidden');
-      }
-    });
-  </script>
+  <script src="../js/category_handler.js"></script>
+  <script src="../js/sidebar_handler.js"></script>
 </body>
 </html>

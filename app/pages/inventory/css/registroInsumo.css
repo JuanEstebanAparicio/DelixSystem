@@ -55,3 +55,15 @@
 .modal-content button[type="submit"]:hover {
   background: #613b3b;
 }
+
+.photo-preview {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.preview-img {
+  max-width: 120px;
+  max-height: 120px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}

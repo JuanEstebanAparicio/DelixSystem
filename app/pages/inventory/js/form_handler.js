@@ -32,6 +32,10 @@ function newIngredient() {
   const hoy = new Date().toISOString().split("T")[0];
   document.getElementById("fecha_ingreso").value = hoy;
 
+  // Ocultar imagen previa si se estaba editando antes
+  const currentPhotoContainer = document.getElementById("currentPhotoContainer");
+  if (currentPhotoContainer) currentPhotoContainer.classList.add("hidden");
+
   showModal("formModal");
 }
 
@@ -51,10 +55,19 @@ function editIngredient(data) {
   document.getElementById("fecha_ingreso").value = data.entrance_date || "";
   document.getElementById("fecha_vencimiento").value = data.expiration_date || "";
 
+  const currentPhotoContainer = document.getElementById("currentPhotoContainer");
+  const currentPhoto = document.getElementById("currentPhoto");
+
+  if (data.photo && data.photo.trim() !== "") {
+    currentPhoto.src = "../" + data.photo;
+    currentPhotoContainer.classList.remove("hidden");
+  } else {
+    currentPhotoContainer.classList.add("hidden");
+  }
+
   document.getElementById("modalTitle").textContent = "Editar Ingrediente";
   document.getElementById("submitBtn").textContent = "Actualizar Ingrediente";
   document.getElementById("ingredientForm").action = "../php/inputs_edit.php";
 
   showModal("formModal");
 }
-
