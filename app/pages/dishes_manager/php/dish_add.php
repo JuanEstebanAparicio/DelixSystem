@@ -1,37 +1,50 @@
 <?php
-require_once('../../Model/Entity/dishes.php');
-require_once('../../Model/Crud/dishes_crud.php');
+require_once(__DIR__ . '/dishes.php');
+require_once(__DIR__ . '/dishes_crud.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = $_POST['nombre'] ?? '';
-    $price = $_POST['precio'] ?? '';
-    $category = $_POST['categoria'] ?? '';
-    $description = $_POST['descripcion'] ?? '';
-    $state = $_POST['estado'] ?? '';
-    $created_at = date('Y-m-d H:i:s');
-    $photo = '';
+    $name        = trim($_POST['name_dish'] ?? '');
+    $price       = $_POST['price'] ?? '';
+    $category    = trim($_POST['category'] ?? '');
+    $newCategory = trim($_POST['new_category'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $state       = $_POST['state'] ?? 'Activo';
+    $created_at  = date('Y-m-d H:i:s');
+    $photo       = '';
 
-    if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
-        $targetDir = '../../Media/platos/';
-        if (!is_dir($targetDir)) {
-            mkdir($targetDir, 0777, true);
-        }
-        $fileName = uniqid() . '_' . basename($_FILES['foto']['name']);
-        $targetFile = $targetDir . $fileName;
-        if (move_uploaded_file($_FILES['foto']['tmp_name'], $targetFile)) {
-            $photo = $targetFile;
-        }
+    if (!empty($newCategory)) {
+        $category = $newCategory;
     }
 
+    if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+        $fileName = basename($_FILES['photo']['name']);
+        $ext = pathinfo($fileName, PATHINFO_EXTENSION);
+
+        $categoryDir = preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower($category));
+        $dishDir = preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower($name));
+
+        $baseDir = __DIR__ . '/../media/' . $categoryDir . '/' . $dishDir . '/';
+        if (!is_dir($baseDir)) {
+            mkdir($baseDir, 0777, true);
+        }
+        $uniqueName = uniqid('dish_') . '.' . $ext;
+        $targetFile = $baseDir . $uniqueName;
+
+        if (move_uploaded_file($_FILES['photo']['tmp_name'], $targetFile)) {
+            $photo = 'pages/dishes_manager/media/' . $categoryDir . '/' . $dishDir . '/' . $uniqueName;
+        }
+    }
     $dish = new dishes(null, $name, $price, $category, $description, $state, $created_at, $photo);
     $crud = new dishes_crud();
+
     try {
         $crud->createDish($dish);
-        header('Location: /Proyecto_de_aula/View/dishes_manager.php?success=1');
+        header('Location: ../view/dishes_manager.php?success=1');
         exit;
     } catch (Exception $e) {
-        header('Location: /Proyecto_de_aula/View/dishes_manager.php?success=0');
+        header('Location: ../view/dishes_manager.php?success=0');
         exit;
     }
 }
 ?>
+
