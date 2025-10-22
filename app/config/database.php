@@ -2,7 +2,7 @@
 // DelixSystem/app/config/database.php
 require_once __DIR__ . '/constants.php';
 
-function supabase(string $table, string $method = 'GET', array $data = null, string $query = '', bool $useService = true): array {
+function supabase(string $table, string $method = 'GET', ?array $data = null, string $query = '', bool $useService = true): array {
     $url = rtrim(SUPABASE_URL, '/') . '/rest/v1/' . ltrim($table, '/') . $query;
     $key = $useService ? SUPABASE_SERVICE_KEY : SUPABASE_ANON_KEY;
 
@@ -36,7 +36,7 @@ function supabase(string $table, string $method = 'GET', array $data = null, str
     ];
 }
 
-function supabaseAuth(string $endpoint, string $method = 'POST', array $data = null): array {
+function supabaseAuth(string $endpoint, string $method = 'POST', ?array $data = null): array {
     $url = rtrim(SUPABASE_URL, '/') . '/auth/v1/' . ltrim($endpoint, '/');
 
     $headers = [

@@ -14,15 +14,6 @@ $email = $_POST['email'] ?? '';
 $password = $_POST['password'] ?? '';
 $restaurant_name = $_POST['restaurant_name'] ?? '';
 
-// Validación básica
-if (empty($first_name) || empty($last_name) || empty($email) || empty($password)) {
-    echo json_encode([
-        'status' => 'error',
-        'message' => '⚠️ Todos los campos son obligatorios.'
-    ]);
-    exit;
-}
-
 // 1️⃣ Insertar usuario directamente en la tabla 'usuarios'
 $insert = supabase('usuarios', 'POST', [
     'first_name' => $first_name,
