@@ -19,7 +19,7 @@ function validarFechas() {
   const ingreso = document.getElementById("fecha_ingreso").value;
   const vencimiento = document.getElementById("fecha_vencimiento").value;
   if (vencimiento && vencimiento < ingreso) {
-    alert("⚠️ La fecha de vencimiento no puede ser anterior a la de ingreso.");
+    alert("La fecha de vencimiento no puede ser anterior a la de ingreso.");
     return false;
   }
   return true;

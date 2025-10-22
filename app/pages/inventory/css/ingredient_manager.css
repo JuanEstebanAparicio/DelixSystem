@@ -202,3 +202,9 @@ body {
     width: 100%;
   }
 }
+.global-create-card {
+  width: 220px;
+  margin: 2rem auto;
+  cursor: pointer;
+  display: flex;
+}
