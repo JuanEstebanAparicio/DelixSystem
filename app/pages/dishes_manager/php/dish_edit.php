@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $targetFile = $baseDir . $uniqueName;
 
         if (move_uploaded_file($_FILES['photo']['tmp_name'], $targetFile)) {
-            $photo = 'pages/dishes_manager/media/' . $categoryDir . '/' . $dishDir . '/' . $uniqueName;
+            $photo = 'media/' . $categoryDir . '/' . $dishDir . '/' . $uniqueName;
         }
     }
 
