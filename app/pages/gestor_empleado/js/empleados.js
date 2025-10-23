@@ -117,52 +117,106 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // -------------------------------------------------------------
-// 🧩 NUEVO BLOQUE: Gestión de tabla de empleados (auto-refresh)
+// 🧩 NUEVO BLOQUE OPTIMIZADO: Tabla reactiva de empleados
 // -------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   const tablaBody = document.querySelector("#tablaEmpleados tbody");
+  if (!tablaBody) return;
 
-  if (!tablaBody) return; // seguridad: no hacer nada si no hay tabla
+  const LIST_URL = "../php/employee/EmpleadoListController.php";
+  const REFRESH_INTERVAL = 5000; // cada 5 segundos
 
-  // 📥 Cargar empleados desde el backend
-  async function loadEmployees() {
+  let empleadosActuales = new Map();
+  let refreshTimer = null;
+
+  // 🎨 Animaciones suaves
+  const highlightRow = (row) => {
+    row.classList.add("highlight-new");
+    setTimeout(() => row.classList.remove("highlight-new"), 2000);
+  };
+
+  // 🧩 Render inicial
+  const renderTable = (empleados) => {
+    tablaBody.innerHTML = "";
+    empleados.forEach((emp) => {
+      const row = createRow(emp);
+      tablaBody.appendChild(row);
+      empleadosActuales.set(emp.id, emp);
+    });
+  };
+
+  // 🧱 Crear fila
+  const createRow = (emp) => {
+    const tr = document.createElement("tr");
+    tr.dataset.id = emp.id;
+    tr.innerHTML = `
+      <td>${emp.id}</td>
+      <td>${emp.full_name}</td>
+      <td>${emp.email}</td>
+      <td>${emp.role}</td>
+      <td>${new Date(emp.created_at).toLocaleString()}</td>
+      <td><button class="btn btn-danger btn-sm" data-id="${emp.id}">Eliminar</button></td>
+    `;
+    return tr;
+  };
+
+  // 🔍 Comparar y actualizar tabla sin recargar todo
+  const updateTable = (nuevosEmpleados) => {
+    const nuevosMap = new Map(nuevosEmpleados.map((e) => [e.id, e]));
+
+    // 1️⃣ Insertar nuevos empleados
+    nuevosEmpleados.forEach((emp) => {
+      if (!empleadosActuales.has(emp.id)) {
+        const newRow = createRow(emp);
+        newRow.classList.add("fade-in");
+        tablaBody.insertBefore(newRow, tablaBody.firstChild);
+        highlightRow(newRow);
+        empleadosActuales.set(emp.id, emp);
+      }
+    });
+
+    // 2️⃣ Eliminar empleados que ya no existen (opcional)
+    empleadosActuales.forEach((_, id) => {
+      if (!nuevosMap.has(id)) {
+        const row = tablaBody.querySelector(`tr[data-id="${id}"]`);
+        if (row) row.remove();
+        empleadosActuales.delete(id);
+      }
+    });
+  };
+
+  // 📡 Obtener empleados del servidor
+  const fetchEmployees = async () => {
     try {
-      const res = await fetch("../php/employee/EmpleadoListController.php");
-      const result = await res.json();
+      const res = await fetch(LIST_URL, { cache: "no-store" });
+      const data = await res.json();
 
-      if (result.status !== "success") {
-        tablaBody.innerHTML = `<tr><td colspan="6">❌ Error al cargar empleados</td></tr>`;
-        return;
+      if (data.status !== "success") throw new Error(data.message);
+      const empleados = data.data || [];
+
+      if (empleadosActuales.size === 0) {
+        renderTable(empleados);
+      } else {
+        updateTable(empleados);
       }
 
-      const empleados = result.data;
-      if (empleados.length === 0) {
+      if (empleados.length === 0 && tablaBody.children.length === 0) {
         tablaBody.innerHTML = `<tr><td colspan="6">⚠️ No hay empleados registrados</td></tr>`;
-        return;
       }
-
-      tablaBody.innerHTML = empleados
-        .map(
-          (emp) => `
-          <tr class="fade-in">
-            <td>${emp.id}</td>
-            <td>${emp.full_name}</td>
-            <td>${emp.email}</td>
-            <td>${emp.role}</td>
-            <td>${new Date(emp.created_at).toLocaleString()}</td>
-            <td><button class="btn btn-danger btn-sm" data-id="${emp.id}">Eliminar</button></td>
-          </tr>`
-        )
-        .join("");
     } catch (err) {
-      console.error("Error al cargar empleados:", err);
-      tablaBody.innerHTML = `<tr><td colspan="6">⚠️ Error de conexión</td></tr>`;
+      console.error("⚠️ Error al obtener empleados:", err);
     }
-  }
+  };
 
-  // 🚀 Carga inicial
-  loadEmployees();
+  // 🔁 Refresco periódico
+  const startAutoRefresh = () => {
+    refreshTimer = setInterval(fetchEmployees, REFRESH_INTERVAL);
+  };
 
-  // 🔄 Actualizar automáticamente cuando un nuevo empleado se registre
-  document.addEventListener("empleado-registrado", loadEmployees);
+  // 🧩 Evento que fuerza actualización inmediata (sin esperar al polling)
+  document.addEventListener("empleado-registrado", fetchEmployees);
+
+  // 🚀 Inicialización
+  fetchEmployees();
+  startAutoRefresh();
 });
