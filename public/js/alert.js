@@ -1,4 +1,4 @@
-// PROJECTDELIX/public/js/alert.js
+// DelixSystem/public/js/alert.js
 // Sistema centralizado de SweetAlert2 reutilizable en todo el proyecto
 
 window.Alerts = {
