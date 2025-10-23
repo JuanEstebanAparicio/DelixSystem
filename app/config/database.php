@@ -1,5 +1,4 @@
 <?php
-// DelixSystem/app/config/database.php
 require_once __DIR__ . '/constants.php';
 
 function supabase(string $table, string $method = 'GET', array $data = null, string $query = '', bool $useService = true): array {
