@@ -1,9 +1,15 @@
 <?php
-session_start();
+require_once __DIR__ . '/../../../middleware/session_guard.php';
+protectPage(); // Asegura que el usuario esté logueado
 
-// ⚙️ Temporary session for testing
-if (!isset($_SESSION['user_id'])) {
-  $_SESSION['user_id'] = 1; // Replace with logged admin ID later
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$userId = $_SESSION['usuario']['id'] ?? null;
+
+if (!$userId) {
+    die("⚠️ No se encontró el ID de usuario en la sesión.");
 }
 ?>
 
@@ -107,7 +113,8 @@ if (!isset($_SESSION['user_id'])) {
   <!-- 🔧 Variables globales -->
   <script>
     // Safe PHP → JS transfer
-    const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
+    const userId = <?= json_encode($userId) ?>;
+    console.log("👤 Logged Admin ID:", userId);
     
   </script>
 
