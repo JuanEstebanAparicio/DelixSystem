@@ -1,4 +1,3 @@
-// --- Mostrar y ocultar modal ---
 function showModal(id) {
   document.getElementById(id).classList.remove("hidden");
 }
@@ -7,14 +6,12 @@ function hideModal(id) {
   document.getElementById(id).classList.add("hidden");
 }
 
-// --- Asignar fecha actual automáticamente ---
 document.addEventListener("DOMContentLoaded", () => {
   const hoy = new Date().toISOString().split("T")[0];
   const fechaIngreso = document.getElementById("fecha_ingreso");
   if (fechaIngreso) fechaIngreso.value = hoy;
 });
 
-// --- Validar fechas ---
 function validarFechas() {
   const ingreso = document.getElementById("fecha_ingreso").value;
   const vencimiento = document.getElementById("fecha_vencimiento").value;
@@ -25,7 +22,6 @@ function validarFechas() {
   return true;
 }
 
-// --- Crear nuevo ingrediente ---
 function newIngredient() {
   document.getElementById("ingredientForm").reset();
   document.getElementById("ingredient_id").value = "";
@@ -36,10 +32,13 @@ function newIngredient() {
   const hoy = new Date().toISOString().split("T")[0];
   document.getElementById("fecha_ingreso").value = hoy;
 
+  // Ocultar imagen previa si se estaba editando antes
+  const currentPhotoContainer = document.getElementById("currentPhotoContainer");
+  if (currentPhotoContainer) currentPhotoContainer.classList.add("hidden");
+
   showModal("formModal");
 }
 
-// --- Editar ingrediente existente ---
 function editIngredient(data) {
   document.getElementById("ingredient_id").value = data.id;
   document.getElementById("name").value = data.name;
@@ -56,10 +55,19 @@ function editIngredient(data) {
   document.getElementById("fecha_ingreso").value = data.entrance_date || "";
   document.getElementById("fecha_vencimiento").value = data.expiration_date || "";
 
+  const currentPhotoContainer = document.getElementById("currentPhotoContainer");
+  const currentPhoto = document.getElementById("currentPhoto");
+
+  if (data.photo && data.photo.trim() !== "") {
+    currentPhoto.src = "../" + data.photo;
+    currentPhotoContainer.classList.remove("hidden");
+  } else {
+    currentPhotoContainer.classList.add("hidden");
+  }
+
   document.getElementById("modalTitle").textContent = "Editar Ingrediente";
   document.getElementById("submitBtn").textContent = "Actualizar Ingrediente";
   document.getElementById("ingredientForm").action = "../php/inputs_edit.php";
 
   showModal("formModal");
 }
-

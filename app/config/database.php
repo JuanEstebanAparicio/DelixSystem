@@ -1,5 +1,25 @@
 <?php
-// DelixSystem/app/config/database.php
+/**--
+ *  Este módulo gestiona la comunicación entre la aplicación y la base de datos
+ *  de Supabase mediante peticiones HTTP (REST API). 
+ * 
+ *  Proporciona funciones reutilizables para:
+ *   - Consultar, insertar, actualizar o eliminar registros en tablas de Supabase.
+ *   - Manejar autenticación de usuarios a través del endpoint de Supabase Auth.
+ * 
+ * Funciones principales:
+ *  • supabase($table, $method, $data, $query, $useService)
+ *      Permite interactuar con cualquier tabla del proyecto Supabase usando 
+ *      métodos HTTP (GET, POST, PATCH, DELETE).
+ * 
+ *  • supabaseAuth($endpoint, $method, $data)
+ *      Gestiona la autenticación (registro, login, recuperación de contraseña)
+ *      con el servicio de autenticación de Supabase.
+ * 
+ * Dependencias:
+ *  - constants.php (debe contener SUPABASE_URL, SUPABASE_ANON_KEY y SUPABASE_SERVICE_KEY)
+ *  - Extensión cURL habilitada en PHP.
+ */
 require_once __DIR__ . '/constants.php';
 
 function supabase(string $table, string $method = 'GET', array $data = null, string $query = '', bool $useService = true): array {

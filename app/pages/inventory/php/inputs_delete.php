@@ -13,13 +13,11 @@ if (isset($_GET['id'])) {
         $crud = new storage_crud($pdo);
         $product = $crud->getProductById($id);
 
-        // Si tiene imagen, eliminar del disco
         if (!empty($product['photo'])) {
             $photoPath = $baseDir . '/pages/inventory/' . $product['photo'];
             if (file_exists($photoPath)) unlink($photoPath);
         }
 
-        // Eliminar registro
         $crud->deleteProduct($id);
 
         header("Location: ../view/ingredient_manager.php?success=3");

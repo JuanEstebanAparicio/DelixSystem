@@ -1,7 +1,5 @@
 <?php
-
 require_once __DIR__ . '/../../../config/supabase.php';
-
 try {
     $query = $conexion->query("SELECT * FROM storage ORDER BY category, name ASC");
     $insumos = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -11,11 +9,12 @@ try {
         $cat = $ing['category'] ?: 'Sin categoría';
         $categorias[$cat][] = $ing;
     }
+
+    $listaCategorias = array_keys($categorias);
 } catch (PDOException $e) {
     die("<p class='error-msg'>Error al obtener datos desde Supabase: " . $e->getMessage() . "</p>");
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -27,15 +26,12 @@ try {
 </head>
 
 <body>
-
-  <!-- === NAVBAR SUPERIOR === -->
   <header class="navbar">
     <button class="hamburger" onclick="toggleSidebar()">☰</button>
     <h1 class="navbar-title">Gestor de Ingredientes</h1>
     <button class="create-btn" onclick="newIngredient()">+ Crear Ingrediente</button>
   </header>
 
-  <!-- === SIDEBAR === -->
   <nav class="sidebar hidden" id="sidebarMenu">
     <h3 class="sidebar-title">Categorías</h3>
     <ul class="sidebar-list">
@@ -48,11 +44,9 @@ try {
     </ul>
   </nav>
 
-  <!-- === CONTENIDO PRINCIPAL === -->
   <main class="main-content container">
     <h2 class="page-title">Gestor de Ingredientes</h2>
 
-    <!-- 🔹 Contenedor general de todas las tarjetas -->
     <div class="card-container" id="ingredientGrid">
 
       <?php foreach ($categorias as $categoria => $items): ?>
@@ -91,7 +85,6 @@ try {
         <?php endforeach; ?>
       <?php endforeach; ?>
 
-      <!-- 🔹 Botón único global (siempre visible al lado) -->
       <div class="ingredient-card card create-card" id="globalCreateCard" onclick="newIngredient()">
         <div class="card-body text-center">
           <span class="plus-icon">+</span>
@@ -101,7 +94,6 @@ try {
     </div>
   </main>
 
-  <!-- === MODAL FORM === -->
   <div id="formModal" class="modal hidden">
     <div class="modal-content">
       <span class="close" onclick="hideModal('formModal')">&times;</span>
@@ -146,7 +138,14 @@ try {
 
         <div class="form-group">
           <label for="category">Categoría:</label>
-          <input type="text" name="category" id="category" required>
+          <select name="category" id="category" required>
+            <option value="" disabled selected>Seleccione o cree una categoría</option>
+            <?php foreach ($listaCategorias as $cat): ?>
+              <option value="<?= htmlspecialchars($cat) ?>"><?= htmlspecialchars($cat) ?></option>
+            <?php endforeach; ?>
+            <option value="__new__">+ Nueva categoría...</option>
+          </select>
+          <input type="text" id="newCategoryInput" name="new_category" placeholder="Nueva categoría" class="hidden">
         </div>
 
         <div class="form-group">
@@ -190,6 +189,11 @@ try {
         <div class="form-group">
           <label for="photo">Foto:</label>
           <input type="file" name="photo" id="photo" accept="image/*">
+
+          <div id="currentPhotoContainer" class="photo-preview hidden">
+            <p>Foto actual:</p>
+            <img id="currentPhoto" src="" alt="Foto actual del ingrediente" class="preview-img">
+          </div>
         </div>
 
         <div class="modal-footer">
@@ -199,38 +203,8 @@ try {
     </div>
   </div>
 
-  <!-- === SCRIPTS === -->
   <script src="../js/form_handler.js"></script>
-  <script>
-    function toggleSidebar() {
-      document.getElementById('sidebarMenu').classList.toggle('hidden');
-    }
-
-    function mostrarCategoria(cat) {
-      const cards = document.querySelectorAll('.ingredient-card');
-      const createCard = document.getElementById('globalCreateCard');
-
-      if (cat === 'Todos') {
-        cards.forEach(card => card.style.display = 'flex');
-      } else {
-        cards.forEach(card => {
-          if (card.dataset.category === cat || card.id === 'globalCreateCard') {
-            card.style.display = 'flex';
-          } else {
-            card.style.display = 'none';
-          }
-        });
-      }
-    }
-
-    // Cerrar sidebar si se hace clic fuera (modo móvil)
-    document.addEventListener('click', function(e) {
-      const sidebar = document.getElementById('sidebarMenu');
-      const hamburger = document.querySelector('.hamburger');
-      if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
-        sidebar.classList.add('hidden');
-      }
-    });
-  </script>
+  <script src="../js/category_handler.js"></script>
+  <script src="../js/sidebar_handler.js"></script>
 </body>
 </html>
