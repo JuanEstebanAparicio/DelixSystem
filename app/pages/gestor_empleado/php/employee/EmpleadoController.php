@@ -38,7 +38,7 @@ try {
             "status" => "success",
             "message" => "Empleado eliminado correctamente."
         ]);
-        exit;
+        exit; // ✅ Detiene el script aquí
     }
 
     // ----------------------------------------------------

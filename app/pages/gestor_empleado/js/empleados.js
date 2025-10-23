@@ -234,10 +234,14 @@ document.addEventListener("DOMContentLoaded", () => {
       Alerts.loading("Eliminando empleado...");
 
       const res = await fetch("../php/employee/EmpleadoController.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ id }),
-      });
+  method: "POST",
+  headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  body: new URLSearchParams({
+    action: "delete",  // 👈 esto es lo que faltaba
+    id
+  }),
+});
+
 
       const result = await res.json();
       Alerts.close();
