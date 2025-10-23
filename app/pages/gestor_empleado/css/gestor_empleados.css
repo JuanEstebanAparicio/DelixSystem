@@ -203,11 +203,24 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
-  display: flex;
+  display: none; /* ✅ Oculto por defecto */
   justify-content: center;
   align-items: center;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 1000;
 }
-.modal.hidden { display: none; }
+
+/* Cuando el modal está visible */
+.modal.show {
+  display: flex;
+  opacity: 1;
+}
+
+.modal.hidden {
+  display: none;
+  opacity: 0;
+}
 
 .modal-content {
   background: var(--color-surface);
@@ -215,17 +228,32 @@ body {
   border-radius: 8px;
   width: 400px;
   box-shadow: var(--shadow);
-  animation: fadeIn 0.25s ease;
+  animation: modalFadeIn 0.25s ease;
 }
+
 .modal-content h2 {
   margin-top: 0;
   font-weight: 600;
 }
+
 .modal-actions {
   display: flex;
   justify-content: space-between;
   margin-top: 15px;
 }
+
+/* ✨ Animación más limpia para la apertura */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }

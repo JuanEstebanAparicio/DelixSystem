@@ -156,7 +156,9 @@ document.addEventListener("DOMContentLoaded", () => {
     <td>${emp.role}</td>
     <td>${new Date(emp.created_at).toLocaleString()}</td>
     <td class="acciones">
-      <button class="btn btn-primary btn-sm asignar-rol" data-id="${emp.id}">Asignar Roles</button>
+      <button class="btn btn-primary btn-sm asignar-rol" 
+              data-id="${emp.id}" 
+              data-modal-target="#modalRoles">Asignar roles</button>
       <button class="btn btn-danger btn-sm eliminar" data-id="${emp.id}">Eliminar</button>
     </td>
   `;

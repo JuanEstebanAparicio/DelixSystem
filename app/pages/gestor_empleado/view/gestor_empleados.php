@@ -26,7 +26,6 @@ if (!$userId) {
     <!-- 🔹 Header -->
     <header class="main-header">
       <h1>Gestor de Empleados</h1>
-     
     </header>
 
     <!-- 🔐 Código dinámico -->
@@ -77,47 +76,41 @@ if (!$userId) {
     </section>
   </div>
 
-  <!-- Modal Asignar Roles -->
-<div class="modal fade" id="modalRoles" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content p-3">
-      <div class="modal-header">
-        <h5 class="modal-title">Asignar Roles al Empleado</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form id="formRoles">
-          <input type="hidden" id="empleadoId">
-          <div id="rolesContainer">
-            <!-- Se generarán dinámicamente los checkboxes -->
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-success" id="guardarRoles">Guardar</button>
-      </div>
+  <!-- 🧩 Modal para asignar roles -->
+  <div id="modalRoles" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>Asignar roles al empleado</h3>
+      <form id="formRoles">
+        <input type="hidden" id="empleadoId">
+        
+        <div id="rolesContainer" class="roles-container">
+          <!-- Aquí se inyectarán los checkboxes dinámicamente -->
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline close">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
     </div>
   </div>
-</div>
-
 
   <!-- 🔧 Variables globales -->
-<script>
-  // ID del usuario actual logueado (inyectado desde PHP)
-  const userId = <?= json_encode($_SESSION['usuario']['id'] ?? null) ?>;
-  if (!userId) {
-    console.error("⚠️ No se encontró el ID del usuario en la sesión.");
-  } else {
-    console.log("👤 Usuario logueado ID:", userId);
-  }
-</script>
+  <script>
+    // ID del usuario actual logueado (inyectado desde PHP)
+    const userId = <?= json_encode($_SESSION['usuario']['id'] ?? null) ?>;
+    if (!userId) {
+      console.error("⚠️ No se encontró el ID del usuario en la sesión.");
+    } else {
+      console.log("👤 Usuario logueado ID:", userId);
+    }
+  </script>
 
   <!-- 📜 JS logic -->
   <script defer src="../js/empleados.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="/DelixSystem/public/js/alert.js"></script>
-<script src="/DelixSystem/public/js/modal.js"></script>
+  <script src="/DelixSystem/public/js/alert.js"></script>
+  <script src="/DelixSystem/public/js/modal.js"></script>
 </body>
-
 </html>
