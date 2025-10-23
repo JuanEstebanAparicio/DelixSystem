@@ -90,5 +90,15 @@ class EmpleadoModel {
         ");
         $stmt->execute(['code' => $code]);
     }
+
+    public function deleteEmployee($id) {
+    try {
+        $stmt = $this->db->prepare("DELETE FROM employees WHERE id = :id");
+        return $stmt->execute(['id' => $id]);
+    } catch (PDOException $e) {
+        error_log("Error al eliminar empleado: " . $e->getMessage());
+        return false;
+    }
+}
 }
 ?>
