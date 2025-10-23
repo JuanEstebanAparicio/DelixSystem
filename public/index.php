@@ -136,7 +136,7 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
         <div class="form-group">
           <input type="email" name="email" placeholder="Correo electrónico" required>
         </div>
-
+        <br>
         <div class="form-group">
           <input type="password" name="password" placeholder="Contraseña" required>
         </div>
