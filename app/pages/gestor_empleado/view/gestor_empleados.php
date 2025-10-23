@@ -111,12 +111,15 @@ if (!$userId) {
   </div>
 
   <!-- 🔧 Variables globales -->
-  <script>
-    // Safe PHP → JS transfer
-    const userId = <?= json_encode($userId) ?>;
-    console.log("👤 Logged Admin ID:", userId);
-    
-  </script>
+<script>
+  // ID del usuario actual logueado (inyectado desde PHP)
+  const userId = <?= json_encode($_SESSION['usuario']['id'] ?? null) ?>;
+  if (!userId) {
+    console.error("⚠️ No se encontró el ID del usuario en la sesión.");
+  } else {
+    console.log("👤 Usuario logueado ID:", userId);
+  }
+</script>
 
   <!-- 📜 JS logic -->
   <script defer src="../js/empleados.js"></script>

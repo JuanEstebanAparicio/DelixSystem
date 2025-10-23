@@ -1,3 +1,4 @@
+// empleados.js
 document.addEventListener("DOMContentLoaded", () => {
   const codigoEl = document.getElementById("codigoDinamico");
   const copiarBtn = document.getElementById("copiarCodigo");
@@ -10,15 +11,18 @@ document.addEventListener("DOMContentLoaded", () => {
   let timer = null;
   let tiempo = 60;
 
-
+  // ⚠️ Verificamos que el userId esté disponible
+  if (typeof userId === "undefined" || !userId) {
+    console.error("❌ No se encontró userId. El usuario no está logueado correctamente.");
+    estado.textContent = "Error: sesión inválida.";
+    estado.classList.add("expirado");
+    return;
+  }
 
   // 🔄 Timer circular
   const startTimer = (exp) => {
     clearInterval(timer);
     const expireTime = new Date(exp + " UTC").getTime();
-
-
-
 
     timer = setInterval(() => {
       const now = Date.now();
@@ -39,18 +43,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
   };
 
-  // 📤 Fetch wrapper
+  // 📤 Request con user_id incluido
   const request = async (action) => {
-    const res = await fetch("../php/key/DynamicKeyController.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ action, user_id: userId }),
-    });
-    const text = await res.text();
     try {
-      return JSON.parse(text);
-    } catch {
-      throw new Error("Invalid JSON: " + text);
+      const res = await fetch("../php/key/DynamicKeyController.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          action,
+          user_id: userId, // 👈 se envía el ID real del usuario logueado
+        }),
+      });
+
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        throw new Error("Invalid JSON: " + text);
+      }
+    } catch (err) {
+      console.error("🚨 Error en request:", err);
+      return { status: "error", message: "Error de red" };
     }
   };
 
@@ -88,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ♻️ Auto regenerar
   const autoRegenerate = () => {
-    setTimeout(generateCode, 2000); // regenerate 2s after expiration
+    setTimeout(generateCode, 2000);
   };
 
   copiarBtn.addEventListener("click", () => {
