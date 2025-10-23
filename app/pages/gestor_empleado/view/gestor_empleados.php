@@ -77,38 +77,30 @@ if (!$userId) {
     </section>
   </div>
 
-  <!-- 💼 Modal de empleado -->
-  <div id="modalEmpleado" class="modal hidden">
-    <div class="modal-content">
-      <h2 id="modalTitle">Nuevo Empleado</h2>
-      <form id="formEmpleado">
-        <input type="hidden" id="empleadoId">
-
-        <label>Nombre Completo</label>
-        <input type="text" id="nombre" required>
-
-        <label>Correo</label>
-        <input type="email" id="correo" required>
-
-        <label>Documento</label>
-        <input type="text" id="documento" required>
-
-        <label>Rol</label>
-        <select id="rol" required>
-          <option value="">Seleccionar...</option>
-          <option value="Cocinero">Cocinero</option>
-          <option value="Mesero">Mesero</option>
-          <option value="Cajero">Cajero</option>
-          <option value="Supervisor">Supervisor</option>
-        </select>
-
-        <div class="modal-actions">
-          <button type="submit" class="btn btn-primary">Guardar</button>
-          <button type="button" id="btnCancelar" class="btn btn-outline">Cancelar</button>
-        </div>
-      </form>
+  <!-- Modal Asignar Roles -->
+<div class="modal fade" id="modalRoles" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3">
+      <div class="modal-header">
+        <h5 class="modal-title">Asignar Roles al Empleado</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formRoles">
+          <input type="hidden" id="empleadoId">
+          <div id="rolesContainer">
+            <!-- Se generarán dinámicamente los checkboxes -->
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-success" id="guardarRoles">Guardar</button>
+      </div>
     </div>
   </div>
+</div>
+
 
   <!-- 🔧 Variables globales -->
 <script>
@@ -125,6 +117,7 @@ if (!$userId) {
   <script defer src="../js/empleados.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/DelixSystem/public/js/alert.js"></script>
+<script src="/DelixSystem/public/js/modal.js"></script>
 </body>
 
 </html>

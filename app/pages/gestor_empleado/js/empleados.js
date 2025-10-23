@@ -147,18 +147,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 🧱 Crear fila
   const createRow = (emp) => {
-    const tr = document.createElement("tr");
-    tr.dataset.id = emp.id;
-    tr.innerHTML = `
-      <td>${emp.id}</td>
-      <td>${emp.full_name}</td>
-      <td>${emp.email}</td>
-      <td>${emp.role}</td>
-      <td>${new Date(emp.created_at).toLocaleString()}</td>
-      <td><button class="btn btn-danger btn-sm" data-id="${emp.id}">Eliminar</button></td>
-    `;
-    return tr;
-  };
+  const tr = document.createElement("tr");
+  tr.dataset.id = emp.id;
+  tr.innerHTML = `
+    <td>${emp.id}</td>
+    <td>${emp.full_name}</td>
+    <td>${emp.email}</td>
+    <td>${emp.role}</td>
+    <td>${new Date(emp.created_at).toLocaleString()}</td>
+    <td class="acciones">
+      <button class="btn btn-primary btn-sm asignar-rol" data-id="${emp.id}">Asignar Roles</button>
+      <button class="btn btn-danger btn-sm eliminar" data-id="${emp.id}">Eliminar</button>
+    </td>
+  `;
+  return tr;
+};
 
   // 🔍 Comparar y actualizar tabla sin recargar todo
   const updateTable = (nuevosEmpleados) => {
