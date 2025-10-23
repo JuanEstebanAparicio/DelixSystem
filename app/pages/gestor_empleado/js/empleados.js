@@ -120,6 +120,11 @@ document.addEventListener("DOMContentLoaded", () => {
 // 🧩 NUEVO BLOQUE OPTIMIZADO: Tabla reactiva de empleados
 // -------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
+  // 🔧 Asegurar que el modal esté oculto al inicio
+const modalRoles = document.getElementById("modalRoles");
+if (modalRoles) modalRoles.style.display = "none";
+
+
   const tablaBody = document.querySelector("#tablaEmpleados tbody");
   if (!tablaBody) return;
 
