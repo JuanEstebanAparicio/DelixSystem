@@ -26,7 +26,7 @@ if (!$userId) {
     <!-- 🔹 Header -->
     <header class="main-header">
       <h1>Gestor de Empleados</h1>
-      <button id="btnAddEmpleado" class="btn btn-primary">+ Nuevo Empleado</button>
+     
     </header>
 
     <!-- 🔐 Código dinámico -->
