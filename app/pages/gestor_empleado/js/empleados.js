@@ -117,65 +117,108 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // -------------------------------------------------------------
-// 🧩 NUEVO BLOQUE OPTIMIZADO: Tabla reactiva de empleados
+// 🧩 GESTOR DE EMPLEADOS — con control interno de modales
 // -------------------------------------------------------------
+// empleados.js (reemplazo del bloque principal — mantiene polling, eliminación, listado)
 document.addEventListener("DOMContentLoaded", () => {
-  // 🔧 Asegurar que el modal esté oculto al inicio
-const modalRoles = document.getElementById("modalRoles");
-if (modalRoles) modalRoles.style.display = "none";
+  console.log("[empleados.js] init");
 
-
+  // ====== Config / elementos ======
   const tablaBody = document.querySelector("#tablaEmpleados tbody");
-  if (!tablaBody) return;
-
+  const modalRoles = document.getElementById("modalRoles");
+  const REFRESH_INTERVAL = 5000;
   const LIST_URL = "../php/employee/EmpleadoListController.php";
-  const REFRESH_INTERVAL = 5000; // cada 5 segundos
-
   let empleadosActuales = new Map();
   let refreshTimer = null;
 
-  // 🎨 Animaciones suaves
+  // Si no existe tabla, salimos (no romperá otras páginas)
+  if (!tablaBody) {
+    console.warn("[empleados.js] No table body found, aborting employees block.");
+    return;
+  }
+
+  // Aseguramos modal oculto al inicio (defensivo)
+  if (modalRoles) {
+    try { modalRoles.style.display = "none"; } catch (e) {}
+  } else {
+    console.warn("[empleados.js] modalRoles not found in DOM.");
+  }
+
+  // ====== Mini helpers de modal ======
+  const openModal = (selectorOrEl) => {
+    const el = (typeof selectorOrEl === "string") ? document.querySelector(selectorOrEl) : selectorOrEl;
+    if (!el) { console.warn("[openModal] modal not found:", selectorOrEl); return; }
+    el.classList.add("show");
+    el.style.display = "flex";
+    const first = el.querySelector("input, button, textarea, select");
+    if (first) first.focus();
+    console.log("[openModal] opened", el.id || el);
+  };
+
+  const closeModal = (selectorOrEl) => {
+    const el = (typeof selectorOrEl === "string") ? document.querySelector(selectorOrEl) : selectorOrEl;
+    if (!el) return;
+    el.classList.remove("show");
+    el.style.display = "none";
+    console.log("[closeModal] closed", el.id || el);
+  };
+
+  // Cerrar modal al hacer clic fuera o tecla ESC
+  document.addEventListener("click", (e) => {
+    // Cerrar botones (tienen clase .close)
+    if (e.target.matches(".modal .close") || e.target.matches(".modal .btn-outline.close")) {
+      const modal = e.target.closest(".modal");
+      if (modal) closeModal(modal);
+    }
+    // Cerrar al hacer clic directamente en el backdrop (el mismo div.modal)
+    if (e.target.classList && e.target.classList.contains("modal")) {
+      closeModal(e.target);
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") document.querySelectorAll(".modal.show").forEach(m => closeModal(m));
+  });
+
+  // ====== Animación fila nueva ======
   const highlightRow = (row) => {
     row.classList.add("highlight-new");
     setTimeout(() => row.classList.remove("highlight-new"), 2000);
   };
 
-  // 🧩 Render inicial
+  // ====== Render / update tabla ======
+  const createRow = (emp) => {
+    const tr = document.createElement("tr");
+    tr.dataset.id = emp.id;
+    tr.innerHTML = `
+      <td>${emp.id}</td>
+      <td>${emp.full_name}</td>
+      <td>${emp.email}</td>
+      <td>${emp.role ?? ''}</td>
+      <td>${new Date(emp.created_at).toLocaleString()}</td>
+      <td class="acciones">
+        <button class="btn btn-primary btn-sm asignar-rol" 
+                data-id="${emp.id}" 
+                data-modal-target="#modalRoles">Asignar roles</button>
+        <button class="btn btn-danger btn-sm eliminar" data-id="${emp.id}">Eliminar</button>
+      </td>
+    `;
+    return tr;
+  };
+
   const renderTable = (empleados) => {
     tablaBody.innerHTML = "";
-    empleados.forEach((emp) => {
+    empleados.forEach(emp => {
       const row = createRow(emp);
       tablaBody.appendChild(row);
       empleadosActuales.set(emp.id, emp);
     });
   };
 
-  // 🧱 Crear fila
-  const createRow = (emp) => {
-  const tr = document.createElement("tr");
-  tr.dataset.id = emp.id;
-  tr.innerHTML = `
-    <td>${emp.id}</td>
-    <td>${emp.full_name}</td>
-    <td>${emp.email}</td>
-    <td>${emp.role}</td>
-    <td>${new Date(emp.created_at).toLocaleString()}</td>
-    <td class="acciones">
-      <button class="btn btn-primary btn-sm asignar-rol" 
-              data-id="${emp.id}" 
-              data-modal-target="#modalRoles">Asignar roles</button>
-      <button class="btn btn-danger btn-sm eliminar" data-id="${emp.id}">Eliminar</button>
-    </td>
-  `;
-  return tr;
-};
-
-  // 🔍 Comparar y actualizar tabla sin recargar todo
   const updateTable = (nuevosEmpleados) => {
-    const nuevosMap = new Map(nuevosEmpleados.map((e) => [e.id, e]));
-
-    // 1️⃣ Insertar nuevos empleados
-    nuevosEmpleados.forEach((emp) => {
+    const nuevosMap = new Map(nuevosEmpleados.map(e => [e.id, e]));
+    // insertar nuevos
+    nuevosEmpleados.forEach(emp => {
       if (!empleadosActuales.has(emp.id)) {
         const newRow = createRow(emp);
         newRow.classList.add("fade-in");
@@ -184,8 +227,7 @@ if (modalRoles) modalRoles.style.display = "none";
         empleadosActuales.set(emp.id, emp);
       }
     });
-
-    // 2️⃣ Eliminar empleados que ya no existen (opcional)
+    // eliminar viejos
     empleadosActuales.forEach((_, id) => {
       if (!nuevosMap.has(id)) {
         const row = tablaBody.querySelector(`tr[data-id="${id}"]`);
@@ -195,91 +237,75 @@ if (modalRoles) modalRoles.style.display = "none";
     });
   };
 
-  // 📡 Obtener empleados del servidor
+  // ====== Fetch empleados ======
   const fetchEmployees = async () => {
     try {
       const res = await fetch(LIST_URL, { cache: "no-store" });
       const data = await res.json();
-
-      if (data.status !== "success") throw new Error(data.message);
+      if (data.status !== "success") throw new Error(data.message || "Invalid response");
       const empleados = data.data || [];
-
-      if (empleadosActuales.size === 0) {
-        renderTable(empleados);
-      } else {
-        updateTable(empleados);
-      }
-
+      if (empleadosActuales.size === 0) renderTable(empleados); else updateTable(empleados);
       if (empleados.length === 0 && tablaBody.children.length === 0) {
         tablaBody.innerHTML = `<tr><td colspan="6">⚠️ No hay empleados registrados</td></tr>`;
       }
     } catch (err) {
-      console.error("⚠️ Error al obtener empleados:", err);
+      console.error("[fetchEmployees] error:", err);
     }
   };
 
-  // 🔁 Refresco periódico
-  const startAutoRefresh = () => {
-    refreshTimer = setInterval(fetchEmployees, REFRESH_INTERVAL);
-  };
+  // ====== Polling ======
+  const startAutoRefresh = () => { refreshTimer = setInterval(fetchEmployees, REFRESH_INTERVAL); };
 
-  // 🧩 Evento que fuerza actualización inmediata (sin esperar al polling)
-  document.addEventListener("empleado-registrado", fetchEmployees);
-
-  // 🗑️ Manejar eliminación de empleados directamente en la tabla
+  // ====== Eliminar empleado ======
   tablaBody.addEventListener("click", async (e) => {
-    if (!e.target.matches(".btn-danger")) return;
-
-    const id = e.target.dataset.id;
-    const fila = e.target.closest("tr");
-
-    const confirmado = await Alerts.confirm(
-      "¿Deseas eliminar este empleado?",
-      "Confirmar eliminación"
-    );
-
-    if (!confirmado) return;
-
-    try {
-      Alerts.loading("Eliminando empleado...");
-
-      const res = await fetch("../php/employee/EmpleadoController.php", {
-  method: "POST",
-  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  body: new URLSearchParams({
-    action: "delete",  // 👈 esto es lo que faltaba
-    id
-  }),
-});
-
-
-      const result = await res.json();
-      Alerts.close();
-
-      if (result.status === "success") {
-        Alerts.success(result.message || "Empleado eliminado correctamente");
-
-        // 🧩 Remover fila con animación suave
-        fila.classList.add("fade-out");
-        setTimeout(() => fila.remove(), 400);
-
-        // 💾 También eliminamos del mapa local para mantener coherencia
-        empleadosActuales.delete(parseInt(id));
-
-      } else {
-        Alerts.error(result.message || "No se pudo eliminar el empleado");
+    // eliminar
+    if (e.target.matches(".btn-danger")) {
+      const id = e.target.dataset.id;
+      const row = e.target.closest("tr");
+      const confirmed = await Alerts.confirm("¿Deseas eliminar este empleado?", "Confirmar eliminación");
+      if (!confirmed) return;
+      try {
+        Alerts.loading("Eliminando empleado...");
+        const res = await fetch("../php/employee/EmpleadoController.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ action: "delete", id }),
+        });
+        const json = await res.json();
+        Alerts.close();
+        if (json.status === "success") {
+          Alerts.success(json.message || "Empleado eliminado");
+          row.classList.add("fade-out");
+          setTimeout(() => row.remove(), 350);
+          empleadosActuales.delete(parseInt(id));
+        } else Alerts.error(json.message || "No se pudo eliminar");
+      } catch (err) {
+        Alerts.close();
+        console.error("[delete] error:", err);
+        Alerts.error("Error de conexión");
       }
-    } catch (err) {
-      Alerts.close();
-      console.error("Error al eliminar empleado:", err);
-      Alerts.error("Error de conexión con el servidor");
+      return;
+    }
+
+    // abrir modal (delegación robusta para botones dinámicos)
+    const btnModal = e.target.closest("[data-modal-target]");
+    if (btnModal) {
+      const target = btnModal.dataset.modalTarget;
+      // debug rápido:
+      console.log("[delegation] clicked modal button, target:", target, "data-id:", btnModal.dataset.id);
+      // set empleadoId hidden inside modal if exists
+      const empleadoIdInput = document.querySelector("#formRoles #empleadoId") || document.getElementById("empleadoId");
+      if (empleadoIdInput) empleadoIdInput.value = btnModal.dataset.id || "";
+      openModal(target);
+      return;
     }
   });
 
-  
-  // 🚀 Inicialización
+  // Forzar actualización cuando un empleado se registre (evento disparado por tu flujo)
+  document.addEventListener("empleado-registrado", fetchEmployees);
+
+  // ====== Inicio ======
   fetchEmployees();
   startAutoRefresh();
 
-  
 });
