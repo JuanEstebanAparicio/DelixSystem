@@ -216,7 +216,56 @@ document.addEventListener("DOMContentLoaded", () => {
   // 🧩 Evento que fuerza actualización inmediata (sin esperar al polling)
   document.addEventListener("empleado-registrado", fetchEmployees);
 
+  // 🗑️ Manejar eliminación de empleados directamente en la tabla
+  tablaBody.addEventListener("click", async (e) => {
+    if (!e.target.matches(".btn-danger")) return;
+
+    const id = e.target.dataset.id;
+    const fila = e.target.closest("tr");
+
+    const confirmado = await Alerts.confirm(
+      "¿Deseas eliminar este empleado?",
+      "Confirmar eliminación"
+    );
+
+    if (!confirmado) return;
+
+    try {
+      Alerts.loading("Eliminando empleado...");
+
+      const res = await fetch("../php/employee/EmpleadoController.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ id }),
+      });
+
+      const result = await res.json();
+      Alerts.close();
+
+      if (result.status === "success") {
+        Alerts.success(result.message || "Empleado eliminado correctamente");
+
+        // 🧩 Remover fila con animación suave
+        fila.classList.add("fade-out");
+        setTimeout(() => fila.remove(), 400);
+
+        // 💾 También eliminamos del mapa local para mantener coherencia
+        empleadosActuales.delete(parseInt(id));
+
+      } else {
+        Alerts.error(result.message || "No se pudo eliminar el empleado");
+      }
+    } catch (err) {
+      Alerts.close();
+      console.error("Error al eliminar empleado:", err);
+      Alerts.error("Error de conexión con el servidor");
+    }
+  });
+
+  
   // 🚀 Inicialización
   fetchEmployees();
   startAutoRefresh();
+
+  
 });

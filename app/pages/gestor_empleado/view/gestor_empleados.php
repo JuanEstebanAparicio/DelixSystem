@@ -123,5 +123,8 @@ if (!$userId) {
 
   <!-- 📜 JS logic -->
   <script defer src="../js/empleados.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/DelixSystem/public/js/alert.js"></script>
 </body>
+
 </html>

@@ -8,14 +8,42 @@ require_once __DIR__ . '/../../../../config/supabase.php';
 require_once __DIR__ . '/EmpleadoModel.php';
 
 try {
-    // ✅ Validar método
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405);
         echo json_encode(["status" => "error", "message" => "Método no permitido"]);
         exit;
     }
 
-    // ✅ Validar entrada
+    // ✅ Determinar acción
+    $action = $_POST['action'] ?? 'register';
+
+    // ✅ Configurar conexión
+    $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $conexion->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+
+    // ✅ Inicializar modelo
+    $model = new EmpleadoModel($conexion);
+
+    // ----------------------------------------------------
+    // 🔹 ELIMINAR EMPLEADO
+    // ----------------------------------------------------
+    if ($action === 'delete') {
+        $id = $_POST['id'] ?? null;
+        if (!$id) throw new Exception("ID de empleado no recibido.");
+
+        $deleted = $model->deleteEmployee($id);
+        if (!$deleted) throw new Exception("No se pudo eliminar el empleado.");
+
+        echo json_encode([
+            "status" => "success",
+            "message" => "Empleado eliminado correctamente."
+        ]);
+        exit;
+    }
+
+    // ----------------------------------------------------
+    // 🔹 REGISTRAR EMPLEADO (acción por defecto)
+    // ----------------------------------------------------
     $codigo = trim($_POST['codigo_dinamico'] ?? '');
     $nombre = trim($_POST['nombre_completo'] ?? '');
     $correo = trim($_POST['correo'] ?? '');
@@ -25,14 +53,6 @@ try {
         throw new Exception("Por favor, completa todos los campos.");
     }
 
-    // ✅ Conexión a Supabase (ya configurada en supabase.php)
-    $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $conexion->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-
-    // ✅ Inicializar modelo
-    $model = new EmpleadoModel($conexion);
-
-    // 🔍 Verificar código dinámico
     $codeCheck = $model->verifyCode($codigo);
     if (!$codeCheck['valid']) {
         throw new Exception($codeCheck['msg']);
@@ -40,16 +60,13 @@ try {
 
     $userId = $codeCheck['user_id'];
 
-    // 👤 Registrar empleado
     $registroExitoso = $model->registerEmployee($userId, $nombre, $correo, $documento);
     if (!$registroExitoso) {
         throw new Exception("No se pudo registrar el empleado. Inténtalo de nuevo.");
     }
 
-    // 📴 Desactivar el código tras su uso
     $model->deactivateCode($codigo);
 
-    // 🎉 Respuesta de éxito
     echo json_encode([
         "status" => "success",
         "message" => "Empleado vinculado correctamente al propietario."
