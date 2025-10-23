@@ -36,3 +36,5 @@
 [2025-10-22 15:14:19] PATCH perfil usuario ID 5 actualizado correctamente
 [2025-10-22 15:21:54] GET perfil usuario ID 5 OK
 [2025-10-22 15:21:57] PATCH perfil usuario ID 5 actualizado correctamente
+[2025-10-23 00:47:13] GET perfil usuario ID 48 OK
+[2025-10-23 00:50:30] GET perfil usuario ID 48 OK
