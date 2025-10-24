@@ -14,13 +14,15 @@ try {
     $conexion = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $user, $password);
     $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // ✅ Nuevo query sin columna "role"
+    // Construcción del query:
+    // - Agregamos los roles con STRING_AGG (separados por coma)
+    // - Si no hay roles devolvemos cadena vacía para compatibilidad con el frontend
     $stmt = $conexion->prepare("
         SELECT 
             e.id,
             e.full_name,
             e.email,
-            COALESCE(STRING_AGG(r.nombre, ', ' ORDER BY r.nombre), 'Sin rol') AS roles,
+            COALESCE(STRING_AGG(r.nombre, ', ' ORDER BY r.nombre), '') AS role,
             e.created_at
         FROM employees e
         LEFT JOIN employee_roles er ON e.id = er.empleado_id
@@ -45,4 +47,3 @@ try {
         "message" => $e->getMessage()
     ]);
 }
-?>
