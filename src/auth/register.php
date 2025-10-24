@@ -31,7 +31,7 @@ if ($insert && isset($insert['status']) && $insert['status'] >= 200 && $insert['
 } else {
     echo json_encode([
         'status' => 'error',
-        'message' => '⚠️ Error al guardar en la tabla usuarios',
+        'message' => '⚠️ Error, el email ya está registrado',
         'debug' => $insert // útil para depurar
     ]);
 }

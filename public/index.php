@@ -127,25 +127,37 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
     </section>
 
     <!-- MODALES -->
-     <!-- MODAL DE LOGIN -->
-  <div id="loginModal" class="modal">
-    <div class="modal-content">
-      <span class="close" id="closeLogin">&times;</span>
-      <h3>Iniciar Sesión</h3>
-      <form method="POST" action="../src/auth/login.php">
-        <div class="form-group">
-          <input type="email" name="email" placeholder="Correo electrónico" required>
-        </div>
+<!-- MODAL DE LOGIN -->
+<div id="loginModal" class="modal">
+  <div class="modal-content">
+    <span class="close" id="closeLogin">&times;</span>
+    <h3>Iniciar Sesión</h3>
 
-        <div class="form-group">
-          <input type="password" name="password" placeholder="Contraseña" required>
+    <form id="loginForm" method="POST" action="../src/auth/login.php">
+      <div class="form-group">
+        <input type="email" name="email" placeholder="Correo electrónico" required>
+      </div>
+
+      <div class="form-group">
+        <input type="password" name="password" placeholder="Contraseña" required>
+      </div>
+
+      <button type="submit" class="btn-primary">Ingresar</button>
+      <div id="loginMessage" style="margin-top:10px; font-weight:bold;"></div>
+    </form>
+
+    <!-- Loader dentro del modal -->
+    <div id="modalLoaderLogin">
+      <div class="loader-backdrop">
+        <div class="loader-box">
+          <div class="loader"></div>
+          <p>Verificando credenciales...</p>
         </div>
-        <br>
-        <button type="submit" class="btn-primary">Entrar</button>
-        
-      </form>
+      </div>
     </div>
   </div>
+</div>
+
 
      <!-- MODAL DE REGISTRO -->
   <div id="registerModal" class="modal">
@@ -187,6 +199,15 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
         <button type="submit" class="btn-primary">Registrarse</button>
         <div id="registerMessage" style="margin-top:10px; font-weight:bold;"></div>
       </form>
+
+          <!-- Loader aquí dentro -->
+    <div id="modalLoader">
+      <div class="loader-box">
+        <div class="loader"></div>
+        <p>Registrando usuario...</p>
+      </div>
+    </div>
+
     </div>
   </div>
 
@@ -195,9 +216,7 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
   <div class="modal-content">
     <span class="close" id="closeLogin">&times;</span>
     <h3>Acceso de Empleado</h3>
-    <form method="POST" 
-      action="/DelixSystem/app/pages/gestor_empleado/php/employee/EmpleadoController.php" 
-      id="empleadoAccessForm">
+    <form method="POST" action="/DelixSystem/app/pages/gestor_empleado/php/employee/EmpleadoController.php"  id="empleadoAccessForm">
       <div class="form-group">
         <input 
           type="text" 
@@ -257,10 +276,13 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
 
 
 <!-- Otros scripts -->
+ <!-- Bootstrap JS (necesario para manejar el modal con JS) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
 <script src="./js/alert.js" defer></script>
 <script src="./js/modal.js" defer></script>
 <script src="./js/register.js" defer></script>
+<script src="./js/login.js" defer></script>
 <script src="/DelixSystem/app/pages/gestor_empleado/js/empleadoAccess.js" defer></script>
 
 

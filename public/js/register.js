@@ -15,9 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   `;
   modal.appendChild(loader);
-
-  // Ocultar inicialmente
-  loader.style.display = 'none';
+  loader.style.display = 'none'; // Oculto inicialmente
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -53,16 +51,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = JSON.parse(rawText);
 
       if (result.status === 'success') {
-        Swal.fire({
-          icon: 'success',
-          title: 'Registro exitoso',
-          text: result.message,
-          confirmButtonText: 'OK'
-        }).then(() => {
-          form.reset();
-          modal.style.display = 'none';
-        });
+        loader.style.display = 'none'; // Quitar loader antes de cerrar modal
+        form.reset();
+
+        // 🔹 Cerrar modal inmediatamente
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open'); // por si bloquea scroll
+
+        // 🔹 Pequeña pausa antes del SweetAlert (para evitar solapamiento)
+        setTimeout(() => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Registro exitoso',
+            text: result.message,
+            confirmButtonText: 'OK'
+          });
+        }, 200);
+
       } else {
+        loader.style.display = 'none';
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -71,9 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (err) {
       console.error(err);
-      Swal.fire('Error de conexión', 'No se pudo conectar con el servidor.', 'error');
-    } finally {
       loader.style.display = 'none';
+      Swal.fire('Error de conexión', 'No se pudo conectar con el servidor.', 'error');
     }
   });
 });
