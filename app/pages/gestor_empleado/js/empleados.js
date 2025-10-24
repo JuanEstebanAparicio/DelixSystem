@@ -287,18 +287,18 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // abrir modal (delegación robusta para botones dinámicos)
-    const btnModal = e.target.closest("[data-modal-target]");
-    if (btnModal) {
-      const target = btnModal.dataset.modalTarget;
-      // debug rápido:
-      console.log("[delegation] clicked modal button, target:", target, "data-id:", btnModal.dataset.id);
-      // set empleadoId hidden inside modal if exists
-      const empleadoIdInput = document.querySelector("#formRoles #empleadoId") || document.getElementById("empleadoId");
-      if (empleadoIdInput) empleadoIdInput.value = btnModal.dataset.id || "";
-      openModal(target);
-      return;
-    }
+    // abrir modal genérico (solo si NO es el botón de asignar rol)
+const btnModal = e.target.closest("[data-modal-target]");
+if (btnModal) {
+  // si es un botón de asignar rol, dejamos que lo maneje el bloque de roles
+  if (btnModal.classList.contains("asignar-rol")) return;
+
+  const target = btnModal.dataset.modalTarget;
+  console.log("[delegation] clicked modal button, target:", target, "data-id:", btnModal.dataset.id);
+  openModal(target);
+  return;
+}
+
   });
 
   // Forzar actualización cuando un empleado se registre (evento disparado por tu flujo)
@@ -311,10 +311,9 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ================================
-// 🎯 BLOQUE NUEVO: CARGA DE ROLES
+// 🎯 BLOQUE NUEVO: CARGA Y ACTUALIZACIÓN DE ROLES
 // ================================
 
-// Este bloque se mantiene independiente pero usa la tabla y modal ya existentes
 document.addEventListener("click", async (e) => {
   const btn = e.target.closest(".asignar-rol");
   if (!btn) return;
@@ -323,24 +322,28 @@ document.addEventListener("click", async (e) => {
   const modal = document.querySelector("#modalRoles");
   const rolesContainer = modal.querySelector("#rolesContainer");
   const inputEmpleadoId = modal.querySelector("#empleadoId");
+  const guardarBtn = modal.querySelector("#guardarRoles");
 
   inputEmpleadoId.value = empleadoId;
 
   try {
-    // Obtener todos los roles disponibles
+    // 1️⃣ Obtener todos los roles disponibles
     const rolesRes = await fetch("../php/roles/RolesListController.php");
     const rolesData = await rolesRes.json();
     if (rolesData.status !== "success") throw new Error("Error al obtener roles");
 
-    // Obtener roles asignados al empleado
+    // 2️⃣ Obtener roles asignados al empleado
     const empRes = await fetch(`../php/roles/RolesByEmployeeController.php?id=${empleadoId}`);
     const empData = await empRes.json();
-    const rolesAsignados = empData.data ? empData.data.map(r => r.id) : [];
 
-    // Renderizar checkboxes
+    const rolesAsignados = Array.isArray(empData.data)
+      ? empData.data.map(r => parseInt(r.rol_id ?? r.id))
+      : [];
+
+    // 3️⃣ Renderizar checkboxes
     rolesContainer.innerHTML = "";
     rolesData.data.forEach((rol) => {
-      const checked = rolesAsignados.includes(rol.id) ? "checked" : "";
+      const checked = rolesAsignados.includes(parseInt(rol.id)) ? "checked" : "";
       const div = document.createElement("div");
       div.classList.add("rol-item");
       div.innerHTML = `
@@ -352,70 +355,60 @@ document.addEventListener("click", async (e) => {
       rolesContainer.appendChild(div);
     });
 
-    // Mostrar modal (reutilizamos la función existente)
+    // 4️⃣ Mostrar modal
     modal.classList.add("show");
     modal.style.display = "flex";
 
-  } catch (err) {
-    console.error("Error al cargar roles:", err);
-    Alerts.error("Error al cargar roles disponibles");
-  }
-});
+    // 5️⃣ Evitar duplicar eventos al guardar
+    guardarBtn.onclick = async (ev) => {
+      ev.preventDefault();
 
-// ================================
-// 🎯 BLOQUE: GUARDAR ROLES (AJAX)
-// ================================
-document.addEventListener("submit", async (e) => {
-  if (e.target.matches("#formRoles")) {
-    e.preventDefault();
+      const seleccionados = [...rolesContainer.querySelectorAll("input[type='checkbox']:checked")].map(chk => chk.value);
+      try {
+        const res = await fetch("../php/roles/RolesAssignController.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            empleado_id: empleadoId,
+            roles: JSON.stringify(seleccionados),
+          }),
+        });
 
-    const form = e.target;
-    const empleadoId = form.querySelector("#empleadoId").value;
-    const rolesSeleccionados = [...form.querySelectorAll("input[type=checkbox]:checked")].map(chk => chk.value);
+        const data = await res.json();
 
-    try {
-      Alerts.loading("Guardando roles...");
+        if (data.status === "success") {
+          Alerts.success("✅ Roles actualizados correctamente");
 
-      const res = await fetch("../php/roles/RolesAssignController.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          empleado_id: empleadoId,
-          roles: JSON.stringify(rolesSeleccionados)
-        })
-      });
+          // 🔁 Volver a marcar correctamente según la nueva asignación
+          setTimeout(async () => {
+            const empReload = await fetch(`../php/roles/RolesByEmployeeController.php?id=${empleadoId}`);
+            const empNewData = await empReload.json();
+            const nuevosRoles = Array.isArray(empNewData.data)
+              ? empNewData.data.map(r => parseInt(r.rol_id ?? r.id))
+              : [];
 
-      const text = await res.text();
-      const data = JSON.parse(text);
-
-      Alerts.close();
-
-      if (data.status === "success") {
-        Alerts.success("✅ " + data.message);
-
-        // 🔹 Actualiza en la tabla el rol visible sin recargar
-        if (rolesSeleccionados.length > 0) {
-          const checkboxes = form.querySelectorAll("input[type=checkbox]:checked");
-          const firstLabel = checkboxes[0].parentNode.textContent.trim().split(" - ")[0];
-          const row = document.querySelector(`tr[data-id="${empleadoId}"]`);
-          if (row) row.querySelector("td:nth-child(4)").textContent = firstLabel;
+            rolesContainer.querySelectorAll("input[type='checkbox']").forEach(chk => {
+              chk.checked = nuevosRoles.includes(parseInt(chk.value));
+            });
+          }, 600);
         } else {
-          // Si no hay roles seleccionados
-          const row = document.querySelector(`tr[data-id="${empleadoId}"]`);
-          if (row) row.querySelector("td:nth-child(4)").textContent = "";
+          Alerts.error(data.message || "Error al asignar roles");
         }
 
-        closeModal("#modalRoles");
-      } else {
-        Alerts.error("⚠️ " + data.message);
+      } catch (err) {
+        console.error("🚨 Error al asignar roles:", err);
+        Alerts.error("Error al asignar roles (ver consola)");
       }
-    } catch (err) {
-      Alerts.close();
-      console.error("🚨 Error al asignar roles:", err);
-      Alerts.error("Error al asignar roles (ver consola)");
-    }
+    };
+
+  } catch (err) {
+    console.error("Error al cargar roles:", err);
+    Alerts.error("Error al cargar roles disponibles (ver consola)");
   }
 });
+
+
+
 function closeModal(selectorOrEl) {
   const el = (typeof selectorOrEl === "string") ? document.querySelector(selectorOrEl) : selectorOrEl;
   if (!el) return;
