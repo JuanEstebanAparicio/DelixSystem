@@ -489,3 +489,26 @@ body {
         width: 90%;
     }
 }
+/* -------------------------
+   LOADER LOGIN DENTRO DEL MODAL
+-------------------------- */
+#modalLoaderLogin {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+}
+
+#modalLoaderLogin .loader-backdrop {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(20, 20, 20, 0.6);
+  top: 0; left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
