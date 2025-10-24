@@ -361,3 +361,43 @@ document.addEventListener("click", async (e) => {
     Alerts.error("Error al cargar roles disponibles");
   }
 });
+
+// Guardar roles seleccionados
+document.addEventListener("click", async (e) => {
+  const btnGuardar = e.target.closest("#guardarRoles");
+  if (!btnGuardar) return;
+
+  const modal = document.querySelector("#modalRoles");
+  const empleadoId = modal.querySelector("#empleadoId").value;
+  const checkboxes = modal.querySelectorAll("#rolesContainer input[type='checkbox']:checked");
+  const roles = Array.from(checkboxes).map(chk => chk.value);
+
+  try {
+    Alerts.loading("Guardando roles...");
+    const res = await fetch("../php/roles/RolesAssignController.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        empleado_id: empleadoId,
+        roles: JSON.stringify(roles)
+      }),
+    });
+
+    const data = await res.json();
+    Alerts.close();
+
+    if (data.status === "success") {
+      Alerts.success(data.message);
+      // Opcional: cerrar modal
+      modal.classList.remove("show");
+      modal.style.display = "none";
+    } else {
+      Alerts.error(data.message || "No se pudieron asignar los roles");
+    }
+  } catch (err) {
+    Alerts.close();
+    console.error("Error al guardar roles:", err);
+    Alerts.error("Error al conectar con el servidor");
+  }
+});
+

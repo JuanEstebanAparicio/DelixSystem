@@ -90,7 +90,8 @@ if (!$userId) {
         <br>
         <div class="modal-actions">
           <button type="button" class="btn btn-outline close">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar</button>
+          <button id="guardarRoles" class="btn btn-primary">Guardar</button>
+
         </div>
       </form>
     </div>
