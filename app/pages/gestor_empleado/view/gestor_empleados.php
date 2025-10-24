@@ -87,7 +87,7 @@ if (!$userId) {
         <div id="rolesContainer" class="roles-container">
           <!-- Aquí se inyectarán los checkboxes dinámicamente -->
         </div>
-
+        <br>
         <div class="modal-actions">
           <button type="button" class="btn btn-outline close">Cancelar</button>
           <button type="submit" class="btn btn-primary">Guardar</button>
