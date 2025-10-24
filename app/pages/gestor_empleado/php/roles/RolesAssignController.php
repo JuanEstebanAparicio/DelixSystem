@@ -33,24 +33,9 @@ try {
                 ':rol_id' => $rolId
             ]);
         }
-
-        // 🔹 Actualizar el campo 'role' del empleado (solo el primero)
-        $firstRoleQuery = $conexion->prepare("SELECT nombre FROM roles WHERE id = :id LIMIT 1");
-        $firstRoleQuery->execute([':id' => $roles[0]]);
-        $rolPrincipal = $firstRoleQuery->fetchColumn();
-
-        if ($rolPrincipal) {
-            $updateEmp = $conexion->prepare("UPDATE employees SET role = :role WHERE id = :id");
-            $updateEmp->execute([
-                ':role' => $rolPrincipal,
-                ':id' => $empleadoId
-            ]);
-        }
-    } else {
-        // Si se quitaron todos los roles, limpiamos el campo "role"
-        $updateEmp = $conexion->prepare("UPDATE employees SET role = NULL WHERE id = :id");
-        $updateEmp->execute([':id' => $empleadoId]);
     }
+
+    // ✅ No se toca la tabla employees — los roles se manejan solo desde employee_roles
 
     echo json_encode([
         "status" => "success",
@@ -62,3 +47,4 @@ try {
         "message" => "Error al actualizar roles: " . $e->getMessage()
     ]);
 }
+?>
