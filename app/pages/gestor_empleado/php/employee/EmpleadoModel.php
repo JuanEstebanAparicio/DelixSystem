@@ -95,24 +95,26 @@ class EmpleadoModel {
      * 🗑️ Elimina un empleado y sus roles relacionados
      */
     public function deleteEmployee($id) {
-        try {
-            $this->db->beginTransaction();
+    try {
+        $this->db->beginTransaction();
 
-            // 🧹 1️⃣ Eliminar asociaciones del empleado con roles
-            $delRel = $this->db->prepare("DELETE FROM employee_roles WHERE employee_id = :id");
-            $delRel->execute(['id' => $id]);
+        // 🧹 1️⃣ Eliminar relaciones con roles
+        $delRel = $this->db->prepare("DELETE FROM employee_roles WHERE empleado_id = :empleado_id");
+        $delRel->execute(['empleado_id' => $id]);
 
-            // 🧍‍♂️ 2️⃣ Eliminar el empleado
-            $stmt = $this->db->prepare("DELETE FROM employees WHERE id = :id");
-            $stmt->execute(['id' => $id]);
+        // 🧍‍♂️ 2️⃣ Eliminar el empleado
+        $stmt = $this->db->prepare("DELETE FROM employees WHERE id = :id");
+        $stmt->execute(['id' => $id]);
 
-            $this->db->commit();
-            return $stmt->rowCount() > 0;
-        } catch (PDOException $e) {
-            $this->db->rollBack();
-            error_log("Error al eliminar empleado (transacción): " . $e->getMessage());
-            return false;
-        }
+        $this->db->commit();
+
+        return $stmt->rowCount() > 0;
+    } catch (PDOException $e) {
+        $this->db->rollBack();
+        error_log("❌ Error al eliminar empleado: " . $e->getMessage());
+        throw new Exception("Error al eliminar empleado: " . $e->getMessage());
     }
+}
+
 }
 ?>
