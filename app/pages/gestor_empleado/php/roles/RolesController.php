@@ -11,4 +11,8 @@ class RolesController {
     public function listarRoles() {
         return $this->model->getAllRoles();
     }
+
+    public function listarRolesPorEmpleado($empleadoId) {
+        return $this->model->getRolesByEmployee($empleadoId);
+    }
 }

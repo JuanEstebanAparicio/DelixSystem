@@ -10,7 +10,8 @@ try {
         "status" => "success",
         "data" => $roles
     ]);
-} catch (Exception $e) {
+} catch (Throwable $e) {
+    // Manejo seguro del error sin romper el JSON
     echo json_encode([
         "status" => "error",
         "message" => "Error al obtener roles: " . $e->getMessage()
