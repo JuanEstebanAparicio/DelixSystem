@@ -362,42 +362,54 @@ document.addEventListener("click", async (e) => {
   }
 });
 
-// Guardar roles seleccionados
-document.addEventListener("click", async (e) => {
-  const btnGuardar = e.target.closest("#guardarRoles");
-  if (!btnGuardar) return;
+// ================================
+// 🎯 BLOQUE: GUARDAR ROLES (AJAX)
+// ================================
+document.addEventListener("submit", async (e) => {
+  const form = e.target.closest("#formRoles");
+  if (!form) return; // si no es el formRoles, no hacemos nada
+  e.preventDefault(); // 🚫 evita recargar la página
 
-  const modal = document.querySelector("#modalRoles");
-  const empleadoId = modal.querySelector("#empleadoId").value;
-  const checkboxes = modal.querySelectorAll("#rolesContainer input[type='checkbox']:checked");
-  const roles = Array.from(checkboxes).map(chk => chk.value);
+  const empleadoId = form.querySelector("#empleadoId").value;
+  const checkboxes = form.querySelectorAll("#rolesContainer input[type='checkbox']");
+  const rolesSeleccionados = Array.from(checkboxes)
+    .filter(ch => ch.checked)
+    .map(ch => ch.value);
 
   try {
-    Alerts.loading("Guardando roles...");
+    Alerts.loading("Asignando roles...");
+
     const res = await fetch("../php/roles/RolesAssignController.php", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
         empleado_id: empleadoId,
-        roles: JSON.stringify(roles)
+        roles: JSON.stringify(rolesSeleccionados)
       }),
     });
 
-    const data = await res.json();
+    const text = await res.text();
+    console.log("Respuesta RolesAssignController.php:", text);
+    const data = JSON.parse(text);
+
     Alerts.close();
 
     if (data.status === "success") {
-      Alerts.success(data.message);
-      // Opcional: cerrar modal
+      Alerts.success("✅ Roles asignados correctamente");
+      // Cerrar modal
+      const modal = document.querySelector("#modalRoles");
       modal.classList.remove("show");
       modal.style.display = "none";
+      // Actualizar tabla sin recargar
+      document.dispatchEvent(new CustomEvent("empleado-registrado"));
     } else {
-      Alerts.error(data.message || "No se pudieron asignar los roles");
+      Alerts.error(data.message || "Error al asignar roles");
     }
+
   } catch (err) {
     Alerts.close();
-    console.error("Error al guardar roles:", err);
-    Alerts.error("Error al conectar con el servidor");
+    console.error("🚨 Error al asignar roles:", err);
+    Alerts.error("Error al asignar roles (ver consola)");
   }
 });
 
