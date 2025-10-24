@@ -93,12 +93,24 @@ class EmpleadoModel {
 
     public function deleteEmployee($id) {
     try {
+        $this->db->beginTransaction();
+
+        // 🧹 1️⃣ Eliminar asociaciones del empleado con roles
+        $delRel = $this->db->prepare("DELETE FROM employee_roles WHERE empleado_id = :id");
+        $delRel->execute(['id' => $id]);
+
+        // 🧍‍♂️ 2️⃣ Eliminar el empleado
         $stmt = $this->db->prepare("DELETE FROM employees WHERE id = :id");
-        return $stmt->execute(['id' => $id]);
+        $stmt->execute(['id' => $id]);
+
+        $this->db->commit();
+        return $stmt->rowCount() > 0;
     } catch (PDOException $e) {
-        error_log("Error al eliminar empleado: " . $e->getMessage());
+        $this->db->rollBack();
+        error_log("Error al eliminar empleado (transacción): " . $e->getMessage());
         return false;
     }
 }
+
 }
 ?>
