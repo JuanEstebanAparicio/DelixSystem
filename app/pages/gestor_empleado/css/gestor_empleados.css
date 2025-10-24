@@ -198,30 +198,54 @@ body {
   background: #f7f9fb;
 }
 
-/* modal base — oculto por defecto */
+/* ===== Modal ===== */
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
-  display: none; /* <- importante */
+  background: rgba(0, 0, 0, 0.6); /* un poco más oscuro para resaltar */
+  display: none;
   justify-content: center;
   align-items: center;
   z-index: 2000;
 }
 
-/* clase control para mostrarlo */
+/* mostrar */
 .modal.show {
   display: flex;
-  animation: modalFadeIn .18s ease;
+  animation: fadeInModal 0.25s ease;
 }
 
-/* opcional: cerrar si .hidden está presente */
-.modal.hidden { display: none; }
-
-@keyframes modalFadeIn {
-  from { opacity: 0; transform: translateY(-6px) scale(.995); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+.modal-content {
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #1a1a1a);
+  padding: 30px;
+  border-radius: 10px;
+  width: 420px;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25); /* mejora el contraste */
+  position: relative;
+  z-index: 2100;
+  opacity: 1; /* aseguramos que sea visible */
 }
+
+/* botón de cerrar */
+.modal-content .close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 22px;
+  font-weight: bold;
+  color: var(--color-muted);
+  cursor: pointer;
+}
+.modal-content .close:hover {
+  color: var(--color-danger);
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }
