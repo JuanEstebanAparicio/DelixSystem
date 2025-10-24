@@ -41,8 +41,7 @@ class EmpleadoModel {
         int $userId,
         string $name,
         string $email,
-        string $document,
-        string $role = "Empleado"
+        string $document
     ): bool {
         try {
             // 🧠 Evitar duplicados por documento o email dentro del mismo user_id
@@ -62,18 +61,19 @@ class EmpleadoModel {
                 throw new Exception("Este empleado ya está registrado en tu cuenta.");
             }
 
-            // 🆕 Registrar el nuevo empleado
+            // 🆕 Registrar el nuevo empleado (sin columna role)
             $stmt = $this->db->prepare("
-                INSERT INTO employees (user_id, full_name, email, document, role, created_at)
-                VALUES (:user_id, :full_name, :email, :document, :role, NOW())
+                INSERT INTO employees (user_id, full_name, email, document, created_at)
+                VALUES (:user_id, :full_name, :email, :document, NOW())
             ");
-            return $stmt->execute([
+            $stmt->execute([
                 'user_id' => $userId,
                 'full_name' => $name,
                 'email' => $email,
-                'document' => $document,
-                'role' => $role
+                'document' => $document
             ]);
+
+            return true;
         } catch (Exception $e) {
             throw new Exception("Error al registrar empleado: " . $e->getMessage());
         }
@@ -91,26 +91,28 @@ class EmpleadoModel {
         $stmt->execute(['code' => $code]);
     }
 
+    /**
+     * 🗑️ Elimina un empleado y sus roles relacionados
+     */
     public function deleteEmployee($id) {
-    try {
-        $this->db->beginTransaction();
+        try {
+            $this->db->beginTransaction();
 
-        // 🧹 1️⃣ Eliminar asociaciones del empleado con roles
-        $delRel = $this->db->prepare("DELETE FROM employee_roles WHERE empleado_id = :id");
-        $delRel->execute(['id' => $id]);
+            // 🧹 1️⃣ Eliminar asociaciones del empleado con roles
+            $delRel = $this->db->prepare("DELETE FROM employee_roles WHERE employee_id = :id");
+            $delRel->execute(['id' => $id]);
 
-        // 🧍‍♂️ 2️⃣ Eliminar el empleado
-        $stmt = $this->db->prepare("DELETE FROM employees WHERE id = :id");
-        $stmt->execute(['id' => $id]);
+            // 🧍‍♂️ 2️⃣ Eliminar el empleado
+            $stmt = $this->db->prepare("DELETE FROM employees WHERE id = :id");
+            $stmt->execute(['id' => $id]);
 
-        $this->db->commit();
-        return $stmt->rowCount() > 0;
-    } catch (PDOException $e) {
-        $this->db->rollBack();
-        error_log("Error al eliminar empleado (transacción): " . $e->getMessage());
-        return false;
+            $this->db->commit();
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            error_log("Error al eliminar empleado (transacción): " . $e->getMessage());
+            return false;
+        }
     }
-}
-
 }
 ?>
