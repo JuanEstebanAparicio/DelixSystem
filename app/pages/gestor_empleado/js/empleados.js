@@ -309,3 +309,55 @@ document.addEventListener("DOMContentLoaded", () => {
   startAutoRefresh();
 
 });
+
+// ================================
+// 🎯 BLOQUE NUEVO: CARGA DE ROLES
+// ================================
+
+// Este bloque se mantiene independiente pero usa la tabla y modal ya existentes
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".asignar-rol");
+  if (!btn) return;
+
+  const empleadoId = btn.dataset.id;
+  const modal = document.querySelector("#modalRoles");
+  const rolesContainer = modal.querySelector("#rolesContainer");
+  const inputEmpleadoId = modal.querySelector("#empleadoId");
+
+  inputEmpleadoId.value = empleadoId;
+
+  try {
+    // Obtener todos los roles disponibles
+    const rolesRes = await fetch("../php/roles/RolesListController.php");
+    const rolesData = await rolesRes.json();
+    if (rolesData.status !== "success") throw new Error("Error al obtener roles");
+
+    // Obtener roles asignados al empleado
+    const empRes = await fetch(`../php/roles/RolesByEmployeeController.php?id=${empleadoId}`);
+    const empData = await empRes.json();
+    const rolesAsignados = empData.data ? empData.data.map(r => r.id) : [];
+
+    // Renderizar checkboxes
+    rolesContainer.innerHTML = "";
+    rolesData.data.forEach((rol) => {
+      const checked = rolesAsignados.includes(rol.id) ? "checked" : "";
+      const div = document.createElement("div");
+      div.classList.add("rol-item");
+      div.innerHTML = `
+        <label>
+          <input type="checkbox" value="${rol.id}" ${checked}>
+          <strong>${rol.nombre}</strong> - <small>${rol.descripcion}</small>
+        </label>
+      `;
+      rolesContainer.appendChild(div);
+    });
+
+    // Mostrar modal (reutilizamos la función existente)
+    modal.classList.add("show");
+    modal.style.display = "flex";
+
+  } catch (err) {
+    console.error("Error al cargar roles:", err);
+    Alerts.error("Error al cargar roles disponibles");
+  }
+});
