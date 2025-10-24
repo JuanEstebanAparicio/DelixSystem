@@ -366,50 +366,61 @@ document.addEventListener("click", async (e) => {
 // 🎯 BLOQUE: GUARDAR ROLES (AJAX)
 // ================================
 document.addEventListener("submit", async (e) => {
-  const form = e.target.closest("#formRoles");
-  if (!form) return; // si no es el formRoles, no hacemos nada
-  e.preventDefault(); // 🚫 evita recargar la página
+  if (e.target.matches("#formRoles")) {
+    e.preventDefault();
 
-  const empleadoId = form.querySelector("#empleadoId").value;
-  const checkboxes = form.querySelectorAll("#rolesContainer input[type='checkbox']");
-  const rolesSeleccionados = Array.from(checkboxes)
-    .filter(ch => ch.checked)
-    .map(ch => ch.value);
+    const form = e.target;
+    const empleadoId = form.querySelector("#empleadoId").value;
+    const rolesSeleccionados = [...form.querySelectorAll("input[type=checkbox]:checked")].map(chk => chk.value);
 
-  try {
-    Alerts.loading("Asignando roles...");
+    try {
+      Alerts.loading("Guardando roles...");
 
-    const res = await fetch("../php/roles/RolesAssignController.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        empleado_id: empleadoId,
-        roles: JSON.stringify(rolesSeleccionados)
-      }),
-    });
+      const res = await fetch("../php/roles/RolesAssignController.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          empleado_id: empleadoId,
+          roles: JSON.stringify(rolesSeleccionados)
+        })
+      });
 
-    const text = await res.text();
-    console.log("Respuesta RolesAssignController.php:", text);
-    const data = JSON.parse(text);
+      const text = await res.text();
+      const data = JSON.parse(text);
 
-    Alerts.close();
+      Alerts.close();
 
-    if (data.status === "success") {
-      Alerts.success("✅ Roles asignados correctamente");
-      // Cerrar modal
-      const modal = document.querySelector("#modalRoles");
-      modal.classList.remove("show");
-      modal.style.display = "none";
-      // Actualizar tabla sin recargar
-      document.dispatchEvent(new CustomEvent("empleado-registrado"));
-    } else {
-      Alerts.error(data.message || "Error al asignar roles");
+      if (data.status === "success") {
+        Alerts.success("✅ " + data.message);
+
+        // 🔹 Actualiza en la tabla el rol visible sin recargar
+        if (rolesSeleccionados.length > 0) {
+          const checkboxes = form.querySelectorAll("input[type=checkbox]:checked");
+          const firstLabel = checkboxes[0].parentNode.textContent.trim().split(" - ")[0];
+          const row = document.querySelector(`tr[data-id="${empleadoId}"]`);
+          if (row) row.querySelector("td:nth-child(4)").textContent = firstLabel;
+        } else {
+          // Si no hay roles seleccionados
+          const row = document.querySelector(`tr[data-id="${empleadoId}"]`);
+          if (row) row.querySelector("td:nth-child(4)").textContent = "";
+        }
+
+        closeModal("#modalRoles");
+      } else {
+        Alerts.error("⚠️ " + data.message);
+      }
+    } catch (err) {
+      Alerts.close();
+      console.error("🚨 Error al asignar roles:", err);
+      Alerts.error("Error al asignar roles (ver consola)");
     }
-
-  } catch (err) {
-    Alerts.close();
-    console.error("🚨 Error al asignar roles:", err);
-    Alerts.error("Error al asignar roles (ver consola)");
   }
 });
+function closeModal(selectorOrEl) {
+  const el = (typeof selectorOrEl === "string") ? document.querySelector(selectorOrEl) : selectorOrEl;
+  if (!el) return;
+  el.classList.remove("show");
+  el.style.display = "none";
+  console.log("[closeModal - global] closed", el.id || el);
+}
 

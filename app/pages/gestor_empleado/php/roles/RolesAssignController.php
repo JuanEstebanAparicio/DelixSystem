@@ -3,43 +3,62 @@ header("Content-Type: application/json");
 require_once __DIR__ . '/../../../../config/supabase.php';
 
 try {
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception("Método no permitido");
-    }
-
+    // ============================
+    // 🔹 Validar entrada
+    // ============================
     $empleadoId = $_POST['empleado_id'] ?? null;
-    $roles = $_POST['roles'] ?? [];
+    $roles = isset($_POST['roles']) ? json_decode($_POST['roles'], true) : [];
 
     if (!$empleadoId) {
-        throw new Exception("ID de empleado no proporcionado");
+        throw new Exception("Falta el ID del empleado.");
     }
 
-    // 🔹 Convertir roles en array si llega como JSON
-    if (is_string($roles)) {
-        $roles = json_decode($roles, true) ?? [];
-    }
+    // ============================
+    // 🔹 Limpiar roles existentes
+    // ============================
+    $stmt = $conexion->prepare("DELETE FROM employee_roles WHERE empleado_id = :id");
+    $stmt->execute([':id' => $empleadoId]);
 
-    // 🔹 Eliminar roles anteriores
-    $stmtDel = $conexion->prepare("DELETE FROM employee_roles WHERE empleado_id = ?");
-    $stmtDel->execute([$empleadoId]);
-
+    // ============================
     // 🔹 Insertar nuevos roles
+    // ============================
     if (!empty($roles)) {
-        $stmtIns = $conexion->prepare(
-            "INSERT INTO employee_roles (empleado_id, rol_id) VALUES (?, ?)"
-        );
+        $stmt = $conexion->prepare("
+            INSERT INTO employee_roles (empleado_id, rol_id)
+            VALUES (:empleado_id, :rol_id)
+        ");
         foreach ($roles as $rolId) {
-            $stmtIns->execute([$empleadoId, $rolId]);
+            $stmt->execute([
+                ':empleado_id' => $empleadoId,
+                ':rol_id' => $rolId
+            ]);
         }
+
+        // 🔹 Actualizar el campo 'role' del empleado (solo el primero)
+        $firstRoleQuery = $conexion->prepare("SELECT nombre FROM roles WHERE id = :id LIMIT 1");
+        $firstRoleQuery->execute([':id' => $roles[0]]);
+        $rolPrincipal = $firstRoleQuery->fetchColumn();
+
+        if ($rolPrincipal) {
+            $updateEmp = $conexion->prepare("UPDATE employees SET role = :role WHERE id = :id");
+            $updateEmp->execute([
+                ':role' => $rolPrincipal,
+                ':id' => $empleadoId
+            ]);
+        }
+    } else {
+        // Si se quitaron todos los roles, limpiamos el campo "role"
+        $updateEmp = $conexion->prepare("UPDATE employees SET role = NULL WHERE id = :id");
+        $updateEmp->execute([':id' => $empleadoId]);
     }
 
     echo json_encode([
         "status" => "success",
-        "message" => "Roles asignados correctamente"
+        "message" => "Roles actualizados correctamente"
     ]);
 } catch (Exception $e) {
     echo json_encode([
         "status" => "error",
-        "message" => "Error al asignar roles: " . $e->getMessage()
+        "message" => "Error al actualizar roles: " . $e->getMessage()
     ]);
 }
