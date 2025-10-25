@@ -1,4 +1,5 @@
 <?php
+// DelixSystem/app/config/supabase.php
 // Datos de tu proyecto Supabase
 $host = "aws-1-us-east-1.pooler.supabase.com"; // host del pooler (usa el que te da Supabase)
 $port = "6543"; // puerto del pooler

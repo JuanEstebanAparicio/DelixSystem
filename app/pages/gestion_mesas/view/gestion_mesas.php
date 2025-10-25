@@ -1,4 +1,5 @@
 <?php
+// DelixSystem/app/pages/gestion_mesas/view/gestion_mesas.php
 include __DIR__ . '/../../../config/supabase.php';
 ?>
 <!DOCTYPE html>
@@ -15,6 +16,13 @@ include __DIR__ . '/../../../config/supabase.php';
   <header class="main-header">
     <h1><i class="fa-solid fa-utensils"></i> Gestión de Mesas</h1>
   </header>
+    <!-- 🔹 BOTÓN IR AL RESUMEN -->
+  <div class="resumen-btn-container" style="text-align:right; margin: 15px 30px;">
+    <a href="resumen_mesas.php" class="btn-summary" title="Ver resumen general">
+      <i class="fa-solid fa-chart-pie"></i> Volver al resumen general
+    </a>
+  </div>
+
 
   <div class="container">
 
@@ -193,11 +201,11 @@ include __DIR__ . '/../../../config/supabase.php';
 
   <!-- 🔹 SCRIPTS -->
   <script src="../js/edit.js"></script>
-  <script src="/Proyecto_aula/public/js/modal.js"></script>
+  <script src="/DelixSystem/public/js/modal.js"></script>
   <script src="../js/qr_modal.js"></script>
   <script src="../js/mesas.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="/Proyecto_aula/public/js/alert.js"></script>
+  <script src="/DelixSystem/public/js/alert.js"></script>
   <script src="../js/areas.js"></script>
 
 </body>

@@ -151,3 +151,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   console.log("✅ Script del dashboard cargado correctamente");
 });
+
+    // ============================
+  // 🍽️ Redirección a Gestión de Mesas
+  // ============================
+  const mesasItem = document.querySelector('.sidebar ul li[data-section="mesas"]');
+
+  if (mesasItem) {
+    mesasItem.addEventListener('click', () => {
+      console.log("🪑 Redirigiendo al gestor de mesas...");
+      Swal.fire({
+        title: "Cargando gestor de mesas...",
+        text: "Por favor espera un momento",
+        icon: "info",
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+          setTimeout(() => {
+            window.location.href = "/DelixSystem/app/pages/gestion_mesas/view/gestion_mesas.php";
+          }, 1200);
+        }
+      });
+    });
+  } else {
+    console.warn("⚠️ No se encontró el elemento del menú lateral para 'Mesas'");
+  }
