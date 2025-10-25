@@ -216,26 +216,46 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const updateTable = (nuevosEmpleados) => {
-    const nuevosMap = new Map(nuevosEmpleados.map(e => [e.id, e]));
-    // insertar nuevos
-    nuevosEmpleados.forEach(emp => {
-      if (!empleadosActuales.has(emp.id)) {
-        const newRow = createRow(emp);
-        newRow.classList.add("fade-in");
-        tablaBody.insertBefore(newRow, tablaBody.firstChild);
-        highlightRow(newRow);
+  const nuevosMap = new Map(nuevosEmpleados.map(e => [e.id, e]));
+
+  // 1️⃣ Insertar nuevos empleados
+  nuevosEmpleados.forEach(emp => {
+    const existente = empleadosActuales.get(emp.id);
+    if (!existente) {
+      const newRow = createRow(emp);
+      newRow.classList.add("fade-in");
+      tablaBody.insertBefore(newRow, tablaBody.firstChild);
+      highlightRow(newRow);
+      empleadosActuales.set(emp.id, emp);
+    } else {
+      // 2️⃣ Si existe, verificar si algo cambió (nombre, correo, roles)
+      if (
+        existente.full_name !== emp.full_name ||
+        existente.email !== emp.email ||
+        existente.role !== emp.role
+      ) {
+        const row = tablaBody.querySelector(`tr[data-id="${emp.id}"]`);
+        if (row) {
+          row.children[1].textContent = emp.full_name;
+          row.children[2].textContent = emp.email;
+          row.children[3].textContent = emp.role;
+          highlightRow(row);
+        }
         empleadosActuales.set(emp.id, emp);
       }
-    });
-    // eliminar viejos
-    empleadosActuales.forEach((_, id) => {
-      if (!nuevosMap.has(id)) {
-        const row = tablaBody.querySelector(`tr[data-id="${id}"]`);
-        if (row) row.remove();
-        empleadosActuales.delete(id);
-      }
-    });
-  };
+    }
+  });
+
+  // 3️⃣ Eliminar empleados que ya no existan
+  empleadosActuales.forEach((_, id) => {
+    if (!nuevosMap.has(id)) {
+      const row = tablaBody.querySelector(`tr[data-id="${id}"]`);
+      if (row) row.remove();
+      empleadosActuales.delete(id);
+    }
+  });
+};
+
 
   // ====== Fetch empleados ======
   const fetchEmployees = async () => {
