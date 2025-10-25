@@ -42,7 +42,7 @@ try {
     }
 
     // ----------------------------------------------------
-    // 🔹 REGISTRAR EMPLEADO (acción por defecto)
+    // 🔹 INGRESO / REGISTRO DE EMPLEADO
     // ----------------------------------------------------
     $codigo = trim($_POST['codigo_dinamico'] ?? '');
     $nombre = trim($_POST['nombre_completo'] ?? '');
@@ -53,23 +53,48 @@ try {
         throw new Exception("Por favor, completa todos los campos.");
     }
 
+    // ✅ Verificar el código dinámico
     $codeCheck = $model->verifyCode($codigo);
-    if (!$codeCheck['valid']) {
-        throw new Exception($codeCheck['msg']);
+    if (!$codeCheck || !$codeCheck['valid']) {
+        throw new Exception($codeCheck['msg'] ?? "Código inválido o expirado.");
     }
 
     $userId = $codeCheck['user_id'];
 
+    // ✅ Registrar empleado
     $registroExitoso = $model->registerEmployee($userId, $nombre, $correo, $documento);
     if (!$registroExitoso) {
         throw new Exception("No se pudo registrar el empleado. Inténtalo de nuevo.");
     }
 
+    // ✅ Desactivar el código usado
     $model->deactivateCode($codigo);
 
+    // ✅ Buscar el empleado recién registrado (para obtener su info)
+    $stmt = $conexion->prepare("SELECT * FROM employees WHERE email = :email LIMIT 1");
+    $stmt->execute(['email' => $correo]);
+    $empleado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$empleado) {
+        throw new Exception("No se pudo recuperar la información del empleado.");
+    }
+
+    // ✅ Crear sesión del empleado
+    if (session_status() === PHP_SESSION_NONE) session_start();
+
+    $_SESSION['empleado'] = [
+        'id' => $empleado['id'],
+        'full_name' => $empleado['full_name'],
+        'email' => $empleado['email'],
+        'document' => $empleado['document'],
+        'user_id' => $empleado['user_id'],
+    ];
+
+    // ✅ Enviar respuesta con redirección
     echo json_encode([
         "status" => "success",
-        "message" => "Empleado vinculado correctamente al propietario."
+        "redirect" => "/DelixSystem/app/pages/dashboard_empleado/view/index.php",
+        "message" => "Bienvenido al sistema, {$empleado['full_name']} 👋"
     ]);
 
 } catch (Throwable $e) {

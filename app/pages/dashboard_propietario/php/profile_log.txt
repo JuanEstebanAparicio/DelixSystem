@@ -41,3 +41,5 @@
 [2025-10-23 05:36:00] GET perfil usuario ID 49 OK
 [2025-10-23 05:36:06] PATCH perfil usuario ID 49 actualizado correctamente
 [2025-10-23 05:36:09] GET perfil usuario ID 49 OK
+[2025-10-25 07:20:09] GET perfil usuario ID 50 OK
+[2025-10-25 07:20:12] GET perfil usuario ID 50 OK

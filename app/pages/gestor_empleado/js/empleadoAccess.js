@@ -1,8 +1,7 @@
 // empleadosAccess.js
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("empleadoAccessForm");
-
-  if (!form) return; // defensivo: si no hay formulario, salir
+  if (!form) return;
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -10,38 +9,38 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = new FormData(form);
 
     try {
-      Alerts.loading("Registrando empleado...");
+      Alerts.loading("Accediendo al sistema...");
 
       const res = await fetch("/DelixSystem/app/pages/gestor_empleado/php/employee/EmpleadoController.php", {
         method: "POST",
         body: data,
       });
 
-      // Capturar texto antes de intentar parsear
       const text = await res.text();
       Alerts.close();
 
       let result;
       try {
         result = JSON.parse(text);
-      } catch (parseErr) {
-        console.error("Respuesta no válida del servidor:", text);
-        Alerts.error("Respuesta del servidor no válida. Intenta nuevamente.");
+      } catch {
+        console.error("❌ Respuesta no válida del servidor:", text);
+        Alerts.error("Respuesta inválida del servidor.");
         return;
       }
 
       if (result.status === "success") {
-        // ✅ Mostrar alerta de éxito
-        Alerts.success("El empleado fue registrado correctamente 🎉");
+        Alerts.success(result.message || "Ingreso exitoso 🎉");
 
-        // 🔒 Cerrar el modal después de un breve delay
         setTimeout(() => {
-          const modal = document.querySelector("#codeModal");
-          if (modal) modal.style.display = "none";
-          form.reset();
-        }, 1000);
+          // Si viene un redirect desde el backend, lo usamos
+          if (result.redirect) {
+            window.location.href = result.redirect;
+          } else {
+            Alerts.info("Redirección no especificada. Contacta al administrador.");
+          }
+        }, 1500);
       } else {
-        Alerts.error(result.message || "Error al registrar el empleado.");
+        Alerts.error(result.message || "No se pudo completar el acceso.");
       }
     } catch (err) {
       Alerts.close();
