@@ -296,9 +296,8 @@ body {
 }
 
 /* -------------------------
-   MEJORA DE ESTILO MODAL REGISTER
+   MODALES (REGISTER / LOGIN EMPLEADO)
 -------------------------- */
-
 .modal {
   display: none;
   position: fixed;
@@ -347,7 +346,7 @@ body {
   margin-bottom: 20px;
 }
 
-/* FORMULARIO */
+/* Formularios */
 #registerForm {
   display: flex;
   flex-direction: column;
@@ -393,9 +392,6 @@ body {
   text-decoration: underline;
 }
 
-/* BOTÓN */
-
-
 /* Mensaje debajo del botón */
 #registerMessage {
   margin-top: 12px;
@@ -405,7 +401,132 @@ body {
   color: #333;
 }
 
-/* Animaciones */
+/* -------------------------
+   EFECTO FLIP PARA MODAL EMPLEADOS
+-------------------------- */
+.modal-flip-container {
+  perspective: 1200px;
+  position: relative;
+  width: 100%;
+  min-height: 480px;
+  overflow: hidden;
+}
+
+.modal-flip-card {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease-in-out;
+  position: relative;
+}
+
+.modal-flip-card.flipped {
+  transform: rotateY(180deg);
+}
+
+.modal-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+  top: 0;
+  left: 0;
+  padding: 40px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-face.back {
+  transform: rotateY(180deg);
+}
+
+/* Botones y textos internos */
+.modal-face h3 {
+  color: #FF6B35;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.modal-face form {
+  width: 100%;
+}
+
+.modal-face .form-group {
+  margin-bottom: 14px;
+}
+
+.modal-face input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fafafa;
+  transition: all 0.3s ease;
+}
+
+.modal-face input:focus {
+  border-color: #FF6B35;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+  outline: none;
+}
+
+.modal-face .btn-primary {
+  background: #FF6B35;
+  color: white;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.modal-face .btn-primary:hover {
+  background: #F7C331;
+  color: #333;
+}
+
+.modal-face p {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.modal-face a {
+  color: #FF6B35;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.modal-face a:hover {
+  text-decoration: underline;
+}
+
+.modal-face .close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-size: 26px;
+  color: #FF6B35;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-face .close:hover {
+  color: #F7C331;
+  transform: scale(1.2);
+}
+
+/* -------------------------
+   ANIMACIONES
+-------------------------- */
 @keyframes modalFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -416,16 +537,14 @@ body {
   to { transform: scale(1); opacity: 1; }
 }
 
-/* Responsive */
-@media (max-width: 480px) {
-  .modal-content {
-    padding: 30px 20px;
-    border-radius: 12px;
-  }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
-  .modal-content h3 {
-    font-size: 1.5rem;
-  }
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
 }
 
 /* -------------------------
@@ -441,35 +560,6 @@ body {
 
 .footer p {
     margin-bottom: 5px;
-}
-.logo {
-  font-size: 2rem; /* controla el tamaño del logo */
-  line-height: 1;  /* opcional: evita espacio extra */
-}
-
-.logo img {
-  height: 1em; /* iguala la altura al texto */
-  width: auto; /* mantiene proporciones */
-  vertical-align: middle; /* centra verticalmente */
-}
-
-
-/* -------------------------
-   ANIMACIONES
--------------------------- */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-}
-
-@keyframes popIn {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
 }
 
 /* -------------------------
@@ -488,4 +578,83 @@ body {
     .hero-img img {
         width: 90%;
     }
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    padding: 30px 20px;
+    border-radius: 12px;
+  }
+
+  .modal-content h3 {
+    font-size: 1.5rem;
+  }
+}
+/* 🔸 Ajustes visuales y coherencia del modal flip */
+/* 🔸 Ajustes visuales y coherencia del modal flip */
+.modal-face {
+  min-height: 500px;
+  padding: 40px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-face form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-face .form-group input {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+  transition: all 0.3s ease;
+}
+
+.modal-face .form-group input:focus {
+  border-color: #FF6B35;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+  outline: none;
+}
+
+/* Botón con proporción y margen */
+.modal-face .btn-primary {
+  margin-top: 10px;
+  padding: 12px 20px;
+  background-color: #FF6B35;
+  border: none;
+  color: white;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.modal-face .btn-primary:hover {
+  background-color: #F7C331;
+  color: #333;
+}
+
+/* Texto inferior (enlaces alternar login/registro) */
+.modal-text-alt {
+  margin-top: 18px;
+  font-size: 0.9rem;
+  color: #555;
+  text-align: center;
+}
+
+.link-accent {
+  color: #FF6B35;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.link-accent:hover {
+  text-decoration: underline;
 }

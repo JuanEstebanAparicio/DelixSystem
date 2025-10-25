@@ -238,21 +238,27 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
       <br>
 
       <button type="submit" class="btn-primary">Unirme al Restaurante</button>
-      <p style="margin-top:15px; font-size: 0.9rem; color:#555;">
+      <p style="margin-top:15px; font-size:0.9rem; color:#555;">
   ¿Ya estás en un restaurante? 
-  <a href="#" id="switchToEmployeeLogin" style="color:#FF6B35; font-weight:600;">
-    Vuelve a entrar
+  <a 
+    href="#" 
+    id="switchToEmployeeLogin" 
+    data-modal-target="#employeeLoginModal"
+    style="color:#FF6B35; font-weight:600;"
+  >
+    Entra desde aquí
   </a>
 </p>
     </form>
   </div>
 </div>
 
-<!-- MODAL DE LOGIN DE EMPLEADO -->
+<!-- 🔸 MODAL DE LOGIN DE EMPLEADO -->
 <div id="employeeLoginModal" class="modal">
   <div class="modal-content">
     <span class="close" id="closeEmployeeLogin">&times;</span>
     <h3>Inicio de Sesión de Empleado</h3>
+
     <form 
       id="employeeLoginForm" 
       method="POST" 
@@ -290,6 +296,7 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
     </form>
   </div>
 </div>
+
 
 
 
