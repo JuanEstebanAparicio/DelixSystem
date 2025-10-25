@@ -2,16 +2,34 @@
 require_once __DIR__ . '/../../../config/supabase.php';
 
 try {
+    // Obtener platos
     $query = $conexion->query("SELECT * FROM dish ORDER BY category, name_dish ASC");
     $platos = $query->fetchAll(PDO::FETCH_ASSOC);
-    $categorias = [];
 
+    // Obtener ingredientes disponibles
+    $queryIng = $conexion->query("SELECT id, name FROM storage ORDER BY name ASC");
+    $ingredientes = $queryIng->fetchAll(PDO::FETCH_ASSOC);
+
+    // Asociar ingredientes a cada plato sin usar referencias (&)
+    foreach ($platos as $i => $dish) {
+        $stmt = $conexion->prepare("
+            SELECT ingredient_id 
+            FROM dish_ingredient 
+            WHERE dish_id = ?
+        ");
+        $stmt->execute([$dish['id']]);
+        $platos[$i]['ingredients'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    // Agrupar platos por categoría
+    $categorias = [];
     foreach ($platos as $dish) {
         $cat = $dish['category'] ?: 'Sin categoría';
         $categorias[$cat][] = $dish;
     }
 
     $listaCategorias = array_keys($categorias);
+
 } catch (PDOException $e) {
     die("<p class='error-msg'>Error al obtener datos desde Supabase: " . $e->getMessage() . "</p>");
 }
@@ -24,6 +42,7 @@ try {
   <link rel="stylesheet" href="../css/dish_manager.css">
   <link rel="stylesheet" href="../css/modales.css">
   <link rel="stylesheet" href="../css/registroInsumo.css">
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -62,7 +81,6 @@ try {
                 $imgPath = "../img/default.png";
             }
           ?>
-
           <div class="ingredient-card card" data-category="<?= htmlspecialchars($categoria) ?>">
             <div class="card-image">
               <img src="<?= $imgPath ?>" alt="<?= htmlspecialchars($dish['name_dish']) ?>">
@@ -75,13 +93,29 @@ try {
                 <?= htmlspecialchars($dish['state']) ?>
               </p>
               <p class="ingredient-desc"><?= htmlspecialchars($dish['description'] ?: 'Sin descripción') ?></p>
+
+              <?php if (!empty($dish['ingredients'])): ?>
+                <p><strong>Ingredientes:</strong></p>
+                <ul>
+                  <?php foreach ($dish['ingredients'] as $ing_id): ?>
+                    <?php
+                      $nombreIng = '';
+                      foreach ($ingredientes as $ing) {
+                        if ($ing['id'] == $ing_id) {
+                          $nombreIng = $ing['name'];
+                          break;
+                        }
+                      }
+                    ?>
+                    <li><?= htmlspecialchars($nombreIng) ?></li>
+                  <?php endforeach; ?>
+                </ul>
+              <?php endif; ?>
             </div>
 
             <div class="card-footer">
-              <button class="btn btn-edit" onclick='editDish(<?= json_encode($dish) ?>)'>✏️</button>
-              <a href="../php/dish_delet.php?id=<?= $dish['id'] ?>"
-                 class="btn btn-delete"
-                 onclick="return confirm('¿Eliminar plato?')">🗑️</a>
+              <button class="btn btn-edit" onclick='editDish(<?= json_encode($dish, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>✏️</button>
+              <a href="../php/dish_delete.php?id=<?= $dish['id'] ?>" class="btn btn-delete" onclick="return confirm('¿Eliminar plato?')">🗑️</a>
             </div>
           </div>
         <?php endforeach; ?>
@@ -101,11 +135,7 @@ try {
       <span class="close" onclick="hideModal('formModal')">&times;</span>
       <h2 id="modalTitle" class="modal-title">Registrar Plato</h2>
 
-      <form id="dishForm"
-            action="../php/dish_add.php"
-            method="POST"
-            enctype="multipart/form-data">
-
+      <form id="dishForm" action="../php/dish_add.php" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="id" id="dish_id">
         <input type="hidden" name="created_at" id="created_at">
 
@@ -129,6 +159,15 @@ try {
             <option value="__new__">+ Nueva categoría...</option>
           </select>
           <input type="text" id="newCategoryInput" name="new_category" placeholder="Nueva categoría" class="hidden">
+        </div>
+
+        <div class="form-group">
+          <label for="ingredients">Ingredientes:</label>
+          <select name="ingredients[]" id="ingredients" multiple required>
+            <?php foreach ($ingredientes as $ing): ?>
+              <option value="<?= htmlspecialchars($ing['id']) ?>"><?= htmlspecialchars($ing['name']) ?></option>
+            <?php endforeach; ?>
+          </select>
         </div>
 
         <div class="form-group">
@@ -163,5 +202,7 @@ try {
   <script src="../js/form_handler.js"></script>
   <script src="../js/category_handler.js"></script>
   <script src="../js/sidebar_handler.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </body>
 </html>

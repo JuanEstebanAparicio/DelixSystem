@@ -10,11 +10,15 @@ class dishes_crud {
         $this->pdo = $pdo ?? $conexion;
     }
 
-    public function createDish(dishes $dish) {
+    /** ✅ CREAR PLATO CON INGREDIENTES */
+    public function createDish(dishes $dish, $ingredients = []) {
         try {
+            $this->pdo->beginTransaction();
+
+            // Insertar el plato
             $sql = "INSERT INTO dish 
-                (name_dish, price, category, description, state, created_at, photo)
-                VALUES (:name_dish, :price, :category, :description, :state, :created_at, :photo)";
+                    (name_dish, price, category, description, state, created_at, photo)
+                    VALUES (:name_dish, :price, :category, :description, :state, :created_at, :photo)";
             
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([
@@ -27,14 +31,37 @@ class dishes_crud {
                 ':photo'       => $dish->getPhoto()
             ]);
 
+            $dishId = $this->pdo->lastInsertId();
+
+            // Insertar los ingredientes seleccionados
+            if (!empty($ingredients)) {
+                $sqlIng = "INSERT INTO dish_ingredient (dish_id, ingredient_id, quantity_used, unit)
+                           VALUES (:dish_id, :ingredient_id, :quantity_used, :unit)";
+                $stmtIng = $this->pdo->prepare($sqlIng);
+
+                foreach ($ingredients as $ing) {
+                    $stmtIng->execute([
+                        ':dish_id' => $dishId,
+                        ':ingredient_id' => $ing['id'],
+                        ':quantity_used' => $ing['quantity'] ?? 1,
+                        ':unit' => $ing['unit'] ?? 'unidad'
+                    ]);
+                }
+            }
+
+            $this->pdo->commit();
             return true;
         } catch (PDOException $e) {
+            $this->pdo->rollBack();
             die("Error al crear plato: " . $e->getMessage());
         }
     }
 
-    public function updateDish(dishes $dish, $id) {
+    /** ✅ ACTUALIZAR PLATO CON INGREDIENTES */
+    public function updateDish(dishes $dish, $id, $ingredients = []) {
         try {
+            $this->pdo->beginTransaction();
+
             $sql = "UPDATE dish SET 
                 name_dish = :name_dish,
                 price = :price,
@@ -57,23 +84,49 @@ class dishes_crud {
                 ':id'          => $id
             ]);
 
+            // Borrar ingredientes anteriores
+            $this->pdo->prepare("DELETE FROM dish_ingredient WHERE dish_id = :id")
+                      ->execute([':id' => $id]);
+
+            // Insertar nuevos ingredientes
+            if (!empty($ingredients)) {
+                $sqlIng = "INSERT INTO dish_ingredient (dish_id, ingredient_id, quantity_used, unit)
+                           VALUES (:dish_id, :ingredient_id, :quantity_used, :unit)";
+                $stmtIng = $this->pdo->prepare($sqlIng);
+
+                foreach ($ingredients as $ing) {
+                    $stmtIng->execute([
+                        ':dish_id' => $id,
+                        ':ingredient_id' => $ing['id'],
+                        ':quantity_used' => $ing['quantity'] ?? 1,
+                        ':unit' => $ing['unit'] ?? 'unidad'
+                    ]);
+                }
+            }
+
+            $this->pdo->commit();
             return true;
         } catch (PDOException $e) {
+            $this->pdo->rollBack();
             die("Error al actualizar plato: " . $e->getMessage());
         }
     }
 
+    /** ✅ ELIMINAR PLATO CON SUS INGREDIENTES */
     public function deleteDish($id) {
         try {
-            $sql = "DELETE FROM dish WHERE id = :id";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':id' => $id]);
+            $this->pdo->beginTransaction();
+            $this->pdo->prepare("DELETE FROM dish_ingredient WHERE dish_id = :id")->execute([':id' => $id]);
+            $this->pdo->prepare("DELETE FROM dish WHERE id = :id")->execute([':id' => $id]);
+            $this->pdo->commit();
             return true;
         } catch (PDOException $e) {
+            $this->pdo->rollBack();
             die("Error al eliminar plato: " . $e->getMessage());
         }
     }
 
+    /** ✅ OBTENER PLATOS */
     public function getAllDishes() {
         try {
             $sql = "SELECT * FROM dish ORDER BY category, name_dish ASC";
@@ -84,6 +137,7 @@ class dishes_crud {
         }
     }
 
+    /** ✅ OBTENER PLATO POR ID */
     public function getDishById($id) {
         try {
             $sql = "SELECT * FROM dish WHERE id = :id";

@@ -13,10 +13,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $created_at  = date('Y-m-d H:i:s');
     $photo       = $_POST['current_photo'] ?? '';
 
+    // Si hay una nueva categoría, la reemplaza
     if (!empty($newCategory)) {
         $category = $newCategory;
     }
 
+    // ✅ Manejo de imagen actualizada
     if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
         $fileName = basename($_FILES['photo']['name']);
         $ext = pathinfo($fileName, PATHINFO_EXTENSION);
@@ -37,14 +39,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // ✅ Capturar ingredientes seleccionados
+    $ingredients = [];
+    if (!empty($_POST['ingredients'])) {
+        foreach ($_POST['ingredients'] as $ingId) {
+            $ingredients[] = [
+                'id' => $ingId,
+                'quantity' => $_POST['quantity_' . $ingId] ?? 1,
+                'unit' => $_POST['unit_' . $ingId] ?? 'unidad'
+            ];
+        }
+    }
+
+    // ✅ Crear objeto plato
     $dish = new dishes($id, $name, $price, $category, $description, $state, $created_at, $photo);
     $crud = new dishes_crud();
 
     try {
-        $crud->updateDish($dish, $id);
+        $crud->updateDish($dish, $id, $ingredients);
         header('Location: ../view/dishes_manager.php?success=2');
         exit;
     } catch (Exception $e) {
+        error_log('Error al editar plato: ' . $e->getMessage());
         header('Location: ../view/dishes_manager.php?success=0');
         exit;
     }

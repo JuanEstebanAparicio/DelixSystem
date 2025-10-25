@@ -7,9 +7,11 @@ if (isset($_GET['id'])) {
 
     try {
         $crud->deleteDish($id);
+
         header('Location: ../view/dishes_manager.php?success=3');
         exit;
     } catch (Exception $e) {
+        error_log('Error al eliminar plato: ' . $e->getMessage());
         header('Location: ../view/dishes_manager.php?success=0');
         exit;
     }

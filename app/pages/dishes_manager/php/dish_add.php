@@ -16,29 +16,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $category = $newCategory;
     }
 
+    // Procesar foto
     if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
         $fileName = basename($_FILES['photo']['name']);
         $ext = pathinfo($fileName, PATHINFO_EXTENSION);
-
         $categoryDir = preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower($category));
         $dishDir = preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower($name));
-
         $baseDir = __DIR__ . '/../media/' . $categoryDir . '/' . $dishDir . '/';
-        if (!is_dir($baseDir)) {
-            mkdir($baseDir, 0777, true);
-        }
+        if (!is_dir($baseDir)) mkdir($baseDir, 0777, true);
         $uniqueName = uniqid('dish_') . '.' . $ext;
         $targetFile = $baseDir . $uniqueName;
-
         if (move_uploaded_file($_FILES['photo']['tmp_name'], $targetFile)) {
             $photo = 'media/' . $categoryDir . '/' . $dishDir . '/' . $uniqueName;
         }
     }
+
+    // 🔹 Capturar ingredientes seleccionados
+    $ingredients = [];
+    if (!empty($_POST['ingredients'])) {
+        foreach ($_POST['ingredients'] as $ingId) {
+            $ingredients[] = [
+                'id' => $ingId,
+                'quantity' => $_POST['quantity_' . $ingId] ?? 1,
+                'unit' => $_POST['unit_' . $ingId] ?? 'unidad'
+            ];
+        }
+    }
+
     $dish = new dishes(null, $name, $price, $category, $description, $state, $created_at, $photo);
     $crud = new dishes_crud();
 
     try {
-        $crud->createDish($dish);
+        $crud->createDish($dish, $ingredients);
         header('Location: ../view/dishes_manager.php?success=1');
         exit;
     } catch (Exception $e) {
@@ -47,4 +56,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-
