@@ -2,6 +2,8 @@
 require_once(__DIR__ . '/dishes.php');
 require_once(__DIR__ . '/dishes_crud.php');
 
+header('Content-Type: application/json');
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name        = trim($_POST['name_dish'] ?? '');
     $price       = $_POST['price'] ?? '';
@@ -16,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $category = $newCategory;
     }
 
-    // Procesar foto
+    // 🖼️ Procesar foto
     if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
         $fileName = basename($_FILES['photo']['name']);
         $ext = pathinfo($fileName, PATHINFO_EXTENSION);
@@ -31,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // 🔹 Capturar ingredientes seleccionados
+    // 🧾 Ingredientes
     $ingredients = [];
     if (!empty($_POST['ingredients'])) {
         foreach ($_POST['ingredients'] as $ingId) {
@@ -48,11 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         $crud->createDish($dish, $ingredients);
-        header('Location: ../view/dishes_manager.php?success=1');
-        exit;
+        echo json_encode(["success" => true, "message" => "Plato creado exitosamente"]);
     } catch (Exception $e) {
-        header('Location: ../view/dishes_manager.php?success=0');
-        exit;
+        echo json_encode(["success" => false, "error" => $e->getMessage()]);
     }
 }
 ?>

@@ -10,12 +10,10 @@ class dishes_crud {
         $this->pdo = $pdo ?? $conexion;
     }
 
-    /** ✅ CREAR PLATO CON INGREDIENTES */
     public function createDish(dishes $dish, $ingredients = []) {
         try {
             $this->pdo->beginTransaction();
 
-            // Insertar el plato
             $sql = "INSERT INTO dish 
                     (name_dish, price, category, description, state, created_at, photo)
                     VALUES (:name_dish, :price, :category, :description, :state, :created_at, :photo)";
@@ -33,7 +31,6 @@ class dishes_crud {
 
             $dishId = $this->pdo->lastInsertId();
 
-            // Insertar los ingredientes seleccionados
             if (!empty($ingredients)) {
                 $sqlIng = "INSERT INTO dish_ingredient (dish_id, ingredient_id, quantity_used, unit)
                            VALUES (:dish_id, :ingredient_id, :quantity_used, :unit)";
@@ -57,7 +54,6 @@ class dishes_crud {
         }
     }
 
-    /** ✅ ACTUALIZAR PLATO CON INGREDIENTES */
     public function updateDish(dishes $dish, $id, $ingredients = []) {
         try {
             $this->pdo->beginTransaction();
@@ -84,11 +80,9 @@ class dishes_crud {
                 ':id'          => $id
             ]);
 
-            // Borrar ingredientes anteriores
             $this->pdo->prepare("DELETE FROM dish_ingredient WHERE dish_id = :id")
                       ->execute([':id' => $id]);
 
-            // Insertar nuevos ingredientes
             if (!empty($ingredients)) {
                 $sqlIng = "INSERT INTO dish_ingredient (dish_id, ingredient_id, quantity_used, unit)
                            VALUES (:dish_id, :ingredient_id, :quantity_used, :unit)";
@@ -112,7 +106,6 @@ class dishes_crud {
         }
     }
 
-    /** ✅ ELIMINAR PLATO CON SUS INGREDIENTES */
     public function deleteDish($id) {
         try {
             $this->pdo->beginTransaction();
@@ -126,7 +119,6 @@ class dishes_crud {
         }
     }
 
-    /** ✅ OBTENER PLATOS */
     public function getAllDishes() {
         try {
             $sql = "SELECT * FROM dish ORDER BY category, name_dish ASC";
@@ -137,7 +129,6 @@ class dishes_crud {
         }
     }
 
-    /** ✅ OBTENER PLATO POR ID */
     public function getDishById($id) {
         try {
             $sql = "SELECT * FROM dish WHERE id = :id";

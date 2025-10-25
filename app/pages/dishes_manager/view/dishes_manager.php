@@ -2,36 +2,28 @@
 require_once __DIR__ . '/../../../config/supabase.php';
 
 try {
-    // Obtener platos
-    $query = $conexion->query("SELECT * FROM dish ORDER BY category, name_dish ASC");
-    $platos = $query->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $conexion->query("SELECT * FROM dish ORDER BY category, name_dish ASC");
+    $platos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Obtener ingredientes disponibles
-    $queryIng = $conexion->query("SELECT id, name FROM storage ORDER BY name ASC");
-    $ingredientes = $queryIng->fetchAll(PDO::FETCH_ASSOC);
+    $stmtIng = $conexion->query("SELECT id, name FROM storage ORDER BY name ASC");
+    $ingredientes = $stmtIng->fetchAll(PDO::FETCH_ASSOC);
 
-    // Asociar ingredientes a cada plato sin usar referencias (&)
     foreach ($platos as $i => $dish) {
-        $stmt = $conexion->prepare("
-            SELECT ingredient_id 
-            FROM dish_ingredient 
-            WHERE dish_id = ?
-        ");
+        $stmt = $conexion->prepare("SELECT ingredient_id FROM dish_ingredient WHERE dish_id = ?");
         $stmt->execute([$dish['id']]);
         $platos[$i]['ingredients'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    // Agrupar platos por categoría
     $categorias = [];
     foreach ($platos as $dish) {
-        $cat = $dish['category'] ?: 'Sin categoría';
-        $categorias[$cat][] = $dish;
+        $categoria = $dish['category'] ?: 'Sin categoría';
+        $categorias[$categoria][] = $dish;
     }
-
+    
     $listaCategorias = array_keys($categorias);
 
 } catch (PDOException $e) {
-    die("<p class='error-msg'>Error al obtener datos desde Supabase: " . $e->getMessage() . "</p>");
+    die("<p class='error-msg'>Error al obtener datos desde Supabase: " . htmlspecialchars($e->getMessage()) . "</p>");
 }
 ?>
 <!DOCTYPE html>
@@ -71,14 +63,10 @@ try {
       <?php foreach ($categorias as $categoria => $items): ?>
         <?php foreach ($items as $dish): ?>
           <?php
+            $imgPath = "../img/default.png";
             if (!empty($dish['photo'])) {
-                if (strpos($dish['photo'], 'media/') === 0) {
-                    $imgPath = "../" . htmlspecialchars($dish['photo']);
-                } else {
-                    $imgPath = "../media/" . htmlspecialchars($dish['photo']);
-                }
-            } else {
-                $imgPath = "../img/default.png";
+                $ruta = htmlspecialchars($dish['photo']);
+                $imgPath = str_starts_with($ruta, 'media/') ? "../$ruta" : "../media/$ruta";
             }
           ?>
           <div class="ingredient-card card" data-category="<?= htmlspecialchars($categoria) ?>">
@@ -114,10 +102,12 @@ try {
             </div>
 
             <div class="card-footer">
-              <button class="btn btn-edit" onclick='editDish(<?= json_encode($dish, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>✏️</button>
-              <a href="../php/dish_delet.php?id=<?= $dish['id'] ?>" class="btn btn-delet" onclick="return confirm('¿Eliminar plato?')">🗑️</a>
+              <button class="btn btn-edit"
+                onclick='editDish(<?= json_encode($dish, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>✏️</button>
+              <button class="btn btn-delet"
+                 onclick="deleteDish('<?= htmlspecialchars($dish['id']) ?>')">🗑️</button>
             </div>
-          </div>
+
         <?php endforeach; ?>
       <?php endforeach; ?>
 
@@ -130,6 +120,7 @@ try {
     </div>
   </main>
 
+  <!-- 🔹 Modal de formulario -->
   <div id="formModal" class="modal hidden">
     <div class="modal-content">
       <span class="close" onclick="hideModal('formModal')">&times;</span>
@@ -172,7 +163,8 @@ try {
 
         <div class="form-group">
           <label for="description">Descripción:</label>
-          <textarea name="description" id="description" rows="3" placeholder="Breve descripción del plato..."></textarea>
+          <textarea name="description" id="description" rows="3"
+            placeholder="Breve descripción del plato..."></textarea>
         </div>
 
         <div class="form-group">
@@ -202,6 +194,7 @@ try {
   <script src="../js/form_handler.js"></script>
   <script src="../js/category_handler.js"></script>
   <script src="../js/sidebar_handler.js"></script>
+  <script src="../js/dish_dynamic_loader.js"></script> <!-- ✅ Para recargar dinámicamente -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </body>

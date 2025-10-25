@@ -11,10 +11,40 @@ document.addEventListener("DOMContentLoaded", () => {
   const fecha = document.getElementById("created_at");
   if (fecha) fecha.value = hoy;
 
-  if (window.jQuery) {
+  // Inicializar select2 si existe
+  if (window.jQuery && $('#ingredients').length) {
     $('#ingredients').select2({
       placeholder: 'Selecciona los ingredientes...',
       width: '100%'
+    });
+  }
+
+  // 🚀 Interceptar el envío del formulario
+  const form = document.getElementById("dishForm");
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault(); // ⛔ Evita recargar la página
+
+      const formData = new FormData(form);
+      const action = form.action;
+
+      try {
+        const res = await fetch(action, {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          hideModal("formModal");
+          alert("✅ Operación realizada correctamente");
+          loadDishes(); // 🔄 Recarga solo los platos, sin refrescar la página
+        } else {
+          alert("❌ Error: " + (data.error || "No se pudo procesar la solicitud."));
+        }
+      } catch (err) {
+        alert("⚠️ Error al enviar los datos: " + err.message);
+      }
     });
   }
 });
@@ -72,4 +102,21 @@ function editDish(data) {
   document.getElementById("dishForm").action = "../php/dish_edit.php";
 
   showModal("formModal");
+}
+async function deleteDish(id) {
+  if (!confirm("¿Seguro que deseas eliminar este plato?")) return;
+
+  try {
+    const res = await fetch(`../php/dish_delet.php?id=${id}`);
+    const data = await res.json();
+
+    if (data.success) {
+      alert("🗑️ Plato eliminado correctamente");
+      loadDishes();
+    } else {
+      alert("❌ Error al eliminar: " + (data.error || "Error desconocido"));
+    }
+  } catch (err) {
+    alert("⚠️ Error al eliminar: " + err.message);
+  }
 }
