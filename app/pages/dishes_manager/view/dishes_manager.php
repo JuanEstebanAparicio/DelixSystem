@@ -115,7 +115,7 @@ try {
 
             <div class="card-footer">
               <button class="btn btn-edit" onclick='editDish(<?= json_encode($dish, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>✏️</button>
-              <a href="../php/dish_delete.php?id=<?= $dish['id'] ?>" class="btn btn-delete" onclick="return confirm('¿Eliminar plato?')">🗑️</a>
+              <a href="../php/dish_delet.php?id=<?= $dish['id'] ?>" class="btn btn-delet" onclick="return confirm('¿Eliminar plato?')">🗑️</a>
             </div>
           </div>
         <?php endforeach; ?>
