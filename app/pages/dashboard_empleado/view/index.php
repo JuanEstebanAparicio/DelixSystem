@@ -23,6 +23,6 @@ $empleado = $_SESSION['empleado'];
   <p>Documento: <?= htmlspecialchars($empleado['document']) ?></p>
   <p>Propietario asociado (user_id): <?= htmlspecialchars($empleado['user_id']) ?></p>
 
-  <a href="/DelixSystem/app/pages/gestor_empleado/php/employee/EmpleadoLogout.php">Cerrar sesión</a>
+  <a href="/DelixSystem/src/auth/logout_empleado.php">Cerrar sesión</a>
 </body>
 </html>
