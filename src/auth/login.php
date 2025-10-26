@@ -1,4 +1,5 @@
 <?php
+// DelixSystem/src/auth/login.php
 header('Content-Type: application/json');
 require_once __DIR__ . '/../../app/config/database.php';
 
