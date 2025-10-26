@@ -324,3 +324,67 @@ th, td {
   color: rgb(0, 0, 0);
   cursor: pointer;
 }
+
+.resumen-container {
+  padding: 40px;
+  text-align: center;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.resumen-container h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 25px;
+  color: #333;
+}
+
+.resumen-cards {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.resumen-cards .card {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  width: 200px;
+  padding: 25px 0;
+  transition: transform 0.2s ease;
+}
+
+.resumen-cards .card:hover {
+  transform: scale(1.05);
+}
+
+.resumen-cards .card h3 {
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.resumen-cards .card p {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2a9d8f;
+}
+
+.btn-primary {
+  background-color: #2a9d8f;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #21867a;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}

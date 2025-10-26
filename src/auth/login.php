@@ -19,8 +19,17 @@ if (!password_verify($password, $usuario['password'])) {
 }
 
 // ✅ Login exitoso
+session_start();
+$_SESSION['usuario'] = [
+  'id' => $usuario['id'], // asegúrate que tu tabla tenga 'id' o cambia por 'id_usuario'
+  'first_name' => $usuario['first_name'],
+  'last_name' => $usuario['last_name'],
+  'email' => $usuario['email'],
+  'restaurant_name' => $usuario['restaurant_name']
+];
+
 echo json_encode([
   'status' => 'success',
   'message' => 'Inicio de sesión exitoso',
-  'redirect' => '../../public/dashboard.php'
+  'redirect' => '/DelixSystem/app/pages/dashboard_propietario/view/index.php'
 ]);

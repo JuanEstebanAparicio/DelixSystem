@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Obtenemos el nombre del usuario desde la sesión
+//🪑 Obtenemos el nombre del usuario desde la sesión
 $nombreUsuario = $_SESSION['usuario']['nombre'] ?? 'Usuario';
 ?>
 
@@ -34,13 +34,31 @@ $nombreUsuario = $_SESSION['usuario']['nombre'] ?? 'Usuario';
     <li class="active"><i>🏠</i><span>Dashboard</span></li>
     <li><i>🧾</i><span>Pedidos</span></li>
     <li><i>🍔</i><span>Menú</span></li>
-    <li><i>🪑</i><span>Mesas</span></li>
+  <a href="../../gestion_mesas/view/resumen_mesas.php" class="menu-link">
+    <i class="fa-solid fa-chair">🪑</i> <span>Mesas</span>
+  </a>
+</li>
     <li><i>👥</i><span>Clientes</span></li>
     <li><i>📊</i><span>Reportes</span></li>
     <li><i>⚙️</i><span>Configuración</span></li>
   </ul>
   </aside>
 
+  <div id="transitionOverlay" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(255,255,255,0.9);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  color: #333;
+  font-weight: bold;
+">
+  Cargando...
+</div>
 
   <main class="main">
    <header>

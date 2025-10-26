@@ -11,19 +11,16 @@ if (session_status() === PHP_SESSION_NONE) {
  */
 function protectPage() {
     if (!isset($_SESSION['usuario']['id'])) {
-        header('Location: ../../../../public/index.php');
+        header('Location: /DelixSystem/public/index.php');
         exit();
     }
 }
 
-/**
- * Verificación inversa:
- * Si el usuario YA está logueado, lo redirige al dashboard
- */
 function checkIfLoggedIn() {
     if (isset($_SESSION['usuario']['id'])) {
-        header('Location: ../../DelixSystem/app/pages/dashboard_propietario/view/index.php');
+        header('Location: /DelixSystem/app/pages/dashboard_propietario/view/index.php');
         exit();
     }
 }
+
 ?>
