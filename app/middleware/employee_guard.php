@@ -1,13 +1,13 @@
 <?php
 // DelixSystem/app/middleware/employee_guard.php
 
-// 🔒 Iniciar sesión solo si no está activa
+// 🧱 Iniciar sesión si aún no está activa
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 /**
- * ✅ Protege páginas que requieren login de empleado.
+ * ✅ Protege páginas del dashboard de empleados.
  * Si no hay sesión, redirige al login de empleados.
  */
 function protectEmpleado() {
@@ -18,9 +18,10 @@ function protectEmpleado() {
 }
 
 /**
- * 🚪 Si ya está logueado, evita que regrese al login.
+ * 🚫 Evita que empleados logueados accedan al index público o al login.
+ * Si ya hay sesión, los manda directo a su dashboard.
  */
-function checkIfEmpleadoLoggedIn() {
+function redirectIfEmpleadoLoggedIn() {
     if (isset($_SESSION['empleado_auth']['id'])) {
         header('Location: /DelixSystem/app/pages/dashboard_empleado/view/index.php');
         exit();

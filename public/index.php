@@ -6,7 +6,11 @@ echo "<!-- BASE_URL = " . BASE_URL . " -->";
 
 <!-- DelixSystem/public/index.php -->
 <?php
+require_once __DIR__ . '/../app/middleware/employee_guard.php';
 require_once __DIR__ . '/../app/middleware/session_guard.php';
+
+redirectIfEmpleadoLoggedIn();
+
 checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
 ?>
 
