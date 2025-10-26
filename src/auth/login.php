@@ -1,7 +1,7 @@
 <?php
 // DelixSystem/src/auth/login.php
 
-require_once __DIR__ . '/../../app/config/database.php';
+require_once __DIR__ . '/../../app/config/supabase.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'];

@@ -262,7 +262,7 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
     <form 
       id="employeeLoginForm" 
       method="POST" 
-      action="/DelixSystem/app/pages/gestor_empleado/php/employee/EmpleadoLogin.php"
+      action="/DelixSystem/src/auth/login_empleado.php"
     >
       <div class="form-group">
         <input 
