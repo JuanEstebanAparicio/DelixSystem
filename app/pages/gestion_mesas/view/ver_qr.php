@@ -1,17 +1,16 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-include _DIR_ . '/../../config/supabase.php';
+// DelixSystem/app/pages/gestion_mesas/view/ver_qr.php
+include __DIR__ . '/../../../config/supabase.php';
 
 $id_mesa = $_GET['id'] ?? null;
 
 if (!$id_mesa) {
-    die("No se especificó una mesa válida.");
+    die("No se especificó la mesa.");
 }
 
-// Consultar mesa y su área
+// Consulta la mesa y el área
 $stmt = $conexion->prepare("
-    SELECT m.id_mesa, m.nombre AS mesa, a.nombre AS area 
+    SELECT m.nombre AS mesa, a.nombre AS area 
     FROM mesas m 
     JOIN areas a ON a.id_area = m.id_area 
     WHERE m.id_mesa = ?
@@ -22,52 +21,40 @@ $mesa = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$mesa) {
     die("Mesa no encontrada.");
 }
+
+// Texto que contendrá el QR
+$ngrok_url = "https://uncatered-thomasina-arousingly.ngrok-free.dev/DelixSystem";
+$contenido = "$ngrok_url/app/views/mesas/view/menu.php?id={$id_mesa}";
+
+// Genera la URL del QR
+$qr_url = "https://api.qrserver.com/v1/create-qr-code/?data=" . urlencode($contenido) . "&size=250x250";
+
+
+/* 🔽 INSERTA AQUÍ ESTE BLOQUE 🔽 */
+$isAjax = isset($_GET['ajax']);
+if ($isAjax) {
+    echo "<h3>QR de " . htmlspecialchars($mesa['mesa']) . " (" . htmlspecialchars($mesa['area']) . ")</h3>";
+    echo "<img src='$qr_url' alt='QR de la mesa' style='width:250px;height:250px;'>";
+    echo "<p><a href='$qr_url' download='QR_". htmlspecialchars($mesa['mesa']) .".png'>Descargar QR</a></p>";
+    exit;
+}
+/* 🔼 HASTA AQUÍ 🔼 */
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title><?= htmlspecialchars($mesa['mesa']) ?> - <?= htmlspecialchars($mesa['area']) ?></title>
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f7f7f7;
-            color: #333;
-            text-align: center;
-            padding: 30px;
-        }
-        .contenedor {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            display: inline-block;
-            padding: 30px 40px;
-        }
-        h2 {
-            color: #2c3e50;
-        }
-        .btn {
-            display: inline-block;
-            margin: 10px;
-            padding: 10px 25px;
-            border-radius: 8px;
-            background-color: #3498db;
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .btn:hover {
-            background-color: #2980b9;
-        }
-    </style>
+    <title>QR de <?= htmlspecialchars($mesa['mesa']) ?></title>
 </head>
 <body>
-    <div class="contenedor">
-        <h2>🍽️ <?= htmlspecialchars($mesa['mesa']) ?></h2>
-        <p>Área: <b><?= htmlspecialchars($mesa['area']) ?></b></p>
-        <p>Bienvenido. Desde aquí pronto podrás:</p>
-        <a href="#" class="btn">Ver Menú</a>
-        <a href="#" class="btn">Ver Mis Órdenes</a>
-    </div>
+    <h2>QR de <?= htmlspecialchars($mesa['mesa']) ?> (<?= htmlspecialchars($mesa['area']) ?>)</h2>
+    <p>Escanea este código para identificar la mesa:</p>
+
+    <!-- Mostrar la imagen del QR -->
+    <img src="<?= $qr_url ?>" alt="QR de la mesa" style="width:250px;height:250px;">
+
+    <br><br>
+    <a href="<?= $qr_url ?>" download="QR_<?= htmlspecialchars($mesa['mesa']) ?>.png">Descargar QR</a>
 </body>
 </html>
