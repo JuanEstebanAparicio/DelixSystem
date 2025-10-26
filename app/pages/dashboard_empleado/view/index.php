@@ -1,12 +1,15 @@
 <?php
+session_name("empleado_session");
 session_start();
+
 if (!isset($_SESSION['empleado'])) {
-  header("Location: /DelixSystem/public/login.php?error=unauthorized");
-  exit;
+    header("Location: /DelixSystem/public/index.php");
+    exit;
 }
 
 $empleado = $_SESSION['empleado'];
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -20,6 +23,6 @@ $empleado = $_SESSION['empleado'];
   <p>Documento: <?= htmlspecialchars($empleado['document']) ?></p>
   <p>Propietario asociado (user_id): <?= htmlspecialchars($empleado['user_id']) ?></p>
 
-  <a href="/DelixSystem/src/auth/logout.php">Cerrar sesión</a>
+  <a href="/DelixSystem/app/pages/gestor_empleado/php/employee/EmpleadoLogout.php">Cerrar sesión</a>
 </body>
 </html>

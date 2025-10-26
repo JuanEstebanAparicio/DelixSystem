@@ -262,18 +262,8 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
     <form 
       id="employeeLoginForm" 
       method="POST" 
-      action="/DelixSystem/app/pages/gestor_empleado/php/employee/EmpleadoController.php"
+      action="/DelixSystem/app/pages/gestor_empleado/php/employee/EmpleadoLogin.php"
     >
-      <div class="form-group">
-        <input 
-          type="text" 
-          name="codigo_dinamico" 
-          placeholder="Código dinámico de acceso" 
-          required 
-          maxlength="20"
-        >
-      </div>
-
       <div class="form-group">
         <input 
           type="email" 
@@ -282,7 +272,7 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
           required
         >
       </div>
-
+<br>
       <div class="form-group">
         <input 
           type="text" 
