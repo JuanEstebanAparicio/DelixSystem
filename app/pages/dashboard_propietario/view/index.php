@@ -1,7 +1,7 @@
 <!-- -- DelixSystem/app/pages/dashboard_propietario/view/index.php -->
 <?php
 require_once __DIR__ . '/../../../middleware/session_guard.php';
-protectPage(); // Evita que accedan al dashboard sin login
+protectPage('propietario'); // Evita que accedan al dashboard sin login
 
 // Iniciamos sesión solo si no está activa (por seguridad extra)
 if (session_status() === PHP_SESSION_NONE) {

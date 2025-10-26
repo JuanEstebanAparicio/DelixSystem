@@ -138,9 +138,10 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
         <input type="email" name="email" placeholder="Correo electrónico" required>
       </div>
 
-      <div class="form-group">
-        <input type="password" name="password" placeholder="Contraseña" required>
-      </div>
+     <div class="form-group password-container">
+  <input type="password" name="password" placeholder="Contraseña" required id="loginPassword">
+  <button type="button" class="toggle-password" data-target="loginPassword">👁️</button>
+</div>
 
       <button type="submit" class="btn-primary">Ingresar</button>
       <div id="loginMessage" style="margin-top:10px; font-weight:bold;"></div>
@@ -181,13 +182,15 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
           <input type="text" name="restaurant_name" placeholder="Nombre del restaurante" required>
         </div>
 
-        <div class="form-group">
-          <input type="password" name="password" placeholder="Contraseña" required minlength="8">
-        </div>
+        <div class="form-group password-container">
+  <input type="password" name="password" placeholder="Contraseña" required minlength="8" id="registerPassword">
+  <button type="button" class="toggle-password" data-target="registerPassword">👁️</button>
+</div>
 
-        <div class="form-group">
-          <input type="password" name="confirm_password" placeholder="Confirmar contraseña" required minlength="8">
-        </div>
+<div class="form-group password-container">
+  <input type="password" name="confirm_password" placeholder="Confirmar contraseña" required minlength="8" id="confirmPassword">
+  <button type="button" class="toggle-password" data-target="confirmPassword">👁️</button>
+</div>
 
         <div class="form-group">
           <label>
@@ -280,6 +283,7 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
 <script src="./js/alert.js" defer></script>
+<script src="./js/show_password.js" defer></script>
 <script src="./js/modal.js" defer></script>
 <script src="./js/register.js" defer></script>
 <script src="./js/login.js" defer></script>
