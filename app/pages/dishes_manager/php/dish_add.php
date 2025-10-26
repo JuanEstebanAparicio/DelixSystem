@@ -18,7 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $category = $newCategory;
     }
 
-    // 🖼️ Procesar foto
     if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
         $fileName = basename($_FILES['photo']['name']);
         $ext = pathinfo($fileName, PATHINFO_EXTENSION);
@@ -33,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // 🧾 Ingredientes
     $ingredients = [];
     if (!empty($_POST['ingredients'])) {
         foreach ($_POST['ingredients'] as $ingId) {

@@ -19,7 +19,7 @@ try {
         $categoria = $dish['category'] ?: 'Sin categoría';
         $categorias[$categoria][] = $dish;
     }
-    
+
     $listaCategorias = array_keys($categorias);
 
 } catch (PDOException $e) {
@@ -107,7 +107,7 @@ try {
               <button class="btn btn-delet"
                  onclick="deleteDish('<?= htmlspecialchars($dish['id']) ?>')">🗑️</button>
             </div>
-
+          </div>
         <?php endforeach; ?>
       <?php endforeach; ?>
 
@@ -120,7 +120,6 @@ try {
     </div>
   </main>
 
-  <!-- 🔹 Modal de formulario -->
   <div id="formModal" class="modal hidden">
     <div class="modal-content">
       <span class="close" onclick="hideModal('formModal')">&times;</span>
@@ -163,8 +162,7 @@ try {
 
         <div class="form-group">
           <label for="description">Descripción:</label>
-          <textarea name="description" id="description" rows="3"
-            placeholder="Breve descripción del plato..."></textarea>
+          <textarea name="description" id="description" rows="3" placeholder="Breve descripción del plato..."></textarea>
         </div>
 
         <div class="form-group">
@@ -178,6 +176,8 @@ try {
         <div class="form-group">
           <label for="photo">Foto:</label>
           <input type="file" name="photo" id="photo" accept="image/*">
+          <input type="hidden" name="current_photo" id="current_photo_input">
+
           <div id="currentPhotoContainer" class="photo-preview hidden">
             <p>Foto actual:</p>
             <img id="currentPhoto" src="" alt="Foto actual del plato" class="preview-img">
@@ -194,7 +194,7 @@ try {
   <script src="../js/form_handler.js"></script>
   <script src="../js/category_handler.js"></script>
   <script src="../js/sidebar_handler.js"></script>
-  <script src="../js/dish_dynamic_loader.js"></script> <!-- ✅ Para recargar dinámicamente -->
+  <script src="../js/dish_dynamic_loader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </body>

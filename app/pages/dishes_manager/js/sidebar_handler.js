@@ -24,3 +24,26 @@ document.addEventListener('click', function(e) {
     sidebar.classList.add('hidden');
   }
 });
+
+async function reloadCategories() {
+  try {
+    const response = await fetch("../php/reload_categories.php");
+    const categorias = await response.json();
+
+    const list = document.getElementById("categoryList");
+    list.innerHTML = `<li class="sidebar-item" onclick="mostrarCategoria('Todos')">Todos</li>`;
+
+    categorias.forEach(cat => {
+      const li = document.createElement("li");
+      li.className = "sidebar-item";
+      li.textContent = cat;
+      li.onclick = () => mostrarCategoria(cat);
+      list.appendChild(li);
+    });
+
+    console.log("✅ Categorías actualizadas correctamente");
+
+  } catch (err) {
+    console.error("❌ Error al recargar categorías:", err);
+  }
+}

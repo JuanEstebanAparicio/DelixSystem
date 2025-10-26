@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  loadDishes(); // 🔄 Cargar automáticamente al iniciar
+  loadDishes();
 });
 
 async function loadDishes() {
@@ -20,7 +20,7 @@ async function loadDishes() {
 
 function renderDishes(platos, ingredientes) {
   const grid = document.getElementById("dishGrid");
-  grid.innerHTML = ""; // limpiar
+  grid.innerHTML = "";
 
   const categorias = {};
   platos.forEach(p => {

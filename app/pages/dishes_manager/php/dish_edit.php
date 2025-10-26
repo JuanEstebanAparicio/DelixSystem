@@ -19,7 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $category = $newCategory;
     }
 
-    // 🖼️ Foto actualizada
     if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
         $fileName = basename($_FILES['photo']['name']);
         $ext = pathinfo($fileName, PATHINFO_EXTENSION);
@@ -32,9 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (move_uploaded_file($_FILES['photo']['tmp_name'], $targetFile)) {
             $photo = 'media/' . $categoryDir . '/' . $dishDir . '/' . $uniqueName;
         }
+    } else {
+        $photo = $_POST['current_photo'] ?? '';
     }
 
-    // 🧾 Ingredientes
     $ingredients = [];
     if (!empty($_POST['ingredients'])) {
         foreach ($_POST['ingredients'] as $ingId) {

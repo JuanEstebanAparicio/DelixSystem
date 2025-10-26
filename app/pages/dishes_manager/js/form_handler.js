@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const fecha = document.getElementById("created_at");
   if (fecha) fecha.value = hoy;
 
-  // Inicializar select2 si existe
   if (window.jQuery && $('#ingredients').length) {
     $('#ingredients').select2({
       placeholder: 'Selecciona los ingredientes...',
@@ -19,11 +18,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 🚀 Interceptar el envío del formulario
   const form = document.getElementById("dishForm");
   if (form) {
     form.addEventListener("submit", async (e) => {
-      e.preventDefault(); // ⛔ Evita recargar la página
+      e.preventDefault();
 
       const formData = new FormData(form);
       const action = form.action;
@@ -38,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.success) {
           hideModal("formModal");
           alert("✅ Operación realizada correctamente");
-          loadDishes(); // 🔄 Recarga solo los platos, sin refrescar la página
+          loadDishes();
         } else {
           alert("❌ Error: " + (data.error || "No se pudo procesar la solicitud."));
         }
@@ -65,6 +63,10 @@ function newDish() {
   const currentPhotoContainer = document.getElementById("currentPhotoContainer");
   if (currentPhotoContainer) currentPhotoContainer.classList.add("hidden");
 
+  // ✅ Limpiar foto actual
+  const currentPhotoInput = document.getElementById("current_photo_input");
+  if (currentPhotoInput) currentPhotoInput.value = "";
+
   $('#ingredients').val(null).trigger('change');
 
   showModal("formModal");
@@ -84,11 +86,15 @@ function editDish(data) {
 
   const currentPhotoContainer = document.getElementById("currentPhotoContainer");
   const currentPhoto = document.getElementById("currentPhoto");
+  const currentPhotoInput = document.getElementById("current_photo_input");
+
   if (data.photo && data.photo.trim() !== "") {
     currentPhoto.src = "../" + data.photo;
     currentPhotoContainer.classList.remove("hidden");
+    currentPhotoInput.value = data.photo;
   } else {
     currentPhotoContainer.classList.add("hidden");
+    currentPhotoInput.value = "";
   }
 
   if (data.ingredients && Array.isArray(data.ingredients)) {
@@ -103,6 +109,7 @@ function editDish(data) {
 
   showModal("formModal");
 }
+
 async function deleteDish(id) {
   if (!confirm("¿Seguro que deseas eliminar este plato?")) return;
 
