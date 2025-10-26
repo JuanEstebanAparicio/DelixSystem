@@ -41,6 +41,10 @@ $nombreUsuario = $_SESSION['usuario']['nombre'] ?? 'Usuario';
     <li><i>👥</i><span>Clientes</span></li>
     <li><i>📊</i><span>Reportes</span></li>
     <li><i>⚙️</i><span>Configuración</span></li>
+    <a href="../../gestor_empleado/view/gestor_empleados.php">
+    <li><i>⚙️</i><span>Admin</span></li>
+    </a>
+
   </ul>
   </aside>
 

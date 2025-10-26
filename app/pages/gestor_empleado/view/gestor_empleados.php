@@ -1,9 +1,15 @@
 <?php
-session_start();
+require_once __DIR__ . '/../../../middleware/session_guard.php';
+protectPage(); // Asegura que el usuario esté logueado
 
-// ⚙️ Temporary session for testing
-if (!isset($_SESSION['user_id'])) {
-  $_SESSION['user_id'] = 1; // Replace with logged admin ID later
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$userId = $_SESSION['usuario']['id'] ?? null;
+
+if (!$userId) {
+    die("⚠️ No se encontró el ID de usuario en la sesión.");
 }
 ?>
 
@@ -20,7 +26,6 @@ if (!isset($_SESSION['user_id'])) {
     <!-- 🔹 Header -->
     <header class="main-header">
       <h1>Gestor de Empleados</h1>
-      <button id="btnAddEmpleado" class="btn btn-primary">+ Nuevo Empleado</button>
     </header>
 
     <!-- 🔐 Código dinámico -->
@@ -71,34 +76,25 @@ if (!isset($_SESSION['user_id'])) {
     </section>
   </div>
 
-  <!-- 💼 Modal de empleado -->
-  <div id="modalEmpleado" class="modal hidden">
+  <!-- 🧩 Modal para asignar roles -->
+  <div id="modalRoles" class="modal">
     <div class="modal-content">
-      <h2 id="modalTitle">Nuevo Empleado</h2>
-      <form id="formEmpleado">
+      <span class="close">&times;</span>
+      <h3>Asignar roles al empleado</h3>
+      <form id="formRoles">
         <input type="hidden" id="empleadoId">
-
-        <label>Nombre Completo</label>
-        <input type="text" id="nombre" required>
-
-        <label>Correo</label>
-        <input type="email" id="correo" required>
-
-        <label>Documento</label>
-        <input type="text" id="documento" required>
-
-        <label>Rol</label>
-        <select id="rol" required>
-          <option value="">Seleccionar...</option>
-          <option value="Cocinero">Cocinero</option>
-          <option value="Mesero">Mesero</option>
-          <option value="Cajero">Cajero</option>
-          <option value="Supervisor">Supervisor</option>
-        </select>
-
+        
+        <div id="rolesContainer" class="roles-container">
+          <!-- Aquí se inyectarán los checkboxes dinámicamente -->
+        </div>
+        <br>
         <div class="modal-actions">
-          <button type="submit" class="btn btn-primary">Guardar</button>
-          <button type="button" id="btnCancelar" class="btn btn-outline">Cancelar</button>
+          <button type="button" class="btn btn-outline close">Cancelar</button>
+          <button id="guardarRoles" type="button" class="btn btn-primary">Guardar</button>
+
+
+
+
         </div>
       </form>
     </div>
@@ -106,12 +102,19 @@ if (!isset($_SESSION['user_id'])) {
 
   <!-- 🔧 Variables globales -->
   <script>
-    // Safe PHP → JS transfer
-    const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
-    
+    // ID del usuario actual logueado (inyectado desde PHP)
+    const userId = <?= json_encode($_SESSION['usuario']['id'] ?? null) ?>;
+    if (!userId) {
+      console.error("⚠️ No se encontró el ID del usuario en la sesión.");
+    } else {
+      console.log("👤 Usuario logueado ID:", userId);
+    }
   </script>
 
   <!-- 📜 JS logic -->
   <script defer src="../js/empleados.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/DelixSystem/public/js/alert.js"></script>
+  <script src="/DelixSystem/public/js/modal.js"></script>
 </body>
 </html>
