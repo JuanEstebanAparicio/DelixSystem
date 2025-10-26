@@ -1,7 +1,10 @@
 <?php
 session_start();
-unset($_SESSION['empleado']);
-session_write_close();
 
-header("Location: /DelixSystem/public/index.php");
+if (isset($_SESSION['empleado'])) {
+    unset($_SESSION['empleado']);
+    session_destroy();
+}
+
+header("Location: /DelixSystem/index.php");
 exit;
