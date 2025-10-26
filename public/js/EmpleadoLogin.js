@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = new FormData(form);
 
     try {
-      Alerts.loading("Verificando credenciales...");
+      Alerts.loading("Verificando acceso...");
 
       const res = await fetch(form.action, {
         method: "POST",
@@ -22,23 +22,26 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         result = JSON.parse(text);
       } catch {
-        console.error("Respuesta no válida del servidor:", text);
-        Alerts.error("Error inesperado del servidor.");
+        console.error("❌ Respuesta inválida:", text);
+        Alerts.error("Respuesta del servidor no válida.");
         return;
       }
 
       if (result.status === "success") {
-        Alerts.success(result.message || "Ingreso exitoso 🎉");
+        Alerts.success(result.message || "Inicio exitoso 🎉");
+
         setTimeout(() => {
-          window.location.href = result.redirect;
+          if (result.redirect) {
+            window.location.href = result.redirect;
+          }
         }, 1500);
       } else {
-        Alerts.error(result.message || "Credenciales incorrectas.");
+        Alerts.error(result.message || "No se pudo iniciar sesión.");
       }
     } catch (err) {
       Alerts.close();
       console.error(err);
-      Alerts.error("⚠️ Error de conexión con el servidor.");
+      Alerts.error("⚠️ Error del servidor. Intenta nuevamente.");
     }
   });
 });
