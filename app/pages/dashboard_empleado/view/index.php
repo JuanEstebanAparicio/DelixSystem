@@ -1,15 +1,18 @@
 <?php
-session_start();
+// ✅ Incluir el middleware de empleados
+require_once __DIR__ . '/../../../middleware/employee_guard.php';
 
-if (!isset($_SESSION['empleado_auth']) || $_SESSION['empleado_auth']['auth_type'] !== 'empleado') {
-    header("Location: /DelixSystem/app/pages/login_empleado.php");
-    exit;
+// ✅ Proteger acceso (redirige si no hay sesión de empleado)
+protectEmpleado();
+
+// ✅ Iniciar sesión solo si aún no está activa
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
+// ✅ Obtener datos del empleado logueado
 $empleado = $_SESSION['empleado_auth'];
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="es">
@@ -19,6 +22,7 @@ $empleado = $_SESSION['empleado_auth'];
 </head>
 <body>
 
+  <h1>Bienvenido, <?= htmlspecialchars($empleado['full_name'] ?? 'Empleado') ?> 👋</h1>
 
 </body>
 </html>
