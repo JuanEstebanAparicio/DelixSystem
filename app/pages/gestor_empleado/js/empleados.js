@@ -192,8 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
   tr.dataset.id = emp.id;
 
   const estadoHTML = emp.is_online
-    ? `<span class="estado online"><span class="dot"></span> Conectado</span>`
-    : `<span class="estado offline"><span class="dot"></span> Desconectado</span>`;
+    ? `<span class="estado online"><span class="dot"></span> ✅Conectado</span>`
+    : `<span class="estado offline"><span class="dot"></span> ❌Desconectado</span>`;
 
   tr.innerHTML = `
     <td>${emp.full_name}</td>
@@ -254,8 +254,8 @@ document.addEventListener("DOMContentLoaded", () => {
         row.children[3].textContent = emp.role ?? '';
 
       const estadoHTML = emp.is_online
-        ? `<span class="estado online"><span class="dot"></span> Conectado</span>`
-        : `<span class="estado offline"><span class="dot"></span> Desconectado</span>`;
+        ? `<span class="estado online"><span class="dot"></span> ✅Conectado</span>`
+        : `<span class="estado offline"><span class="dot"></span> ❌Desconectado</span>`;
       row.children[4].innerHTML = estadoHTML;
 
     highlightRow(row);
@@ -265,7 +265,6 @@ document.addEventListener("DOMContentLoaded", () => {
  
     }
   });
-
   // 3️⃣ Eliminar empleados que ya no existan
   empleadosActuales.forEach((_, id) => {
     if (!nuevosMap.has(id)) {

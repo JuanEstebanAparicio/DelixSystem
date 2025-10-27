@@ -62,6 +62,9 @@ try {
     'auth_type' => 'empleado'
   ];
 
+  // 🟢 Marcar como conectado
+  supabase('employees', 'PATCH', ['is_online' => true], '?id=eq.' . $empleado['id']);
+
   echo json_encode([
     'status' => 'success',
     'message' => 'Inicio de sesión exitoso.',
