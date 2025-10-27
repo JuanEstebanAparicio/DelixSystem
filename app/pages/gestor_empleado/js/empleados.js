@@ -236,19 +236,29 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       // 2️⃣ Si existe, verificar si algo cambió (nombre, correo, roles)
       if (
-        existente.full_name !== emp.full_name ||
-        existente.email !== emp.email ||
-        existente.role !== emp.role
-      ) {
-        const row = tablaBody.querySelector(`tr[data-id="${emp.id}"]`);
-        if (row) {
-          row.children[1].textContent = emp.full_name;
-          row.children[2].textContent = emp.email;
-          row.children[3].textContent = emp.role;
-          highlightRow(row);
-        }
-        empleadosActuales.set(emp.id, emp);
-      }
+  existente.full_name !== emp.full_name ||
+  existente.email !== emp.email ||
+  existente.role !== emp.role ||
+  existente.is_online !== emp.is_online
+) {
+  const row = tablaBody.querySelector(`tr[data-id="${emp.id}"]`);
+  if (row) {
+    // columnas actuales:
+    // 0: Nombre, 1: Correo, 2: Rol, 3: Estado, 4: Fecha, 5: Acciones
+    row.children[0].textContent = emp.full_name;
+    row.children[1].textContent = emp.email;
+    row.children[2].textContent = emp.role ?? "";
+
+    // actualizar estado visual (conectado/desconectado)
+    const estadoHTML = emp.is_online
+      ? `<span class="estado online">🟢 Conectado</span>`
+      : `<span class="estado offline">⚫ Desconectado</span>`;
+    row.children[3].innerHTML = estadoHTML;
+
+    highlightRow(row);
+  }
+  empleadosActuales.set(emp.id, emp);
+} 
     }
   });
 
