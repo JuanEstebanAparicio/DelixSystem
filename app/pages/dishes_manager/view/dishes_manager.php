@@ -38,7 +38,7 @@ try {
 </head>
 
 <body>
-  <header class="navbar">
+  <header class="navbar">b
     <button class="hamburger" onclick="toggleSidebar()">☰</button>
     <h1 class="navbar-title">Gestor de Platos</h1>
     <button class="create-btn" onclick="newDish()">+ Crear Plato</button>

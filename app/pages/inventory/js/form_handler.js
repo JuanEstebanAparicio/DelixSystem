@@ -16,23 +16,23 @@ function validarFechas() {
   const ingreso = document.getElementById("fecha_ingreso").value;
   const vencimiento = document.getElementById("fecha_vencimiento").value;
   if (vencimiento && vencimiento < ingreso) {
-    alert("La fecha de vencimiento no puede ser anterior a la de ingreso.");
+    alert("⚠️ La fecha de vencimiento no puede ser anterior a la de ingreso.");
     return false;
   }
   return true;
 }
 
 function newIngredient() {
-  document.getElementById("ingredientForm").reset();
+  const form = document.getElementById("ingredientForm");
+  form.reset();
   document.getElementById("ingredient_id").value = "";
   document.getElementById("modalTitle").textContent = "Registrar Ingrediente";
   document.getElementById("submitBtn").textContent = "Registrar Ingrediente";
-  document.getElementById("ingredientForm").action = "../php/inputs_add.php";
+  form.action = "../php/inputs_add.php";
 
   const hoy = new Date().toISOString().split("T")[0];
   document.getElementById("fecha_ingreso").value = hoy;
 
-  // Ocultar imagen previa si se estaba editando antes
   const currentPhotoContainer = document.getElementById("currentPhotoContainer");
   if (currentPhotoContainer) currentPhotoContainer.classList.add("hidden");
 
@@ -52,8 +52,8 @@ function editIngredient(data) {
   document.getElementById("location").value = data.location || "";
   document.getElementById("status").value = data.status || "Activo";
   document.getElementById("supplier").value = data.supplier;
-  document.getElementById("fecha_ingreso").value = data.entrance_date || "";
-  document.getElementById("fecha_vencimiento").value = data.expiration_date || "";
+  document.getElementById("fecha_ingreso").value = data.entrance_date?.split("T")[0] || "";
+  document.getElementById("fecha_vencimiento").value = data.expiration_date?.split("T")[0] || "";
 
   const currentPhotoContainer = document.getElementById("currentPhotoContainer");
   const currentPhoto = document.getElementById("currentPhoto");

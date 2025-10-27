@@ -1,5 +1,33 @@
 document.addEventListener("DOMContentLoaded", () => {
   loadStorage();
+
+  const form = document.getElementById("ingredientForm");
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!validarFechas()) return;
+
+      const formData = new FormData(form);
+      const id = formData.get("id");
+      const isEdit = id && id.trim() !== "";
+      const url = isEdit ? "../php/inputs_edit.php" : "../php/inputs_add.php";
+
+      try {
+        const res = await fetch(url, { method: "POST", body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+          alert(data.message || "✅ Ingrediente guardado correctamente");
+          hideModal("formModal");
+          loadStorage(); // 🔄 Recarga sin refrescar
+        } else {
+          alert("⚠️ Error: " + (data.error || "No se pudo procesar la solicitud"));
+        }
+      } catch (err) {
+        alert("❌ Error de red: " + err.message);
+      }
+    });
+  }
 });
 
 async function loadStorage() {
@@ -78,8 +106,8 @@ async function deleteIngredient(id) {
   if (!confirm("¿Eliminar ingrediente?")) return;
 
   try {
-    const res = await fetch("../php/inputs_delet.php?id=" + id);
-    if (!res.ok) throw new Error("Error al eliminar");
+    const res = await fetch("../php/inputs_delete.php?id=" + id);
+    if (!res.ok) throw new Error("Error al eliminar ingrediente");
     loadStorage();
   } catch (err) {
     alert(err.message);
