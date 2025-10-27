@@ -36,6 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
           inputNuevaCategoria.focus();
           return false;
         }
+
         let hiddenCat = document.getElementById("realCategory");
         if (!hiddenCat) {
           hiddenCat = document.createElement("input");
@@ -99,28 +100,36 @@ function newIngredient() {
 
   showModal("formModal");
 }
+function formatDateForInput(dateStr) {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  if (isNaN(date)) return "";
+  return date.toISOString().split("T")[0];
+}
 
 function editIngredient(data) {
-  document.getElementById("ingredient_id").value = data.id;
-  document.getElementById("name").value = data.name;
-  document.getElementById("amount").value = data.amount;
-  document.getElementById("minimum_quantity").value = data.minimum_quantity;
-  document.getElementById("unit").value = data.unit;
-  document.getElementById("unit_cost").value = data.unit_cost;
+  document.getElementById("ingredient_id").value = data.id || "";
+  document.getElementById("name").value = data.name || "";
+  document.getElementById("amount").value = data.amount || "";
+  document.getElementById("minimum_quantity").value = data.minimum_quantity || "";
+  document.getElementById("unit").value = data.unit || "Unidad";
+  document.getElementById("unit_cost").value = data.unit_cost || "";
   document.getElementById("batch").value = data.batch || "";
   document.getElementById("description").value = data.description || "";
   document.getElementById("location").value = data.location || "";
   document.getElementById("state").value = data.state || "Activo";
-  document.getElementById("supplier").value = data.supplier;
-  document.getElementById("fecha_ingreso").value =
-    data.entrance_date?.split("T")[0] || "";
-  document.getElementById("fecha_vencimiento").value =
-    data.expiration_date?.split("T")[0] || "";
+  document.getElementById("supplier").value = data.supplier || "";
+    
+  const ingreso = data.entrance_date || data.fecha_ingreso || data.ingreso || "";
+  const vencimiento = data.expiration_date || data.fecha_vencimiento || data.vencimiento || "";
+
+  document.getElementById("fecha_ingreso").value = formatDateForInput(ingreso);
+  document.getElementById("fecha_vencimiento").value = formatDateForInput(vencimiento);
 
   const selectCategoria = document.getElementById("category");
   const inputNuevaCategoria = document.getElementById("newCategoryInput");
-
   let existe = false;
+
   if (selectCategoria) {
     for (let i = 0; i < selectCategoria.options.length; i++) {
       if (selectCategoria.options[i].value === data.category) {
@@ -131,21 +140,15 @@ function editIngredient(data) {
   }
 
   if (existe) {
-    if (selectCategoria) selectCategoria.value = data.category;
-    if (inputNuevaCategoria) {
-      inputNuevaCategoria.classList.add("hidden");
-      inputNuevaCategoria.required = false;
-      inputNuevaCategoria.value = "";
-      inputNuevaCategoria.removeAttribute("data-edit-value");
-    }
+    selectCategoria.value = data.category;
+    inputNuevaCategoria.classList.add("hidden");
+    inputNuevaCategoria.required = false;
+    inputNuevaCategoria.value = "";
   } else {
-    if (selectCategoria) selectCategoria.value = "__new__";
-    if (inputNuevaCategoria) {
-      inputNuevaCategoria.classList.remove("hidden");
-      inputNuevaCategoria.required = true;
-      inputNuevaCategoria.value = data.category || "";
-      inputNuevaCategoria.setAttribute("data-edit-value", "1");
-    }
+    selectCategoria.value = "__new__";
+    inputNuevaCategoria.classList.remove("hidden");
+    inputNuevaCategoria.required = true;
+    inputNuevaCategoria.value = data.category || "";
   }
 
   const currentPhotoContainer = document.getElementById("currentPhotoContainer");
@@ -165,6 +168,5 @@ function editIngredient(data) {
   if (hiddenCat) hiddenCat.remove();
 
   selectCategoria.disabled = false;
-
   showModal("formModal");
 }
