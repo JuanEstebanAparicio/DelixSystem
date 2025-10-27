@@ -294,8 +294,8 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
       <div class="form-group">
         <input 
           type="text" 
-          name="codigo_dinamico" 
-          placeholder="Código dinámico del restaurante"
+          name="restaurant_name" 
+          placeholder="Nombre del restaurante"
           required
         >
       </div>
@@ -305,7 +305,7 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
       <div class="form-group">
         <input 
           type="email" 
-          name="correo" 
+          name="email" 
           placeholder="Correo electrónico" 
           required
         >
@@ -316,7 +316,7 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
       <div class="form-group">
         <input 
           type="text" 
-          name="documento" 
+          name="document" 
           placeholder="Número de documento o cédula" 
           required
         >
@@ -328,12 +328,6 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
     </form>
   </div>
 </div>
-
-
-    </form>
-  </div>
-</div>
-
 
 
 
