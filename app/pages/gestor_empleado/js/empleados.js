@@ -188,23 +188,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ====== Render / update tabla ======
   const createRow = (emp) => {
-    const tr = document.createElement("tr");
-    tr.dataset.id = emp.id;
-    tr.innerHTML = `
-      <td>${emp.id}</td>
-      <td>${emp.full_name}</td>
-      <td>${emp.email}</td>
-      <td>${emp.role ?? ''}</td>
-      <td>${new Date(emp.created_at).toLocaleString()}</td>
-      <td class="acciones">
-        <button class="btn btn-primary btn-sm asignar-rol" 
-                data-id="${emp.id}" 
-                data-modal-target="#modalRoles">Asignar roles</button>
-        <button class="btn btn-danger btn-sm eliminar" data-id="${emp.id}">Eliminar</button>
-      </td>
-    `;
-    return tr;
-  };
+  const tr = document.createElement("tr");
+  tr.dataset.id = emp.id; // lo mantenemos para control interno, aunque no se muestra
+
+  const estadoHTML = emp.is_online
+    ? `<span class="estado online">🟢 Conectado</span>`
+    : `<span class="estado offline">⚫ Desconectado</span>`;
+
+  tr.innerHTML = `
+    <td>${emp.full_name}</td>
+    <td>${emp.email}</td>
+    <td>${emp.role ?? ''}</td>
+    <td>${estadoHTML}</td>
+    <td>${new Date(emp.created_at).toLocaleString()}</td>
+    <td class="acciones">
+      <button class="btn btn-primary btn-sm asignar-rol" 
+              data-id="${emp.id}" 
+              data-modal-target="#modalRoles">Asignar roles</button>
+      <button class="btn btn-danger btn-sm eliminar" data-id="${emp.id}">Eliminar</button>
+    </td>
+  `;
+  return tr;
+};
+
 
   const renderTable = (empleados) => {
     tablaBody.innerHTML = "";

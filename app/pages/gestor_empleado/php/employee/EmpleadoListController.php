@@ -18,19 +18,21 @@ try {
     // - Agregamos los roles con STRING_AGG (separados por coma)
     // - Si no hay roles devolvemos cadena vacía para compatibilidad con el frontend
     $stmt = $conexion->prepare("
-        SELECT 
-            e.id,
-            e.full_name,
-            e.email,
-            COALESCE(STRING_AGG(r.nombre, ', ' ORDER BY r.nombre), '') AS role,
-            e.created_at
-        FROM employees e
-        LEFT JOIN employee_roles er ON e.id = er.empleado_id
-        LEFT JOIN roles r ON er.rol_id = r.id
-        WHERE e.user_id = :user_id
-        GROUP BY e.id, e.full_name, e.email, e.created_at
-        ORDER BY e.created_at DESC
-    ");
+    SELECT 
+        e.id,
+        e.full_name,
+        e.email,
+        COALESCE(STRING_AGG(r.nombre, ', ' ORDER BY r.nombre), '') AS role,
+        e.is_online,
+        e.created_at
+    FROM employees e
+    LEFT JOIN employee_roles er ON e.id = er.empleado_id
+    LEFT JOIN roles r ON er.rol_id = r.id
+    WHERE e.user_id = :user_id
+    GROUP BY e.id, e.full_name, e.email, e.is_online, e.created_at
+    ORDER BY e.created_at DESC
+");
+
 
     $stmt->execute(['user_id' => $userId]);
     $empleados = $stmt->fetchAll(PDO::FETCH_ASSOC);

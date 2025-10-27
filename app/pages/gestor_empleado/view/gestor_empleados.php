@@ -59,22 +59,22 @@ if (!$userId) {
     </section>
 
     <!-- 📋 Tabla de empleados -->
-    <section class="tabla-wrapper">
-      <table id="tablaEmpleados" class="tabla-empleados">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Correo</th>
-            <th>Rol</th>
-            <th>Fecha de Registro</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
-  </div>
+<section class="tabla-wrapper">
+  <table id="tablaEmpleados" class="tabla-empleados">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Correo</th>
+        <th>Rol</th>
+        <th>Estado</th> <!-- 🟢 Nueva columna -->
+        <th>Fecha de Registro</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</section>
+
 
   <!-- 🧩 Modal para asignar roles -->
   <div id="modalRoles" class="modal">
