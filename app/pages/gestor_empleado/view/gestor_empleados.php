@@ -102,13 +102,7 @@ if (!$userId) {
 
   <!-- 🔧 Variables globales -->
   <script>
-    // ID del usuario actual logueado (inyectado desde PHP)
     const userId = <?= json_encode($_SESSION['usuario']['id'] ?? null) ?>;
-    if (!userId) {
-      console.error("⚠️ No se encontró el ID del usuario en la sesión.");
-    } else {
-      console.log("👤 Usuario logueado ID:", userId);
-    }
   </script>
 
   <!-- 📜 JS logic -->
