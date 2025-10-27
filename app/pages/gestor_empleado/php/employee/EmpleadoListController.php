@@ -22,6 +22,7 @@ try {
         e.id,
         e.full_name,
         e.email,
+        e.document AS documento,  -- 👈 alias para coincidir con el JS
         COALESCE(STRING_AGG(r.nombre, ', ' ORDER BY r.nombre), '') AS role,
         e.is_online,
         e.created_at
@@ -29,7 +30,7 @@ try {
     LEFT JOIN employee_roles er ON e.id = er.empleado_id
     LEFT JOIN roles r ON er.rol_id = r.id
     WHERE e.user_id = :user_id
-    GROUP BY e.id, e.full_name, e.email, e.is_online, e.created_at
+    GROUP BY e.id, e.full_name, e.email, e.document, e.is_online, e.created_at
     ORDER BY e.created_at DESC
 ");
 

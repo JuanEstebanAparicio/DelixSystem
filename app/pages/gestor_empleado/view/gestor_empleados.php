@@ -58,15 +58,15 @@ if (!$userId) {
       </div>
     </section>
 
-    <!-- 📋 Tabla de empleados -->
 <section class="tabla-wrapper">
   <table id="tablaEmpleados" class="tabla-empleados">
     <thead>
       <tr>
         <th>Nombre</th>
         <th>Correo</th>
+        <th>Documento</th>
         <th>Rol</th>
-        <th>Estado</th> <!-- 🟢 Nueva columna -->
+        <th>Estado</th>
         <th>Fecha de Registro</th>
         <th>Acciones</th>
       </tr>
