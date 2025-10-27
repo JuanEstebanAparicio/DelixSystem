@@ -9,9 +9,12 @@ try {
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
         throw new Exception("🚫 Solo se permiten solicitudes POST.");
     }
-
-    // 📦 Crear directorios de categoría y producto
     $category = trim($_POST['category'] ?? '');
+    $newCategory = trim($_POST['new_category'] ?? '');
+    if ($category === '__new__' || $newCategory !== '') {
+        $category = $newCategory;
+    }
+
     $productName = trim($_POST['name'] ?? '');
     $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', $category);
     $safeProduct = preg_replace('/[^a-zA-Z0-9_-]/', '_', $productName);
@@ -21,7 +24,6 @@ try {
     if (!is_dir($categoryDir)) mkdir($categoryDir, 0777, true);
     if (!is_dir($productDir)) mkdir($productDir, 0777, true);
 
-    // 🖼️ Subida de imagen (opcional)
     $photoPath = null;
     if (isset($_FILES["photo"]) && $_FILES["photo"]["error"] === UPLOAD_ERR_OK) {
         $photoName = uniqid('photo_') . "_" . basename($_FILES["photo"]["name"]);
@@ -49,6 +51,7 @@ try {
         $_POST['supplier'] ?? null,
         $photoPath
     );
+
     $crud = new storage_crud();
     $crud->createProduct($product);
 

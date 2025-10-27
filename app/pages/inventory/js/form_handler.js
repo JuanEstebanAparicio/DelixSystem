@@ -7,9 +7,53 @@ function hideModal(id) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const hoy = new Date().toISOString().split("T")[0];
-  const fechaIngreso = document.getElementById("fecha_ingreso");
-  if (fechaIngreso) fechaIngreso.value = hoy;
+  const selectCategoria = document.getElementById("category");
+  const inputNuevaCategoria = document.getElementById("newCategoryInput");
+
+  if (selectCategoria && inputNuevaCategoria) {
+    selectCategoria.addEventListener("change", () => {
+      if (selectCategoria.value === "__new__") {
+        inputNuevaCategoria.classList.remove("hidden");
+        inputNuevaCategoria.required = true;
+        inputNuevaCategoria.focus();
+      } else {
+        inputNuevaCategoria.classList.add("hidden");
+        inputNuevaCategoria.required = false;
+        inputNuevaCategoria.value = "";
+      }
+    });
+  }
+
+  const form = document.getElementById("ingredientForm");
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      if (selectCategoria && selectCategoria.value === "__new__") {
+        const nuevaCat = inputNuevaCategoria.value.trim();
+
+        if (!nuevaCat) {
+          e.preventDefault();
+          alert("⚠️ Debes escribir un nombre para la nueva categoría.");
+          inputNuevaCategoria.focus();
+          return false;
+        }
+        let hiddenCat = document.getElementById("realCategory");
+        if (!hiddenCat) {
+          hiddenCat = document.createElement("input");
+          hiddenCat.type = "hidden";
+          hiddenCat.name = "category";
+          hiddenCat.id = "realCategory";
+          form.appendChild(hiddenCat);
+        }
+
+        hiddenCat.value = nuevaCat;
+        selectCategoria.disabled = true;
+      } else {
+        selectCategoria.disabled = false;
+        const hiddenCat = document.getElementById("realCategory");
+        if (hiddenCat) hiddenCat.remove();
+      }
+    });
+  }
 });
 
 function validarFechas() {
@@ -36,6 +80,23 @@ function newIngredient() {
   const currentPhotoContainer = document.getElementById("currentPhotoContainer");
   if (currentPhotoContainer) currentPhotoContainer.classList.add("hidden");
 
+  const inputNuevaCategoria = document.getElementById("newCategoryInput");
+  if (inputNuevaCategoria) {
+    inputNuevaCategoria.classList.add("hidden");
+    inputNuevaCategoria.required = false;
+    inputNuevaCategoria.value = "";
+    inputNuevaCategoria.removeAttribute("data-edit-value");
+  }
+
+  const selectCategoria = document.getElementById("category");
+  if (selectCategoria) {
+    selectCategoria.disabled = false;
+    selectCategoria.value = "";
+  }
+
+  const hiddenCat = document.getElementById("realCategory");
+  if (hiddenCat) hiddenCat.remove();
+
   showModal("formModal");
 }
 
@@ -46,18 +107,49 @@ function editIngredient(data) {
   document.getElementById("minimum_quantity").value = data.minimum_quantity;
   document.getElementById("unit").value = data.unit;
   document.getElementById("unit_cost").value = data.unit_cost;
-  document.getElementById("category").value = data.category;
   document.getElementById("batch").value = data.batch || "";
   document.getElementById("description").value = data.description || "";
   document.getElementById("location").value = data.location || "";
-  document.getElementById("status").value = data.status || "Activo";
+  document.getElementById("state").value = data.state || "Activo";
   document.getElementById("supplier").value = data.supplier;
-  document.getElementById("fecha_ingreso").value = data.entrance_date?.split("T")[0] || "";
-  document.getElementById("fecha_vencimiento").value = data.expiration_date?.split("T")[0] || "";
+  document.getElementById("fecha_ingreso").value =
+    data.entrance_date?.split("T")[0] || "";
+  document.getElementById("fecha_vencimiento").value =
+    data.expiration_date?.split("T")[0] || "";
+
+  const selectCategoria = document.getElementById("category");
+  const inputNuevaCategoria = document.getElementById("newCategoryInput");
+
+  let existe = false;
+  if (selectCategoria) {
+    for (let i = 0; i < selectCategoria.options.length; i++) {
+      if (selectCategoria.options[i].value === data.category) {
+        existe = true;
+        break;
+      }
+    }
+  }
+
+  if (existe) {
+    if (selectCategoria) selectCategoria.value = data.category;
+    if (inputNuevaCategoria) {
+      inputNuevaCategoria.classList.add("hidden");
+      inputNuevaCategoria.required = false;
+      inputNuevaCategoria.value = "";
+      inputNuevaCategoria.removeAttribute("data-edit-value");
+    }
+  } else {
+    if (selectCategoria) selectCategoria.value = "__new__";
+    if (inputNuevaCategoria) {
+      inputNuevaCategoria.classList.remove("hidden");
+      inputNuevaCategoria.required = true;
+      inputNuevaCategoria.value = data.category || "";
+      inputNuevaCategoria.setAttribute("data-edit-value", "1");
+    }
+  }
 
   const currentPhotoContainer = document.getElementById("currentPhotoContainer");
   const currentPhoto = document.getElementById("currentPhoto");
-
   if (data.photo && data.photo.trim() !== "") {
     currentPhoto.src = "../" + data.photo;
     currentPhotoContainer.classList.remove("hidden");
@@ -68,6 +160,11 @@ function editIngredient(data) {
   document.getElementById("modalTitle").textContent = "Editar Ingrediente";
   document.getElementById("submitBtn").textContent = "Actualizar Ingrediente";
   document.getElementById("ingredientForm").action = "../php/inputs_edit.php";
+
+  const hiddenCat = document.getElementById("realCategory");
+  if (hiddenCat) hiddenCat.remove();
+
+  selectCategoria.disabled = false;
 
   showModal("formModal");
 }

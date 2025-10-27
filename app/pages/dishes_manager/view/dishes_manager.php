@@ -38,7 +38,7 @@ try {
 </head>
 
 <body>
-  <header class="navbar">b
+  <header class="navbar">
     <button class="hamburger" onclick="toggleSidebar()">☰</button>
     <h1 class="navbar-title">Gestor de Platos</h1>
     <button class="create-btn" onclick="newDish()">+ Crear Plato</button>
@@ -46,7 +46,10 @@ try {
 
   <nav class="sidebar hidden" id="sidebarMenu">
     <h3 class="sidebar-title">Categorías</h3>
-    <ul class="sidebar-list">
+
+    <button id="reloadBtn" class="reload-btn" onclick="reloadCategories()">🔄 Recargar</button>
+
+    <ul class="sidebar-list" id="categoryList">
       <li class="sidebar-item" onclick="mostrarCategoria('Todos')">Todos</li>
       <?php foreach ($categorias as $categoria => $items): ?>
         <li class="sidebar-item" onclick="mostrarCategoria('<?= htmlspecialchars($categoria) ?>')">
@@ -55,6 +58,7 @@ try {
       <?php endforeach; ?>
     </ul>
   </nav>
+
 
   <main class="main-content container">
     <h2 class="page-title">Gestor de Platos</h2>

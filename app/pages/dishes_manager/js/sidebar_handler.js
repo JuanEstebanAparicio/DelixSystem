@@ -41,9 +41,9 @@ async function reloadCategories() {
       list.appendChild(li);
     });
 
-    console.log("✅ Categorías actualizadas correctamente");
+    console.log("Categorías actualizadas correctamente");
 
   } catch (err) {
-    console.error("❌ Error al recargar categorías:", err);
+    console.error("Error al recargar categorías:", err);
   }
 }

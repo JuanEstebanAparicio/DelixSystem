@@ -57,7 +57,7 @@ try {
         $_POST['batch'] ?? $current['batch'],
         $_POST['description'] ?? $current['description'],
         $_POST['location'] ?? $current['location'],
-        $_POST['status'] ?? $current['state'],
+        $_POST['state'] ?? $current['state'],
         $_POST['supplier'] ?? $current['supplier'],
         $photoPath
     );
