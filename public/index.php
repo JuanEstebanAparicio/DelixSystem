@@ -287,9 +287,9 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
     <h3>Inicio de Sesión de Empleado</h3>
 
     <form 
-      id="employeeLoginForm" 
-      method="POST" 
-      action="/DelixSystem/src/auth/login_empleado.php"
+        id="employeeLoginForm"
+        method="POST" 
+        action="/DelixSystem/src/auth/login_empleado.php"
     >
       <div class="form-group">
         <input 
