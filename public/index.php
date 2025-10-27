@@ -352,6 +352,7 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
 <script src="./js/register.js" defer></script>
 <script src="./js/login.js" defer></script>
 <script src="/DelixSystem/app/pages/gestor_empleado/js/empleadoAccess.js" defer></script>
+<script src="./js/login_empleado.js" defer></script>
 
 
 
