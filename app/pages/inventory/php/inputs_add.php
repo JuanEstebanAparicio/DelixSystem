@@ -5,30 +5,37 @@ require_once($baseDir . '/config/supabase.php');
 require_once(__DIR__ . '/products.php');
 require_once(__DIR__ . '/storage_crud.php');
 
+header('Content-Type: application/json');
 $pdo = $conexion ?? null;
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $photoPath = null;
+try {
+    if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+        throw new Exception("🚫 Solo se permiten solicitudes POST.");
+    }
 
+    $photoPath = null;
     $category = trim($_POST['category']);
     $productName = trim($_POST['name']);
+
     $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', $category);
     $safeProduct = preg_replace('/[^a-zA-Z0-9_-]/', '_', $productName);
+
     $categoryDir = $baseDir . "/pages/inventory/media/$safeCategory";
     $productDir = "$categoryDir/$safeProduct";
 
     if (!is_dir($categoryDir)) mkdir($categoryDir, 0777, true);
     if (!is_dir($productDir)) mkdir($productDir, 0777, true);
 
+    // Subida de imagen
     if (isset($_FILES["photo"]) && $_FILES["photo"]["error"] === 0) {
         $photoName = uniqid() . "_" . basename($_FILES["photo"]["name"]);
         $targetPath = "$productDir/$photoName";
 
-        if (move_uploaded_file($_FILES["photo"]["tmp_name"], $targetPath)) {
-            $photoPath = "media/$safeCategory/$safeProduct/$photoName";
-        } else {
-            die("❌ Error al mover la imagen al destino.");
+        if (!move_uploaded_file($_FILES["photo"]["tmp_name"], $targetPath)) {
+            throw new Exception("❌ Error al mover la imagen al destino.");
         }
+
+        $photoPath = "media/$safeCategory/$safeProduct/$photoName";
     }
 
     $product = new Product(
@@ -48,17 +55,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $photoPath
     );
 
-    try {
-        $crud = new storage_crud($pdo);
-        $crud->createProduct($product);
+    $crud = new storage_crud($pdo);
+    $crud->createProduct($product);
 
-        header("Location: ../view/ingredient_manager.php?success=1");
-        exit();
-    } catch (Exception $e) {
-        die("❌ Error al registrar producto: " . $e->getMessage());
-    }
-} else {
-    http_response_code(403);
-    echo "🚫 Este recurso solo acepta solicitudes POST.";
+    echo json_encode(["success" => true, "message" => "✅ Ingrediente agregado correctamente"]);
+} catch (Exception $e) {
+    echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }
 ?>

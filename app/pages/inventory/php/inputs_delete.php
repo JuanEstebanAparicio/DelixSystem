@@ -4,29 +4,31 @@ require_once($baseDir . '/config/supabase.php');
 require_once(__DIR__ . '/products.php');
 require_once(__DIR__ . '/storage_crud.php');
 
+header('Content-Type: application/json');
 $pdo = $conexion ?? null;
 
-if (isset($_GET['id'])) {
-    $id = $_GET['id'];
-
-    try {
-        $crud = new storage_crud($pdo);
-        $product = $crud->getProductById($id);
-
-        if (!empty($product['photo'])) {
-            $photoPath = $baseDir . '/pages/inventory/' . $product['photo'];
-            if (file_exists($photoPath)) unlink($photoPath);
-        }
-
-        $crud->deleteProduct($id);
-
-        header("Location: ../view/ingredient_manager.php?success=3");
-        exit();
-    } catch (Exception $e) {
-        die(" Error al eliminar: " . $e->getMessage());
+try {
+    if ($_SERVER["REQUEST_METHOD"] !== "GET" || !isset($_GET['id'])) {
+        throw new Exception("⚠️ ID no especificado o método inválido.");
     }
-} else {
-    http_response_code(400);
-    echo "⚠️ ID no especificado.";
+
+    $id = $_GET['id'];
+    $crud = new storage_crud($pdo);
+    $product = $crud->getProductById($id);
+
+    if (!$product) {
+        throw new Exception("Ingrediente no encontrado.");
+    }
+
+    if (!empty($product['photo'])) {
+        $photoPath = $baseDir . '/pages/inventory/' . $product['photo'];
+        if (file_exists($photoPath)) unlink($photoPath);
+    }
+
+    $crud->deleteProduct($id);
+
+    echo json_encode(["success" => true, "message" => "🗑️ Ingrediente eliminado correctamente"]);
+} catch (Exception $e) {
+    echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }
 ?>

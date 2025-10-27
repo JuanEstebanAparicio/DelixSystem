@@ -63,7 +63,6 @@ function newDish() {
   const currentPhotoContainer = document.getElementById("currentPhotoContainer");
   if (currentPhotoContainer) currentPhotoContainer.classList.add("hidden");
 
-  // ✅ Limpiar foto actual
   const currentPhotoInput = document.getElementById("current_photo_input");
   if (currentPhotoInput) currentPhotoInput.value = "";
 

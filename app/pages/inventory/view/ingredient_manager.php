@@ -77,7 +77,7 @@ try {
 
             <div class="card-footer">
               <button class="btn btn-edit" onclick='editIngredient(<?= json_encode($ing) ?>)'>✏️</button>
-              <a href="../php/inputs_delete.php?id=<?= $ing['id'] ?>"
+              <a href="../php/inputs_delet.php?id=<?= $ing['id'] ?>"
                   class="btn btn-delete"
                   onclick="return confirm('¿Eliminar ingrediente?')">🗑️</a>
             </div>
@@ -206,5 +206,6 @@ try {
   <script src="../js/form_handler.js"></script>
   <script src="../js/category_handler.js"></script>
   <script src="../js/sidebar_handler.js"></script>
+  <script src="../js/storage_dynamic_loader.js"></script>
 </body>
 </html>

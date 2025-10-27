@@ -1,13 +1,16 @@
 <?php
 $baseDir = dirname(__DIR__, 3);
-
 require_once($baseDir . '/config/supabase.php');
 require_once(__DIR__ . '/products.php');
 require_once(__DIR__ . '/storage_crud.php');
 
+header('Content-Type: application/json');
 $pdo = $conexion ?? null;
 
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['id'])) {
+try {
+    if ($_SERVER["REQUEST_METHOD"] !== "POST" || !isset($_POST['id'])) {
+        throw new Exception("🚫 Solicitud no válida o ID faltante.");
+    }
 
     $id = $_POST['id'];
     $photoPath = $_POST['photo_actual'] ?? null;
@@ -21,21 +24,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['id'])) {
     if (!is_dir($categoryDir)) mkdir($categoryDir, 0777, true);
     if (!is_dir($productDir)) mkdir($productDir, 0777, true);
 
+    // Subir nueva foto (si hay)
     if (isset($_FILES["photo"]) && $_FILES["photo"]["error"] === 0) {
         $photoName = uniqid() . "_" . basename($_FILES["photo"]["name"]);
         $targetPath = "$productDir/$photoName";
 
-        if (move_uploaded_file($_FILES["photo"]["tmp_name"], $targetPath)) {
-            if (!empty($_POST['photo_actual'])) {
-                $oldPhotoAbs = $baseDir . '/pages/inventory/' . ltrim($_POST['photo_actual'], '/');
-                if (file_exists($oldPhotoAbs)) {
-                    @unlink($oldPhotoAbs);
-                }
-            }
-            $photoPath = "media/$safeCategory/$safeProduct/$photoName";
-        } else {
-            die("❌ Error al mover la nueva imagen al destino.");
+        if (!move_uploaded_file($_FILES["photo"]["tmp_name"], $targetPath)) {
+            throw new Exception("❌ Error al mover la nueva imagen.");
         }
+
+        if (!empty($_POST['photo_actual'])) {
+            $oldPhotoAbs = $baseDir . '/pages/inventory/' . ltrim($_POST['photo_actual'], '/');
+            if (file_exists($oldPhotoAbs)) @unlink($oldPhotoAbs);
+        }
+
+        $photoPath = "media/$safeCategory/$safeProduct/$photoName";
     }
 
     $product = new Product(
@@ -55,17 +58,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['id'])) {
         $photoPath
     );
 
-    try {
-        $crud = new storage_crud($pdo);
-        $crud->updateProduct($product, $id);
-        header("Location: ../view/ingredient_manager.php?success=2");
-        exit();
-    } catch (Exception $e) {
-        die("❌ Error al actualizar producto: " . $e->getMessage());
-    }
+    $crud = new storage_crud($pdo);
+    $crud->updateProduct($product, $id);
 
-} else {
-    http_response_code(403);
-    echo "🚫 Este recurso solo acepta solicitudes POST.";
+    echo json_encode(["success" => true, "message" => "✏️ Ingrediente actualizado correctamente"]);
+} catch (Exception $e) {
+    echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }
 ?>
