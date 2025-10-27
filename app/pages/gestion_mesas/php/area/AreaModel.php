@@ -14,22 +14,23 @@ class AreaModel {
     }
 
     /** Crear nueva área */
-    public function crearArea($nombre, $id_usuario) {
-        $stmt = $this->db->prepare("INSERT INTO areas (nombre, id_usuario) VALUES (?, ?)");
-        $ok = $stmt->execute([$nombre, $id_usuario]);
+   public function crearArea($nombre, $id_usuario, $nombre_restaurante) {
+    $stmt = $this->db->prepare("INSERT INTO areas (nombre, id_usuario, nombre_restaurante) VALUES (?, ?, ?)");
+    $ok = $stmt->execute([$nombre, $id_usuario, $nombre_restaurante]);
 
-        if ($ok) {
-            $id_area = $this->db->lastInsertId();
-            $stmtOrden = $this->db->prepare("SELECT COALESCE(MAX(orden), 0) + 1 AS nuevo_orden FROM areas WHERE id_usuario = ?");
-            $stmtOrden->execute([$id_usuario]);
-            $nuevoOrden = (int)$stmtOrden->fetchColumn();
+    if ($ok) {
+        $id_area = $this->db->lastInsertId();
+        $stmtOrden = $this->db->prepare("SELECT COALESCE(MAX(orden), 0) + 1 AS nuevo_orden FROM areas WHERE id_usuario = ?");
+        $stmtOrden->execute([$id_usuario]);
+        $nuevoOrden = (int)$stmtOrden->fetchColumn();
 
-            $update = $this->db->prepare("UPDATE areas SET orden = ? WHERE id_area = ?");
-            $update->execute([$nuevoOrden, $id_area]);
-        }
-
-        return $ok;
+        $update = $this->db->prepare("UPDATE areas SET orden = ? WHERE id_area = ?");
+        $update->execute([$nuevoOrden, $id_area]);
     }
+
+    return $ok;
+}
+
 
     /** Editar área existente */
     public function editarArea($id_area, $nombre, $id_usuario) {

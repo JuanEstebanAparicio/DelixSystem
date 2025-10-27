@@ -1,68 +1,60 @@
-function makeOrder() {
-    alert("🛒 Pedido registrado con éxito. ¡Gracias por tu orden!");
-    // Aquí podrías redirigir a otra página o guardar el pedido en Supabase:
-    // window.location.href = "pedido.php?id_mesa=" + mesaId;
-}
-let carrito = [];
-const verCarritoBtn = document.getElementById("verCarritoBtn");
+// Manejo del carrito
+const carrito = [];
+const carritoBtn = document.getElementById("verCarritoBtn");
 const carritoModal = document.getElementById("carritoModal");
 const carritoLista = document.getElementById("carritoLista");
 const totalCarrito = document.getElementById("totalCarrito");
-const pagarBtn = document.getElementById("pagarBtn");
 const cerrarCarrito = document.getElementById("cerrarCarrito");
-const pagoModal = document.getElementById("pagoModal");
-const confirmarPagoBtn = document.getElementById("confirmarPagoBtn");
-const cancelarPago = document.getElementById("cancelarPago");
-const metodoPago = document.getElementById("metodoPago");
-const tarjetaInfo = document.getElementById("tarjetaInfo");
 
 document.querySelectorAll(".add-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     const nombre = btn.dataset.nombre;
-    const precio = parseInt(btn.dataset.precio);
+    const precio = parseFloat(btn.dataset.precio);
     carrito.push({ nombre, precio });
-    alert(`${nombre} agregado al carrito`);
+    actualizarCarrito();
   });
 });
 
-verCarritoBtn.addEventListener("click", () => {
+function actualizarCarrito() {
   carritoLista.innerHTML = "";
   let total = 0;
-  carrito.forEach(item => {
-    carritoLista.innerHTML += `<li>${item.nombre} - $${item.precio}</li>`;
+
+  carrito.forEach((item, i) => {
     total += item.precio;
+    const li = document.createElement("li");
+    li.textContent = `${item.nombre} — $${item.precio.toLocaleString()}`;
+    carritoLista.appendChild(li);
   });
-  totalCarrito.textContent = total;
-  carritoModal.style.display = "block";
-});
 
-cerrarCarrito.addEventListener("click", () => carritoModal.style.display = "none");
+  totalCarrito.textContent = total.toLocaleString();
+}
 
-pagarBtn.addEventListener("click", () => {
+// Mostrar y cerrar carrito
+carritoBtn.onclick = () => carritoModal.style.display = "block";
+cerrarCarrito.onclick = () => carritoModal.style.display = "none";
+
+// Simulación de pago
+const pagoModal = document.getElementById("pagoModal");
+const pagarBtn = document.getElementById("pagarBtn");
+const cancelarPago = document.getElementById("cancelarPago");
+const confirmarPago = document.getElementById("confirmarPagoBtn");
+const metodoPago = document.getElementById("metodoPago");
+const tarjetaInfo = document.getElementById("tarjetaInfo");
+
+pagarBtn.onclick = () => {
   carritoModal.style.display = "none";
   pagoModal.style.display = "block";
-});
+};
 
-cancelarPago.addEventListener("click", () => pagoModal.style.display = "none");
+cancelarPago.onclick = () => pagoModal.style.display = "none";
 
-metodoPago.addEventListener("change", () => {
-  tarjetaInfo.style.display = metodoPago.value === "tarjeta" ? "block" : "none";
-});
-
-confirmarPagoBtn.addEventListener("click", async () => {
+confirmarPago.onclick = () => {
+  alert("✅ Pago simulado correctamente. ¡Tu pedido está en preparación!");
   pagoModal.style.display = "none";
-  alert("✅ Pago confirmado. Pedido en preparación...");
+  carrito.length = 0;
+  actualizarCarrito();
+};
 
-  // Simulación de registro del pedido en Supabase
-  const pedido = {
-    id_mesa: idMesa,
-    items: carrito,
-    total: carrito.reduce((acc, i) => acc + i.precio, 0),
-    estado: "Pendiente"
-  };
-
-  console.log("Pedido enviado:", pedido);
-
-  // Aquí puedes usar fetch() para enviar a un endpoint PHP o directamente a Supabase.
-  carrito = [];
-});
+metodoPago.onchange = () => {
+  tarjetaInfo.style.display = metodoPago.value === "tarjeta" ? "block" : "none";
+};

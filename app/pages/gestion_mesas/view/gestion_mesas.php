@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../../config/supabase.php';
 
 $id_usuario = $_SESSION['usuario']['id'] ?? null;
 $nombreUsuario = $_SESSION['usuario']['first_name'] ?? 'Usuario';
+$nombreRestaurante = $_SESSION['usuario']['nombre_restaurante'] ?? 'Restaurante sin nombre';
 
 if (!$id_usuario) {
   header("Location: /DelixSystem/app/pages/login.php");
@@ -33,9 +34,10 @@ $areas = $areasStmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
 
   <!-- 🔹 HEADER -->
-  <header class="main-header">
-    <h1><i class="fa-solid fa-utensils"></i> Gestión de Mesas</h1>
-  </header>
+<header class="main-header">
+  <h1><i class="fa-solid fa-utensils"></i> Gestión de Mesas - <?= htmlspecialchars($nombreRestaurante) ?></h1>
+</header>
+
     <!-- 🔹 BOTÓN IR AL RESUMEN -->
   <div class="resumen-btn-container" style="text-align:right; margin: 15px 30px;">
     <a href="resumen_mesas.php" class="btn-summary" title="Ver resumen general">

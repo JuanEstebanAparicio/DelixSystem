@@ -18,25 +18,29 @@ if (!$id_usuario) {
 switch ($accion) {
 
     // ✅ Crear área
-    case 'crear':
-        $nombre = trim($_POST['nombre_area'] ?? '');
+case 'crear':
+    $nombre = trim($_POST['nombre_area'] ?? '');
+    $nombre_restaurante = $_SESSION['usuario']['restaurant_name'] ?? 'Restaurante sin nombre';
 
-        if (empty($nombre)) {
-            returnJson($isAjax, 'error', 'El nombre del área es obligatorio.');
-        }
+    if (empty($nombre)) {
+        returnJson($isAjax, 'error', 'El nombre del área es obligatorio.');
+    }
 
-        if ($areaModel->areaExiste($nombre, $id_usuario)) {
-            returnJson($isAjax, 'error', 'Ya existe un área con ese nombre en tu cuenta.');
-        }
+    if ($areaModel->areaExiste($nombre, $id_usuario)) {
+        returnJson($isAjax, 'error', 'Ya existe un área con ese nombre en tu cuenta.');
+    }
 
-        $areaModel->crearArea($nombre, $id_usuario);
-        $id_area = $conexion->lastInsertId();
+    $areaModel->crearArea($nombre, $id_usuario, $nombre_restaurante);
+    $id_area = $conexion->lastInsertId();
 
-        returnJson($isAjax, 'success', 'Área creada correctamente.', [
-            'id_area' => $id_area,
-            'nombre' => $nombre
-        ]);
-        break;
+    returnJson($isAjax, 'success', 'Área creada correctamente.', [
+        'id_area' => $id_area,
+        'nombre' => $nombre,
+        'nombre_restaurante' => $nombre_restaurante
+    ]);
+    break;
+
+
 
     // ✅ Editar área
     case 'editar':
