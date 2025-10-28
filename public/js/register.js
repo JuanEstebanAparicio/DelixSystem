@@ -45,20 +45,25 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       const rawText = await response.text();
-      console.log("Respuesta del servidor:");
+      console.log("📩 Respuesta del servidor:");
       console.log(rawText);
 
-      const result = JSON.parse(rawText);
+      let result;
+      try {
+        result = JSON.parse(rawText);
+      } catch (err) {
+        throw new Error("Respuesta del servidor no válida");
+      }
+
+      loader.style.display = 'none'; // Quitar loader antes de cerrar modal
+
+      // 🔹 Cerrar modal tanto en éxito como en error
+      modal.style.display = 'none';
+      document.body.classList.remove('modal-open');
 
       if (result.status === 'success') {
-        loader.style.display = 'none'; // Quitar loader antes de cerrar modal
         form.reset();
 
-        // 🔹 Cerrar modal inmediatamente
-        modal.style.display = 'none';
-        document.body.classList.remove('modal-open'); // por si bloquea scroll
-
-        // 🔹 Pequeña pausa antes del SweetAlert (para evitar solapamiento)
         setTimeout(() => {
           Swal.fire({
             icon: 'success',
@@ -67,19 +72,37 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmButtonText: 'OK'
           });
         }, 200);
-
       } else {
-        loader.style.display = 'none';
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: result.message
-        });
+        setTimeout(() => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error en el registro',
+            text: result.message
+          });
+        }, 200);
       }
     } catch (err) {
       console.error(err);
       loader.style.display = 'none';
+      modal.style.display = 'none'; // También cerramos modal si hay error de conexión
+      document.body.classList.remove('modal-open');
+
       Swal.fire('Error de conexión', 'No se pudo conectar con el servidor.', 'error');
+    }
+  });
+
+  // 🔹 Cerrar modal manualmente
+  const closeBtn = document.getElementById('closeRegister');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+  }
+
+  // 🔹 Cerrar modal al hacer clic fuera
+  window.addEventListener('click', (event) => {
+    if (event.target === modal) {
+      modal.style.display = 'none';
     }
   });
 });
