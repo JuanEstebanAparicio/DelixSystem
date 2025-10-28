@@ -9,9 +9,9 @@ try {
     $ingredientes = $stmtIng->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($platos as $i => $dish) {
-        $stmt = $conexion->prepare("SELECT ingredient_id FROM dish_ingredient WHERE dish_id = ?");
+        $stmt = $conexion->prepare("SELECT ingredient_id AS id, quantity_used, unit FROM dish_ingredient WHERE dish_id = ?");
         $stmt->execute([$dish['id']]);
-        $platos[$i]['ingredients'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $platos[$i]['ingredients'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     $categorias = [];
@@ -21,7 +21,6 @@ try {
     }
 
     $listaCategorias = array_keys($categorias);
-
 } catch (PDOException $e) {
     die("<p class='error-msg'>Error al obtener datos desde Supabase: " . htmlspecialchars($e->getMessage()) . "</p>");
 }
@@ -46,7 +45,6 @@ try {
 
   <nav class="sidebar hidden" id="sidebarMenu">
     <h3 class="sidebar-title">Categorías</h3>
-
     <button id="reloadBtn" class="reload-btn" onclick="reloadCategories()">🔄 Recargar</button>
 
     <ul class="sidebar-list" id="categoryList">
@@ -58,7 +56,6 @@ try {
       <?php endforeach; ?>
     </ul>
   </nav>
-
 
   <main class="main-content container">
     <h2 class="page-title">Gestor de Platos</h2>
@@ -89,17 +86,17 @@ try {
               <?php if (!empty($dish['ingredients'])): ?>
                 <p><strong>Ingredientes:</strong></p>
                 <ul>
-                  <?php foreach ($dish['ingredients'] as $ing_id): ?>
+                  <?php foreach ($dish['ingredients'] as $ing): ?>
                     <?php
                       $nombreIng = '';
-                      foreach ($ingredientes as $ing) {
-                        if ($ing['id'] == $ing_id) {
-                          $nombreIng = $ing['name'];
+                      foreach ($ingredientes as $i) {
+                        if ($i['id'] == $ing['id']) {
+                          $nombreIng = $i['name'];
                           break;
                         }
                       }
                     ?>
-                    <li><?= htmlspecialchars($nombreIng) ?></li>
+                    <li><?= htmlspecialchars($nombreIng) ?> (<?= $ing['quantity_used'] . ' ' . $ing['unit'] ?>)</li>
                   <?php endforeach; ?>
                 </ul>
               <?php endif; ?>
@@ -164,6 +161,8 @@ try {
           </select>
         </div>
 
+        <div id="ingredientQuantities"></div>
+
         <div class="form-group">
           <label for="description">Descripción:</label>
           <textarea name="description" id="description" rows="3" placeholder="Breve descripción del plato..."></textarea>
@@ -196,11 +195,11 @@ try {
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script src="../js/form_handler.js"></script>
   <script src="../js/category_handler.js"></script>
   <script src="../js/sidebar_handler.js"></script>
   <script src="../js/dish_dynamic_loader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </body>
 </html>

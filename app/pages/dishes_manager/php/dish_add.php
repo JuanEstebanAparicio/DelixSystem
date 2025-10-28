@@ -14,10 +14,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $created_at  = date('Y-m-d H:i:s');
     $photo       = '';
 
+    // Si se agrega una nueva categoría, reemplaza la seleccionada
     if (!empty($newCategory)) {
         $category = $newCategory;
     }
 
+    // 📸 Manejo de imagen
     if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
         $fileName = basename($_FILES['photo']['name']);
         $ext = pathinfo($fileName, PATHINFO_EXTENSION);
@@ -32,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // 🧄 Ingredientes con cantidades y unidades
     $ingredients = [];
     if (!empty($_POST['ingredients'])) {
         foreach ($_POST['ingredients'] as $ingId) {
@@ -43,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // 🥗 Crear instancia del plato
     $dish = new dishes(null, $name, $price, $category, $description, $state, $created_at, $photo);
     $crud = new dishes_crud();
 

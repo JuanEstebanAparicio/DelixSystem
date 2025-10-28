@@ -50,7 +50,7 @@ class dishes_crud {
             return true;
         } catch (PDOException $e) {
             $this->pdo->rollBack();
-            die("Error al crear plato: " . $e->getMessage());
+            throw new Exception("Error al crear plato: " . $e->getMessage());
         }
     }
 
@@ -79,9 +79,8 @@ class dishes_crud {
                 ':photo'       => $dish->getPhoto(),
                 ':id'          => $id
             ]);
-
-            $this->pdo->prepare("DELETE FROM dish_ingredient WHERE dish_id = :id")
-                      ->execute([':id' => $id]);
+ 
+            $this->pdo->prepare("DELETE FROM dish_ingredient WHERE dish_id = :id")->execute([':id' => $id]);
 
             if (!empty($ingredients)) {
                 $sqlIng = "INSERT INTO dish_ingredient (dish_id, ingredient_id, quantity_used, unit)
@@ -102,10 +101,9 @@ class dishes_crud {
             return true;
         } catch (PDOException $e) {
             $this->pdo->rollBack();
-            die("Error al actualizar plato: " . $e->getMessage());
+            throw new Exception("Error al actualizar plato: " . $e->getMessage());
         }
     }
-
     public function deleteDish($id) {
         try {
             $this->pdo->beginTransaction();
@@ -115,7 +113,7 @@ class dishes_crud {
             return true;
         } catch (PDOException $e) {
             $this->pdo->rollBack();
-            die("Error al eliminar plato: " . $e->getMessage());
+            throw new Exception("Error al eliminar plato: " . $e->getMessage());
         }
     }
 
@@ -125,7 +123,7 @@ class dishes_crud {
             $stmt = $this->pdo->query($sql);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            die("Error al obtener platos: " . $e->getMessage());
+            throw new Exception("Error al obtener platos: " . $e->getMessage());
         }
     }
 
@@ -136,7 +134,7 @@ class dishes_crud {
             $stmt->execute([':id' => $id]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            die("Error al obtener plato: " . $e->getMessage());
+            throw new Exception("Error al obtener plato: " . $e->getMessage());
         }
     }
 }

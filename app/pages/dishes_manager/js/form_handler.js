@@ -1,3 +1,5 @@
+// form_handler.js
+
 function showModal(id) {
   document.getElementById(id).classList.remove("hidden");
 }
@@ -11,13 +13,38 @@ document.addEventListener("DOMContentLoaded", () => {
   const fecha = document.getElementById("created_at");
   if (fecha) fecha.value = hoy;
 
+  // Inicializar Select2 y generar inputs vacíos al cambiar selección
   if (window.jQuery && $('#ingredients').length) {
     $('#ingredients').select2({
       placeholder: 'Selecciona los ingredientes...',
       width: '100%'
     });
+
+    $('#ingredients').on('change', function () {
+      const selected = $(this).val() || [];
+      const container = $('#ingredientQuantities');
+      container.empty();
+
+      selected.forEach(id => {
+        const name = $('#ingredients option[value="' + id + '"]').text();
+        const inputId = 'quantity_' + id;
+        const block = `
+          <div class="ingredient-quantity-block">
+            <label for="${inputId}">${name} - Cantidad:</label>
+            <input type="number" step="0.01" name="quantity_${id}" id="${inputId}" placeholder="Ej: 2">
+            <select name="unit_${id}">
+              <option value="kg">kg</option>
+              <option value="litros">litros</option>
+              <option value="unidad">unidad</option>
+            </select>
+          </div>
+        `;
+        container.append(block);
+      });
+    });
   }
 
+  // Envío del formulario por fetch
   const form = document.getElementById("dishForm");
   if (form) {
     form.addEventListener("submit", async (e) => {
@@ -66,7 +93,9 @@ function newDish() {
   const currentPhotoInput = document.getElementById("current_photo_input");
   if (currentPhotoInput) currentPhotoInput.value = "";
 
+  // limpiar select2 y contenedor de cantidades (inputs vacíos)
   $('#ingredients').val(null).trigger('change');
+  $('#ingredientQuantities').empty();
 
   showModal("formModal");
 }
@@ -97,9 +126,39 @@ function editDish(data) {
   }
 
   if (data.ingredients && Array.isArray(data.ingredients)) {
-    $('#ingredients').val(data.ingredients).trigger('change');
+    let ingredientIds = [];
+    if (data.ingredients.length > 0 && typeof data.ingredients[0] === 'object') {
+      ingredientIds = data.ingredients.map(i => i.id);
+    } else {
+      ingredientIds = data.ingredients.map(i => i);
+    }
+
+    $('#ingredients').val(ingredientIds).trigger('change');
+
+    setTimeout(() => {
+      const container = $('#ingredientQuantities');
+      container.empty();
+
+      ingredientIds.forEach(id => {
+        const name = $('#ingredients option[value="' + id + '"]').text();
+        const inputId = 'quantity_' + id;
+        const block = `
+          <div class="ingredient-quantity-block">
+            <label for="${inputId}">${name} - Cantidad:</label>
+            <input type="number" step="0.01" name="quantity_${id}" id="${inputId}" placeholder="Ej: 2">
+            <select name="unit_${id}">
+              <option value="kg">kg</option>
+              <option value="litros">litros</option>
+              <option value="unidad" selected>unidad</option>
+            </select>
+          </div>
+        `;
+        container.append(block);
+      });
+    }, 100);
   } else {
     $('#ingredients').val(null).trigger('change');
+    $('#ingredientQuantities').empty();
   }
 
   document.getElementById("modalTitle").textContent = "Editar Plato";
