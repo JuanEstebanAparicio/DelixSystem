@@ -26,4 +26,7 @@ function redirectIfEmpleadoLoggedIn() {
         header('Location: /DelixSystem/app/pages/dashboard_empleado/view/index.php');
         exit();
     }
+    
 }
+
+
