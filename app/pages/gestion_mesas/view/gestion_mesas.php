@@ -11,7 +11,7 @@ require_once __DIR__ . '/../../../config/supabase.php';
 
 $id_usuario = $_SESSION['usuario']['id'] ?? null;
 $nombreUsuario = $_SESSION['usuario']['first_name'] ?? 'Usuario';
-$nombreRestaurante = $_SESSION['usuario']['nombre_restaurante'] ?? 'Restaurante sin nombre';
+$nombreRestaurante = $_SESSION['usuario']['restaurant_name'] ?? 'MiRestaurante';
 
 if (!$id_usuario) {
   header("Location: /DelixSystem/app/pages/login.php");

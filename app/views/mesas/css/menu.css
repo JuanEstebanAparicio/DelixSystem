@@ -13,13 +13,13 @@ body {
 
 /* HEADER */
 header {
-  background-color: #e85a4f;
+  background-color: #1f1c1c;
   color: #fff;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 12px 18px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 5px rgba(17, 13, 13, 0.2);
   position: sticky;
   top: 0;
   z-index: 10;
