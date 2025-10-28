@@ -151,6 +151,8 @@ try {
           </select>
           <input type="text" id="newCategoryInput" name="new_category" placeholder="Nueva categoría" class="hidden">
         </div>
+        
+        <div id="previousIngredients" style="margin-bottom: 10px; font-size: 14px;"></div>
 
         <div class="form-group">
           <label for="ingredients">Ingredientes:</label>

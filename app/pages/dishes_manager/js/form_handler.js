@@ -1,5 +1,3 @@
-// form_handler.js
-
 function showModal(id) {
   document.getElementById(id).classList.remove("hidden");
 }
@@ -13,7 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const fecha = document.getElementById("created_at");
   if (fecha) fecha.value = hoy;
 
-  // Inicializar Select2 y generar inputs vacíos al cambiar selección
   if (window.jQuery && $('#ingredients').length) {
     $('#ingredients').select2({
       placeholder: 'Selecciona los ingredientes...',
@@ -44,7 +41,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Envío del formulario por fetch
   const form = document.getElementById("dishForm");
   if (form) {
     form.addEventListener("submit", async (e) => {
@@ -93,7 +89,6 @@ function newDish() {
   const currentPhotoInput = document.getElementById("current_photo_input");
   if (currentPhotoInput) currentPhotoInput.value = "";
 
-  // limpiar select2 y contenedor de cantidades (inputs vacíos)
   $('#ingredients').val(null).trigger('change');
   $('#ingredientQuantities').empty();
 
