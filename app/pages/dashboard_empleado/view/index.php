@@ -1,8 +1,11 @@
 <?php
 require_once __DIR__ . '/../../../middleware/employee_guard.php';
-protectEmpleado();
 include __DIR__ . '/../../../components/header_empleado.php';
-$empleado = $_SESSION['empleado_auth'];
+include __DIR__ . '/../../../components/control_center.php';
+protectEmpleado();
+
+if (session_status() === PHP_SESSION_NONE) session_start();
+$empleado = $_SESSION['empleado_auth'] ?? ['full_name' => 'Empleado', 'email' => ''];
 ?>
 
 <!DOCTYPE html>
@@ -12,7 +15,8 @@ $empleado = $_SESSION['empleado_auth'];
   <title>Delix | Employees</title>
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="../css/dashboard_empleado.css">
+  <link rel="stylesheet" href="/DelixSystem/app/shared/css/globals.css">
+  <link rel="stylesheet" href="/DelixSystem/app/shared/css/control_center.css">
 </head>
 <body class="bg-gray-50 min-h-screen">
 
@@ -30,11 +34,10 @@ $empleado = $_SESSION['empleado_auth'];
           <a href="/DelixSystem/app/pages/dishes_manager/view/index.php" class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-lg font-medium transition-all">Gestor Menú</a>
         </div>
       </div>
-      <img src="https://cdn.dribbble.com/users/242220/screenshots/15658596/media/75dc88c0b1de9c72063b93c4a94cc9ee.png" 
-           alt="Welcome Illustration" class="w-64 hidden md:block rounded-xl shadow-sm">
+      <img src="https://cdn.dribbble.com/users/242220/screenshots/15658596/media/75dc88c0b1de9c72063b93c4a94cc9ee.png" alt="Welcome Illustration" class="w-64 hidden md:block rounded-xl shadow-sm">
     </section>
   </main>
 
-  <script src="../js/header_empleado.js"></script>
+  <script src="/DelixSystem/app/shared/js/control_center.js"></script>
 </body>
 </html>
