@@ -10,6 +10,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
 //🪑 Obtenemos el nombre del usuario desde la sesión
 $nombreUsuario = $_SESSION['usuario']['nombre'] ?? 'Usuario';
+$nombreRestaurante = $_SESSION['usuario']['restaurant_name'] ?? 'MiRestaurante';
+
 ?>
 
 <!DOCTYPE html>
@@ -27,7 +29,7 @@ $nombreUsuario = $_SESSION['usuario']['nombre'] ?? 'Usuario';
 
   <aside class="sidebar">
   <h2>
-    <span class="logo-full">🍴 MiRestaurante</span>
+    <span class="logo-full">🍴 <?= htmlspecialchars($nombreRestaurante) ?></span>
     <span class="logo-mini">DELIX</span>
   </h2>
   <ul>
@@ -42,7 +44,7 @@ $nombreUsuario = $_SESSION['usuario']['nombre'] ?? 'Usuario';
     <li><i>📊</i><span>Reportes</span></li>
     <li><i>⚙️</i><span>Configuración</span></li>
     <a href="../../gestor_empleado/view/gestor_empleados.php">
-    <li><i>⚙️</i><span>Admin</span></li>
+    <li><i>👨‍💼</i><span>Admin</span></li>
     </a>
 
   </ul>
