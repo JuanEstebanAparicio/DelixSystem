@@ -1,3 +1,4 @@
+// empleados.js
 document.addEventListener("DOMContentLoaded", () => {
   const codigoEl = document.getElementById("codigoDinamico");
   const copiarBtn = document.getElementById("copiarCodigo");
@@ -10,15 +11,18 @@ document.addEventListener("DOMContentLoaded", () => {
   let timer = null;
   let tiempo = 60;
 
-
+  // ⚠️ Verificamos que el userId esté disponible
+  if (typeof userId === "undefined" || !userId) {
+    console.error("❌ No se encontró userId. El usuario no está logueado correctamente.");
+    estado.textContent = "Error: sesión inválida.";
+    estado.classList.add("expirado");
+    return;
+  }
 
   // 🔄 Timer circular
   const startTimer = (exp) => {
     clearInterval(timer);
     const expireTime = new Date(exp + " UTC").getTime();
-
-
-
 
     timer = setInterval(() => {
       const now = Date.now();
@@ -39,18 +43,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
   };
 
-  // 📤 Fetch wrapper
+  // 📤 Request con user_id incluido
   const request = async (action) => {
-    const res = await fetch("../php/key/DynamicKeyController.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ action, user_id: userId }),
-    });
-    const text = await res.text();
     try {
-      return JSON.parse(text);
-    } catch {
-      throw new Error("Invalid JSON: " + text);
+      const res = await fetch("../php/key/DynamicKeyController.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          action,
+          user_id: userId, // 👈 se envía el ID real del usuario logueado
+        }),
+      });
+
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        throw new Error("Invalid JSON: " + text);
+      }
+    } catch (err) {
+      console.error("🚨 Error en request:", err);
+      return { status: "error", message: "Error de red" };
     }
   };
 
@@ -88,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ♻️ Auto regenerar
   const autoRegenerate = () => {
-    setTimeout(generateCode, 2000); // regenerate 2s after expiration
+    setTimeout(generateCode, 2000);
   };
 
   copiarBtn.addEventListener("click", () => {
@@ -102,3 +115,325 @@ document.addEventListener("DOMContentLoaded", () => {
   // 🚀 Init
   getCode();
 });
+
+// -------------------------------------------------------------
+// 🧩 GESTOR DE EMPLEADOS — con control interno de modales
+// -------------------------------------------------------------
+// empleados.js (reemplazo del bloque principal — mantiene polling, eliminación, listado)
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("[empleados.js] init");
+
+  // ====== Config / elementos ======
+  const tablaBody = document.querySelector("#tablaEmpleados tbody");
+  const modalRoles = document.getElementById("modalRoles");
+  const REFRESH_INTERVAL = 5000;
+  const LIST_URL = "../php/employee/EmpleadoListController.php";
+  let empleadosActuales = new Map();
+  let refreshTimer = null;
+
+  // Si no existe tabla, salimos (no romperá otras páginas)
+  if (!tablaBody) {
+    console.warn("[empleados.js] No table body found, aborting employees block.");
+    return;
+  }
+
+  // Aseguramos modal oculto al inicio (defensivo)
+  if (modalRoles) {
+    try { modalRoles.style.display = "none"; } catch (e) {}
+  } else {
+    console.warn("[empleados.js] modalRoles not found in DOM.");
+  }
+
+  // ====== Mini helpers de modal ======
+  const openModal = (selectorOrEl) => {
+    const el = (typeof selectorOrEl === "string") ? document.querySelector(selectorOrEl) : selectorOrEl;
+    if (!el) { console.warn("[openModal] modal not found:", selectorOrEl); return; }
+    el.classList.add("show");
+    el.style.display = "flex";
+    const first = el.querySelector("input, button, textarea, select");
+    if (first) first.focus();
+    console.log("[openModal] opened", el.id || el);
+  };
+
+  const closeModal = (selectorOrEl) => {
+    const el = (typeof selectorOrEl === "string") ? document.querySelector(selectorOrEl) : selectorOrEl;
+    if (!el) return;
+    el.classList.remove("show");
+    el.style.display = "none";
+    console.log("[closeModal] closed", el.id || el);
+  };
+
+  // Cerrar modal al hacer clic fuera o tecla ESC
+  document.addEventListener("click", (e) => {
+    // Cerrar botones (tienen clase .close)
+    if (e.target.matches(".modal .close") || e.target.matches(".modal .btn-outline.close")) {
+      const modal = e.target.closest(".modal");
+      if (modal) closeModal(modal);
+    }
+    // Cerrar al hacer clic directamente en el backdrop (el mismo div.modal)
+    if (e.target.classList && e.target.classList.contains("modal")) {
+      closeModal(e.target);
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") document.querySelectorAll(".modal.show").forEach(m => closeModal(m));
+  });
+
+  // ====== Animación fila nueva ======
+  const highlightRow = (row) => {
+    row.classList.add("highlight-new");
+    setTimeout(() => row.classList.remove("highlight-new"), 2000);
+  };
+
+  // ====== Render / update tabla ======
+  const createRow = (emp) => {
+    const tr = document.createElement("tr");
+    tr.dataset.id = emp.id;
+    tr.innerHTML = `
+      <td>${emp.id}</td>
+      <td>${emp.full_name}</td>
+      <td>${emp.email}</td>
+      <td>${emp.role ?? ''}</td>
+      <td>${new Date(emp.created_at).toLocaleString()}</td>
+      <td class="acciones">
+        <button class="btn btn-primary btn-sm asignar-rol" 
+                data-id="${emp.id}" 
+                data-modal-target="#modalRoles">Asignar roles</button>
+        <button class="btn btn-danger btn-sm eliminar" data-id="${emp.id}">Eliminar</button>
+      </td>
+    `;
+    return tr;
+  };
+
+  const renderTable = (empleados) => {
+    tablaBody.innerHTML = "";
+    empleados.forEach(emp => {
+      const row = createRow(emp);
+      tablaBody.appendChild(row);
+      empleadosActuales.set(emp.id, emp);
+    });
+  };
+
+  const updateTable = (nuevosEmpleados) => {
+  const nuevosMap = new Map(nuevosEmpleados.map(e => [e.id, e]));
+
+  // 1️⃣ Insertar nuevos empleados
+  nuevosEmpleados.forEach(emp => {
+    const existente = empleadosActuales.get(emp.id);
+    if (!existente) {
+      const newRow = createRow(emp);
+      newRow.classList.add("fade-in");
+      tablaBody.insertBefore(newRow, tablaBody.firstChild);
+      highlightRow(newRow);
+      empleadosActuales.set(emp.id, emp);
+    } else {
+      // 2️⃣ Si existe, verificar si algo cambió (nombre, correo, roles)
+      if (
+        existente.full_name !== emp.full_name ||
+        existente.email !== emp.email ||
+        existente.role !== emp.role
+      ) {
+        const row = tablaBody.querySelector(`tr[data-id="${emp.id}"]`);
+        if (row) {
+          row.children[1].textContent = emp.full_name;
+          row.children[2].textContent = emp.email;
+          row.children[3].textContent = emp.role;
+          highlightRow(row);
+        }
+        empleadosActuales.set(emp.id, emp);
+      }
+    }
+  });
+
+  // 3️⃣ Eliminar empleados que ya no existan
+  empleadosActuales.forEach((_, id) => {
+    if (!nuevosMap.has(id)) {
+      const row = tablaBody.querySelector(`tr[data-id="${id}"]`);
+      if (row) row.remove();
+      empleadosActuales.delete(id);
+    }
+  });
+};
+
+
+  // ====== Fetch empleados ======
+  const fetchEmployees = async () => {
+    try {
+      const res = await fetch(LIST_URL, { cache: "no-store" });
+      const data = await res.json();
+      if (data.status !== "success") throw new Error(data.message || "Invalid response");
+      const empleados = data.data || [];
+      if (empleadosActuales.size === 0) renderTable(empleados); else updateTable(empleados);
+      if (empleados.length === 0 && tablaBody.children.length === 0) {
+        tablaBody.innerHTML = `<tr><td colspan="6">⚠️ No hay empleados registrados</td></tr>`;
+      }
+    } catch (err) {
+      console.error("[fetchEmployees] error:", err);
+    }
+  };
+
+  // ====== Polling ======
+  const startAutoRefresh = () => { refreshTimer = setInterval(fetchEmployees, REFRESH_INTERVAL); };
+
+  // ====== Eliminar empleado ======
+  tablaBody.addEventListener("click", async (e) => {
+    // eliminar
+    if (e.target.matches(".btn-danger")) {
+      const id = e.target.dataset.id;
+      const row = e.target.closest("tr");
+      const confirmed = await Alerts.confirm("¿Deseas eliminar este empleado?", "Confirmar eliminación");
+      if (!confirmed) return;
+      try {
+        Alerts.loading("Eliminando empleado...");
+        const res = await fetch("../php/employee/EmpleadoController.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ action: "delete", id }),
+        });
+        const json = await res.json();
+        Alerts.close();
+        if (json.status === "success") {
+          Alerts.success(json.message || "Empleado eliminado");
+          row.classList.add("fade-out");
+          setTimeout(() => row.remove(), 350);
+          empleadosActuales.delete(parseInt(id));
+        } else Alerts.error(json.message || "No se pudo eliminar");
+      } catch (err) {
+        Alerts.close();
+        console.error("[delete] error:", err);
+        Alerts.error("Error de conexión");
+      }
+      return;
+    }
+
+    // abrir modal genérico (solo si NO es el botón de asignar rol)
+const btnModal = e.target.closest("[data-modal-target]");
+if (btnModal) {
+  // si es un botón de asignar rol, dejamos que lo maneje el bloque de roles
+  if (btnModal.classList.contains("asignar-rol")) return;
+
+  const target = btnModal.dataset.modalTarget;
+  console.log("[delegation] clicked modal button, target:", target, "data-id:", btnModal.dataset.id);
+  openModal(target);
+  return;
+}
+
+  });
+
+  // Forzar actualización cuando un empleado se registre (evento disparado por tu flujo)
+  document.addEventListener("empleado-registrado", fetchEmployees);
+
+  // ====== Inicio ======
+  fetchEmployees();
+  startAutoRefresh();
+
+});
+
+// ================================
+// 🎯 BLOQUE NUEVO: CARGA Y ACTUALIZACIÓN DE ROLES
+// ================================
+
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".asignar-rol");
+  if (!btn) return;
+
+  const empleadoId = btn.dataset.id;
+  const modal = document.querySelector("#modalRoles");
+  const rolesContainer = modal.querySelector("#rolesContainer");
+  const inputEmpleadoId = modal.querySelector("#empleadoId");
+  const guardarBtn = modal.querySelector("#guardarRoles");
+
+  inputEmpleadoId.value = empleadoId;
+
+  try {
+    // 1️⃣ Obtener todos los roles disponibles
+    const rolesRes = await fetch("../php/roles/RolesListController.php");
+    const rolesData = await rolesRes.json();
+    if (rolesData.status !== "success") throw new Error("Error al obtener roles");
+
+    // 2️⃣ Obtener roles asignados al empleado
+    const empRes = await fetch(`../php/roles/RolesByEmployeeController.php?id=${empleadoId}`);
+    const empData = await empRes.json();
+
+    const rolesAsignados = Array.isArray(empData.data)
+      ? empData.data.map(r => parseInt(r.rol_id ?? r.id))
+      : [];
+
+    // 3️⃣ Renderizar checkboxes
+    rolesContainer.innerHTML = "";
+    rolesData.data.forEach((rol) => {
+      const checked = rolesAsignados.includes(parseInt(rol.id)) ? "checked" : "";
+      const div = document.createElement("div");
+      div.classList.add("rol-item");
+      div.innerHTML = `
+        <label>
+          <input type="checkbox" value="${rol.id}" ${checked}>
+          <strong>${rol.nombre}</strong> - <small>${rol.descripcion}</small>
+        </label>
+      `;
+      rolesContainer.appendChild(div);
+    });
+
+    // 4️⃣ Mostrar modal
+    modal.classList.add("show");
+    modal.style.display = "flex";
+
+    // 5️⃣ Evitar duplicar eventos al guardar
+    guardarBtn.onclick = async (ev) => {
+      ev.preventDefault();
+
+      const seleccionados = [...rolesContainer.querySelectorAll("input[type='checkbox']:checked")].map(chk => chk.value);
+      try {
+        const res = await fetch("../php/roles/RolesAssignController.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            empleado_id: empleadoId,
+            roles: JSON.stringify(seleccionados),
+          }),
+        });
+
+        const data = await res.json();
+
+        if (data.status === "success") {
+          Alerts.success("✅ Roles actualizados correctamente");
+
+          // 🔁 Volver a marcar correctamente según la nueva asignación
+          setTimeout(async () => {
+            const empReload = await fetch(`../php/roles/RolesByEmployeeController.php?id=${empleadoId}`);
+            const empNewData = await empReload.json();
+            const nuevosRoles = Array.isArray(empNewData.data)
+              ? empNewData.data.map(r => parseInt(r.rol_id ?? r.id))
+              : [];
+
+            rolesContainer.querySelectorAll("input[type='checkbox']").forEach(chk => {
+              chk.checked = nuevosRoles.includes(parseInt(chk.value));
+            });
+          }, 600);
+        } else {
+          Alerts.error(data.message || "Error al asignar roles");
+        }
+
+      } catch (err) {
+        console.error("🚨 Error al asignar roles:", err);
+        Alerts.error("Error al asignar roles (ver consola)");
+      }
+    };
+
+  } catch (err) {
+    console.error("Error al cargar roles:", err);
+    Alerts.error("Error al cargar roles disponibles (ver consola)");
+  }
+});
+
+
+
+function closeModal(selectorOrEl) {
+  const el = (typeof selectorOrEl === "string") ? document.querySelector(selectorOrEl) : selectorOrEl;
+  if (!el) return;
+  el.classList.remove("show");
+  el.style.display = "none";
+  console.log("[closeModal - global] closed", el.id || el);
+}
+

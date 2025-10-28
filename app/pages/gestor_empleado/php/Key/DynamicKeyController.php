@@ -8,6 +8,11 @@ require_once __DIR__ . '/../../../../config/supabase.php';
 // ✅ Include the model
 require_once __DIR__ . '/DynamicKeyModel.php';
 
+// ✅ Start session (por si el frontend no envía user_id)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 $conexion->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 
 try {
@@ -16,21 +21,35 @@ try {
     }
 
     $action = $_POST['action'] ?? null;
-    $userId = isset($_POST['user_id']) ? intval($_POST['user_id']) : null;
+
+    // ✅ Prioriza el user_id del POST, pero usa el de sesión si existe
+    $userId = isset($_POST['user_id']) ? intval($_POST['user_id']) : (
+        $_SESSION['usuario']['id'] ?? null
+    );
 
     if (!$action || !$userId) {
-        throw new Exception("Missing parameters");
+        throw new Exception("Missing parameters: action or user_id");
     }
 
-    // ✅ Create model (connection comes from supabase.php)
+    // ✅ Crear modelo
     $model = new DynamicKeyModel($conexion);
 
     switch ($action) {
         case 'get':
+            // 1️⃣ Limpia claves expiradas
             $model->expireKey($userId);
-            $key = $model->getActiveKey($userId);
 
-            if (!$key) {
+            // 2️⃣ Busca si hay clave activa en memoria (mejora de velocidad)
+            if (!isset($_SESSION['active_key'][$userId])) {
+                $key = $model->getActiveKey($userId);
+                if ($key) {
+                    $_SESSION['active_key'][$userId] = $key; // Cache temporal
+                }
+            } else {
+                $key = $_SESSION['active_key'][$userId];
+            }
+
+            if (empty($key)) {
                 echo json_encode(["status" => "no_active"]);
                 exit;
             }
@@ -43,25 +62,31 @@ try {
             break;
 
         case 'generate':
-    // 1️⃣ Desactiva cualquier clave activa anterior
-                $model->deactivateOldKeys($userId);
+            // 1️⃣ Desactiva claves previas activas
+            $model->deactivateOldKeys($userId);
 
-    // 2️⃣ Limpia claves viejas e inactivas
-                $model->cleanOldKeys($userId);
+            // 2️⃣ Limpia claves inactivas antiguas
+            $model->cleanOldKeys($userId);
 
-    // 3️⃣ Genera el nuevo código
-                $code = strtoupper(implode('-', str_split(bin2hex(random_bytes(4)), 4)));
-                $expiresAt = gmdate("Y-m-d H:i:s", strtotime("+1 minute"));
-                $model->createKey($userId, $code, $expiresAt);
+            // 3️⃣ Genera nueva clave
+            $code = strtoupper(implode('-', str_split(bin2hex(random_bytes(4)), 4)));
+            $expiresAt = gmdate("Y-m-d H:i:s", strtotime("+1 minute"));
+
+            // 4️⃣ Guarda en base de datos
+            $model->createKey($userId, $code, $expiresAt);
+
+            // 5️⃣ Cachea en sesión (mejora de rendimiento)
+            $_SESSION['active_key'][$userId] = [
+                'code' => $code,
+                'expires_at' => $expiresAt
+            ];
 
             echo json_encode([
-            "status" => "success",
-            "code" => $code,
-            "expires_at" => $expiresAt
-        ]);
-        break;
-
-
+                "status" => "success",
+                "code" => $code,
+                "expires_at" => $expiresAt
+            ]);
+            break;
 
         default:
             throw new Exception("Invalid action");
@@ -69,6 +94,9 @@ try {
 
 } catch (Throwable $e) {
     http_response_code(500);
-    echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+    echo json_encode([
+        "status" => "error",
+        "message" => $e->getMessage()
+    ]);
 }
 ?>

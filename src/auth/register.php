@@ -20,7 +20,8 @@ $insert = supabase('usuarios', 'POST', [
     'last_name' => $last_name,
     'email' => $email,
     'restaurant_name' => $restaurant_name,
-    'password' => password_hash($password, PASSWORD_DEFAULT)
+    'password' => password_hash($password, PASSWORD_DEFAULT),
+    'rol' => 'propietario' 
 ]);
 
 if ($insert && isset($insert['status']) && $insert['status'] >= 200 && $insert['status'] < 300) {

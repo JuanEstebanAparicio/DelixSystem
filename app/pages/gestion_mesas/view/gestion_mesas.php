@@ -1,5 +1,27 @@
 <?php
-include __DIR__ . '/../../../config/supabase.php';
+// DelixSystem/app/pages/gestion_mesas/view/gestion_mesas.php
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+require_once __DIR__ . '/../../../middleware/session_guard.php';
+protectPage(); // ✅ Verifica sesión y evita accesos no logueados
+
+require_once __DIR__ . '/../../../config/supabase.php';
+
+$id_usuario = $_SESSION['usuario']['id'] ?? null;
+$nombreUsuario = $_SESSION['usuario']['first_name'] ?? 'Usuario';
+$nombreRestaurante = $_SESSION['usuario']['restaurant_name'] ?? 'MiRestaurante';
+
+if (!$id_usuario) {
+  header("Location: /DelixSystem/app/pages/login.php");
+  exit;
+}
+
+// ✅ Filtrar las áreas por usuario actual
+$areasStmt = $conexion->prepare("SELECT * FROM areas WHERE id_usuario = ? ORDER BY orden ASC, id_area ASC");
+$areasStmt->execute([$id_usuario]);
+$areas = $areasStmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -12,9 +34,17 @@ include __DIR__ . '/../../../config/supabase.php';
 <body>
 
   <!-- 🔹 HEADER -->
-  <header class="main-header">
-    <h1><i class="fa-solid fa-utensils"></i> Gestión de Mesas</h1>
-  </header>
+<header class="main-header">
+  <h1><i class="fa-solid fa-utensils"></i> Gestión de Mesas - <?= htmlspecialchars($nombreRestaurante) ?></h1>
+</header>
+
+    <!-- 🔹 BOTÓN IR AL RESUMEN -->
+  <div class="resumen-btn-container" style="text-align:right; margin: 15px 30px;">
+    <a href="resumen_mesas.php" class="btn-summary" title="Ver resumen general">
+      <i class="fa-solid fa-chart-pie"></i> Volver al resumen general
+    </a>
+  </div>
+
 
   <div class="container">
 
@@ -45,9 +75,9 @@ include __DIR__ . '/../../../config/supabase.php';
 
     <!-- 🔹 LISTADO DE ÁREAS -->
     <?php
-    $areasStmt = $conexion->query("SELECT * FROM areas ORDER BY orden ASC, id_area ASC");
+   // $areasStmt = $conexion->query("SELECT * FROM areas ORDER BY orden ASC, id_area ASC");
 
-    $areas = $areasStmt->fetchAll(PDO::FETCH_ASSOC);
+    // $areas = $areasStmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($areas as $area):
     ?>

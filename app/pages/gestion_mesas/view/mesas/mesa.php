@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-include __DIR__ . '/../../config/supabase.php';
+include _DIR_ . '/../../config/supabase.php';
 
 $id_mesa = $_GET['id'] ?? null;
 

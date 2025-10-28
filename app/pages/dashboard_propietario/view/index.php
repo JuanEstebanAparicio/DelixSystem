@@ -1,15 +1,17 @@
 <!-- -- DelixSystem/app/pages/dashboard_propietario/view/index.php -->
 <?php
 require_once __DIR__ . '/../../../middleware/session_guard.php';
-protectPage(); // Evita que accedan al dashboard sin login
+protectPage('propietario'); // Evita que accedan al dashboard sin login
 
 // Iniciamos sesión solo si no está activa (por seguridad extra)
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Obtenemos el nombre del usuario desde la sesión
+//🪑 Obtenemos el nombre del usuario desde la sesión
 $nombreUsuario = $_SESSION['usuario']['nombre'] ?? 'Usuario';
+$nombreRestaurante = $_SESSION['usuario']['restaurant_name'] ?? 'MiRestaurante';
+
 ?>
 
 <!DOCTYPE html>
@@ -27,20 +29,42 @@ $nombreUsuario = $_SESSION['usuario']['nombre'] ?? 'Usuario';
 
   <aside class="sidebar">
   <h2>
-    <span class="logo-full">🍴 MiRestaurante</span>
+    <span class="logo-full">🍴 <?= htmlspecialchars($nombreRestaurante) ?></span>
     <span class="logo-mini">DELIX</span>
   </h2>
   <ul>
     <li class="active"><i>🏠</i><span>Dashboard</span></li>
     <li><i>🧾</i><span>Pedidos</span></li>
     <li><i>🍔</i><span>Menú</span></li>
-    <li><i>🪑</i><span>Mesas</span></li>
+  <a href="../../gestion_mesas/view/resumen_mesas.php" class="menu-link">
+    <i class="fa-solid fa-chair">🪑</i> <span>Mesas</span>
+  </a>
+</li>
     <li><i>👥</i><span>Clientes</span></li>
     <li><i>📊</i><span>Reportes</span></li>
     <li><i>⚙️</i><span>Configuración</span></li>
+    <a href="../../gestor_empleado/view/gestor_empleados.php">
+    <li><i>👨‍💼</i><span>Admin</span></li>
+    </a>
+
   </ul>
   </aside>
 
+  <div id="transitionOverlay" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(255,255,255,0.9);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  color: #333;
+  font-weight: bold;
+">
+  Cargando...
+</div>
 
   <main class="main">
    <header>

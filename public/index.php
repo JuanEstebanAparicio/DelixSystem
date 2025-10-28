@@ -138,9 +138,10 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
         <input type="email" name="email" placeholder="Correo electrónico" required>
       </div>
 
-      <div class="form-group">
-        <input type="password" name="password" placeholder="Contraseña" required>
-      </div>
+     <div class="form-group password-container">
+  <input type="password" name="password" placeholder="Contraseña" required id="loginPassword">
+  <button type="button" class="toggle-password" data-target="loginPassword">👁️</button>
+</div>
 
       <button type="submit" class="btn-primary">Ingresar</button>
       <div id="loginMessage" style="margin-top:10px; font-weight:bold;"></div>
@@ -181,13 +182,15 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
           <input type="text" name="restaurant_name" placeholder="Nombre del restaurante" required>
         </div>
 
-        <div class="form-group">
-          <input type="password" name="password" placeholder="Contraseña" required minlength="8">
-        </div>
+        <div class="form-group password-container">
+  <input type="password" name="password" placeholder="Contraseña" required minlength="8" id="registerPassword">
+  <button type="button" class="toggle-password" data-target="registerPassword">👁️</button>
+</div>
 
-        <div class="form-group">
-          <input type="password" name="confirm_password" placeholder="Confirmar contraseña" required minlength="8">
-        </div>
+<div class="form-group password-container">
+  <input type="password" name="confirm_password" placeholder="Confirmar contraseña" required minlength="8" id="confirmPassword">
+  <button type="button" class="toggle-password" data-target="confirmPassword">👁️</button>
+</div>
 
         <div class="form-group">
           <label>
@@ -257,6 +260,72 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
       <br>
 
       <button type="submit" class="btn-primary">Unirme al Restaurante</button>
+
+        <p style="margin-top:15px; font-size:0.9rem; color:#555;">
+  ¿Ya estás en un restaurante? 
+  <a 
+    href="#" 
+    id="switchToEmployeeLogin" 
+    data-modal-target="#employeeLoginModal"
+    style="color:#FF6B35; font-weight:600;"
+  >
+    Entra desde aquí
+  </a>
+</p>
+    </form>
+  </div>
+</div>
+
+<!-- 🔸 MODAL DE LOGIN DE EMPLEADO -->
+<div id="employeeLoginModal" class="modal">
+  <div class="modal-content">
+    <span class="close" id="closeEmployeeLogin">&times;</span>
+    <h3>Inicio de Sesión de Empleado</h3>
+
+    <form 
+      id="employeeLoginForm" 
+      method="POST" 
+      action="/DelixSystem/src/auth/login_empleado.php"
+    >
+      <div class="form-group">
+        <input 
+          type="text" 
+          name="codigo_dinamico" 
+          placeholder="Código dinámico del restaurante"
+          required
+        >
+      </div>
+
+      <br>
+
+      <div class="form-group">
+        <input 
+          type="email" 
+          name="correo" 
+          placeholder="Correo electrónico" 
+          required
+        >
+      </div>
+
+      <br>
+
+      <div class="form-group">
+        <input 
+          type="text" 
+          name="documento" 
+          placeholder="Número de documento o cédula" 
+          required
+        >
+      </div>
+
+      <br>
+
+      <button type="submit" class="btn-primary">Ingresar</button>
+    </form>
+  </div>
+</div>
+
+
     </form>
   </div>
 </div>
@@ -280,6 +349,7 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
 <script src="./js/alert.js" defer></script>
+<script src="./js/show_password.js" defer></script>
 <script src="./js/modal.js" defer></script>
 <script src="./js/register.js" defer></script>
 <script src="./js/login.js" defer></script>

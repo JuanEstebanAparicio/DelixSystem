@@ -1,6 +1,5 @@
-// empleadosAccess.js
 document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("empleadoAccessForm");
+  const form = document.getElementById("employeeLoginForm");
   if (!form) return;
 
   form.addEventListener("submit", async (e) => {
@@ -9,9 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = new FormData(form);
 
     try {
-      Alerts.loading("Accediendo al sistema...");
+      Alerts.loading("Verificando acceso...");
 
-      const res = await fetch("/DelixSystem/app/pages/gestor_empleado/php/employee/EmpleadoController.php", {
+      const res = await fetch(form.action, {
         method: "POST",
         body: data,
       });
@@ -23,24 +22,21 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         result = JSON.parse(text);
       } catch {
-        console.error("❌ Respuesta no válida del servidor:", text);
-        Alerts.error("Respuesta inválida del servidor.");
+        console.error("❌ Respuesta inválida:", text);
+        Alerts.error("Respuesta del servidor no válida.");
         return;
       }
 
       if (result.status === "success") {
-        Alerts.success(result.message || "Ingreso exitoso 🎉");
+        Alerts.success(result.message || "Inicio exitoso 🎉");
 
         setTimeout(() => {
-          // Si viene un redirect desde el backend, lo usamos
           if (result.redirect) {
             window.location.href = result.redirect;
-          } else {
-            Alerts.info("Redirección no especificada. Contacta al administrador.");
           }
         }, 1500);
       } else {
-        Alerts.error(result.message || "No se pudo completar el acceso.");
+        Alerts.error(result.message || "No se pudo iniciar sesión.");
       }
     } catch (err) {
       Alerts.close();

@@ -1,9 +1,0 @@
-{
-    "email": "LUISMALDONADOURIB@GMAIL.COM",
-    "password": "123123123",
-    "data": {
-        "first_name": "Luis",
-        "last_name": "Maldonado",
-        "restaurant_name": "Tripitropi"
-    }
-}

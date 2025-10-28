@@ -1,0 +1,162 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: #fffaf3;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* HEADER */
+header {
+  background-color: #1f1c1c;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  box-shadow: 0 2px 5px rgba(17, 13, 13, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+header h1 {
+  font-size: 1.1rem;
+}
+
+#verCarritoBtn {
+  background: #fff;
+  color: #e85a4f;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* SECCIONES DEL MENÚ */
+main {
+  padding: 20px;
+  text-align: center;
+}
+
+main h2 {
+  margin: 25px 0 10px;
+  color: #e85a4f;
+  font-size: 1.4rem;
+}
+
+.menu-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* ITEMS DE COMIDA */
+.item {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  padding: 15px;
+  width: 160px;
+  transition: transform 0.2s;
+}
+
+.item:hover {
+  transform: scale(1.03);
+}
+
+.item img {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 8px;
+}
+
+.item h3 {
+  font-size: 1rem;
+  margin: 6px 0;
+}
+
+.item p {
+  font-weight: bold;
+}
+
+.add-btn {
+  background-color: #e85a4f;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 5px;
+  font-size: 0.9rem;
+}
+
+/* MODALES */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: #fff;
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20% auto;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  animation: abrirModal 0.3s ease-out;
+}
+
+.modal-content button {
+  background: #e85a4f;
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 1rem;
+}
+
+button.secundario {
+  background: #ccc;
+  color: #222;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  header {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+
+  header h1 {
+    font-size: 1rem;
+  }
+
+  .menu-section {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .item {
+    width: 80%;
+  }
+
+  .modal-content {
+    margin: 40% auto;
+  }
+}

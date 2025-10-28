@@ -1,29 +1,30 @@
 <?php
+// DelixSystem/app/pages/gestion_mesas/view/ver_qr.php
 include __DIR__ . '/../../../config/supabase.php';
 
-$id_mesa = $_GET['id'] ?? null;
+$id_mesa = isset($_GET['id']) ? (int) $_GET['id'] : null;
 
 if (!$id_mesa) {
-    die("No se especificó la mesa.");
+    die("No se especificó la mesa válida.");
 }
 
 // Consulta la mesa y el área
-$stmt = $conexion->prepare("
-    SELECT m.nombre AS mesa, a.nombre AS area 
-    FROM mesas m 
-    JOIN areas a ON a.id_area = m.id_area 
-    WHERE m.id_mesa = ?
-");
-$stmt->execute([$id_mesa]);
+$stmt = $conexion->prepare("\n    SELECT m.nombre AS mesa, a.nombre AS area \n    FROM mesas m \n    JOIN areas a ON a.id_area = m.id_area \n    WHERE m.id_mesa = :id_mesa\n");
+$stmt->bindValue(':id_mesa', $id_mesa, PDO::PARAM_INT);
+$stmt->execute();
 $mesa = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$mesa) {
+    // Si se pasa ?debug=1 mostramos el id consultado para depuración local
+    if (isset($_GET['debug'])) {
+        die("Mesa no encontrada. ID consultado: " . htmlspecialchars($id_mesa));
+    }
     die("Mesa no encontrada.");
 }
 
 // Texto que contendrá el QR
 $ngrok_url = "https://uncatered-thomasina-arousingly.ngrok-free.dev/DelixSystem";
-$contenido = "$ngrok_url/app/views/mesas/mesa.php?id={$id_mesa}";
+$contenido = "$ngrok_url/app/views/mesas/view/menu.php?id={$id_mesa}";
 
 // Genera la URL del QR
 $qr_url = "https://api.qrserver.com/v1/create-qr-code/?data=" . urlencode($contenido) . "&size=250x250";
