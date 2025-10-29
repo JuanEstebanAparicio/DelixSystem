@@ -39,7 +39,7 @@ $displayEmail = htmlspecialchars($empleado['email']);
           <span>Pedidos</span>
         </a>
 
-        <a href="/DelixSystem/app/pages/gestion_mesas/view/resumen_mesas.php" class="group card-control bg-sky-50 hover:bg-sky-100">
+        <a href="/DelixSystem/app/pages/gestion_mesas/view/gestion_mesas.php" class="group card-control bg-sky-50 hover:bg-sky-100">
           <i class="ri-restaurant-line text-sky-500 text-3xl group-hover:scale-110 transition-transform"></i>
           <span>Mesas</span>
         </a>
@@ -54,7 +54,7 @@ $displayEmail = htmlspecialchars($empleado['email']);
           <span>Empleados</span>
         </a>
 
-        <a href="/DelixSystem/app/pages/inventory/view/index.php" class="group card-control bg-rose-50 hover:bg-rose-100">
+        <a href="/DelixSystem/app/pages/inventory/view/ingredient_manager.php" class="group card-control bg-rose-50 hover:bg-rose-100">
           <i class="ri-archive-2-fill text-rose-500 text-3xl group-hover:scale-110 transition-transform"></i>
           <span>Inventario</span>
         </a>
