@@ -70,17 +70,17 @@ $empleado = DashboardEmpleadoController::obtenerDatosEmpleado($empleadoAuth['id'
     </div>
     <div class="bg-gray-50 rounded-xl p-5">
   <p class="text-gray-500 text-sm">Roles asignados</p>
-  <div class="flex flex-wrap gap-2 mt-1">
-    <?php if (!empty($empleado['roles'])): ?>
-      <?php foreach ($empleado['roles'] as $rol): ?>
-        <span class="px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-700">
-          <?= htmlspecialchars($rol['nombre']) ?>
-        </span>
-      <?php endforeach; ?>
-    <?php else: ?>
-      <span class="text-gray-500 text-sm">Sin roles asignados</span>
-    <?php endif; ?>
-  </div>
+  <div id="rolesContainer" class="flex flex-wrap gap-2 mt-1">
+  <?php if (!empty($empleado['roles'])): ?>
+    <?php foreach ($empleado['roles'] as $rol): ?>
+      <span class="px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-700">
+        <?= htmlspecialchars($rol['nombre']) ?>
+      </span>
+    <?php endforeach; ?>
+  <?php else: ?>
+    <span class="text-gray-500 text-sm">Sin roles asignados</span>
+  <?php endif; ?>
+</div>
 </div>
 
   </div>
@@ -95,7 +95,6 @@ $empleado = DashboardEmpleadoController::obtenerDatosEmpleado($empleadoAuth['id'
 
   </main>
 
-  <!-- JS Global -->
-  <script src="/DelixSystem/app/shared/js/control_center.js"></script>
+  <script src="../js/roles_auto_update.js"></script>
 </body>
 </html>
