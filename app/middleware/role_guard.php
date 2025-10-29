@@ -8,34 +8,50 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 /**
- * 🔒 Permite restringir acciones a empleados con un rol específico.
- * Propietarios siempre tienen acceso total.
+ * 🛡️ Control de permisos de empleados basado en roles.
+ *
+ * @param array|string $allowedRoles  Uno o varios roles permitidos para la acción.
+ * @param bool $returnBool  Si es true, devuelve solo true/false sin cortar la ejecución.
+ * 
+ * - Propietarios siempre pueden continuar.
+ * - Empleados deben tener al menos un rol permitido.
  */
-function allowRole($requiredRoles = []) {
-    // ✅ Propietarios siempre permitidos
+function canEmployeePerform($allowedRoles, $returnBool = false) {
+    // Normalizamos a array
+    $allowedRoles = is_array($allowedRoles) ? $allowedRoles : [$allowedRoles];
+
+    // ✅ Si es propietario, tiene acceso total
     if (isset($_SESSION['usuario']['id'])) {
         return true;
     }
 
-    // 🚫 Si no hay sesión de empleado, negar
+    // 🚫 Si no hay sesión de empleado
     if (!isset($_SESSION['empleado_auth']['id'])) {
-        http_response_code(403);
-        echo json_encode(['status' => 'error', 'message' => 'Acceso no autorizado']);
+        if ($returnBool) return false;
+        http_response_code(401);
+        echo json_encode(['status' => 'error', 'message' => 'Sesión de empleado no válida.']);
         exit;
     }
 
+    $empleadoId = $_SESSION['empleado_auth']['id'];
+
     // 🔹 Obtener roles actualizados del empleado
-    $empleado = DashboardEmpleadoController::obtenerDatosEmpleado($_SESSION['empleado_auth']['id']);
+    $empleado = DashboardEmpleadoController::obtenerDatosEmpleado($empleadoId);
     $rolesEmpleado = array_map('strtoupper', array_column($empleado['roles'], 'nombre'));
 
-    // 🔹 Verificar si cumple alguno de los roles requeridos
-    foreach ($requiredRoles as $rol) {
+    // 🔹 Si el empleado tiene alguno de los roles requeridos
+    foreach ($allowedRoles as $rol) {
         if (in_array(strtoupper($rol), $rolesEmpleado)) {
             return true;
         }
     }
 
+    if ($returnBool) return false;
+
     http_response_code(403);
-    echo json_encode(['status' => 'error', 'message' => 'No tienes permisos para esta acción.']);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'No tienes permisos suficientes para realizar esta acción.'
+    ]);
     exit;
 }
