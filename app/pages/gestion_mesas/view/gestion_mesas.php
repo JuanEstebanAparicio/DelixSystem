@@ -4,24 +4,32 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-require_once __DIR__ . '/../../../middleware/session_guard.php';
-protectPage(); // ✅ Verifica sesión y evita accesos no logueados
-
+require_once __DIR__ . '/../../../middleware/universal_guard.php';
 require_once __DIR__ . '/../../../config/supabase.php';
 
-$id_usuario = $_SESSION['usuario']['id'] ?? null;
-$nombreUsuario = $_SESSION['usuario']['first_name'] ?? 'Usuario';
+// ✅ Protege acceso y obtiene datos de sesión
+$usuario = universalGuard();
 
-if (!$id_usuario) {
-  header("Location: /DelixSystem/app/pages/login.php");
-  exit;
+// Determinar el ID base para filtrar las áreas
+if ($usuario['tipo'] === 'propietario') {
+    $id_usuario = $usuario['id'];
+} elseif ($usuario['tipo'] === 'empleado') {
+    // el id del propietario asociado al restaurante del empleado
+    $id_usuario = $usuario['restaurant_id'];
+} else {
+    header("Location: /DelixSystem/public/index.php");
+    exit;
 }
 
-// ✅ Filtrar las áreas por usuario actual
+// Nombre del usuario actual (solo para mostrar)
+$nombreUsuario = $usuario['nombre'];
+
+// ✅ Filtrar las áreas por el restaurante correspondiente
 $areasStmt = $conexion->prepare("SELECT * FROM areas WHERE id_usuario = ? ORDER BY orden ASC, id_area ASC");
 $areasStmt->execute([$id_usuario]);
 $areas = $areasStmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
