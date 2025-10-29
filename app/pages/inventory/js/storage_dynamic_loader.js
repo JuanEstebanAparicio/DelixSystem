@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.success) {
           alert(data.message || "✅ Ingrediente guardado correctamente");
           hideModal("formModal");
-          loadStorage(); // 🔄 Recarga sin refrescar
+          loadStorage();
         } else {
           alert("⚠️ Error: " + (data.error || "No se pudo procesar la solicitud"));
         }
@@ -32,10 +32,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadStorage() {
   const grid = document.getElementById("ingredientGrid");
+  const id_user = grid.dataset.user;
+
   grid.innerHTML = "<p class='loading'>Cargando ingredientes...</p>";
 
   try {
-    const response = await fetch("../php/get_storage.php");
+    const response = await fetch("../php/get_storage.php?id_user=" + id_user);
     const data = await response.json();
 
     if (!data.success) throw new Error(data.error);

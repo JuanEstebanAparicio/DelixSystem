@@ -1,4 +1,10 @@
 <?php
+session_start();
+if (!isset($_SESSION['usuario'])) {
+  header("Location: /DelixSystem/");
+  exit;
+}
+$id_usuario = $_SESSION['usuario']['id'];
 require_once __DIR__ . '/../../../config/supabase.php';
 try {
     $query = $conexion->query("SELECT * FROM storage ORDER BY category, name ASC");
@@ -50,7 +56,7 @@ try {
   <main class="main-content container">
     <h2 class="page-title">Gestor de Ingredientes</h2>
 
-    <div class="card-container" id="ingredientGrid">
+    <div class="card-container" id="ingredientGrid" data-user="<?= $id_usuario ?>">
 
       <?php foreach ($categorias as $categoria => $items): ?>
         <?php foreach ($items as $ing): ?>

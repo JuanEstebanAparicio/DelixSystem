@@ -1,10 +1,20 @@
 <?php
-require_once __DIR__ . '/../../../config/supabase.php';
+session_start();
 header('Content-Type: application/json');
 
+require_once __DIR__ . '/../../../config/supabase.php';
+
+if (!isset($_SESSION['usuario'])) {
+    echo json_encode(["success" => false, "error" => "Sesión no iniciada"]);
+    exit;
+}
+
+$id_user = $_SESSION['usuario']['id'];
+
 try {
-    $query = $conexion->query("SELECT * FROM storage ORDER BY category, name ASC");
-    $insumos = $query->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $conexion->prepare("SELECT * FROM storage WHERE id_user = :id_user ORDER BY category, name ASC");
+    $stmt->execute([':id_user' => $id_user]);
+    $insumos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode([
         "success" => true,
@@ -16,4 +26,3 @@ try {
         "error" => $e->getMessage()
     ]);
 }
-?>

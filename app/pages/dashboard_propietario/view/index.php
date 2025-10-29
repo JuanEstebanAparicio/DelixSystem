@@ -11,7 +11,6 @@ if (session_status() === PHP_SESSION_NONE) {
 //🪑 Obtenemos el nombre del usuario desde la sesión
 $nombreUsuario = $_SESSION['usuario']['nombre'] ?? 'Usuario';
 $nombreRestaurante = $_SESSION['usuario']['restaurant_name'] ?? 'MiRestaurante';
-
 ?>
 
 <!DOCTYPE html>
@@ -27,55 +26,70 @@ $nombreRestaurante = $_SESSION['usuario']['restaurant_name'] ?? 'MiRestaurante';
 </head>
 <body>
 
+  <!-- ======= Sidebar ======= -->
   <aside class="sidebar">
-  <h2>
-    <span class="logo-full">🍴 <?= htmlspecialchars($nombreRestaurante) ?></span>
-    <span class="logo-mini">DELIX</span>
-  </h2>
-  <ul>
-    <li class="active"><i>🏠</i><span>Dashboard</span></li>
-    <li><i>🧾</i><span>Pedidos</span></li>
-    <li><i>🍔</i><span>Menú</span></li>
-  <a href="../../gestion_mesas/view/resumen_mesas.php" class="menu-link">
-    <i class="fa-solid fa-chair">🪑</i> <span>Mesas</span>
-  </a>
-</li>
-    <li><i>👥</i><span>Clientes</span></li>
-    <li><i>📊</i><span>Reportes</span></li>
-    <li><i>⚙️</i><span>Configuración</span></li>
-    <a href="../../gestor_empleado/view/gestor_empleados.php">
-    <li><i>👨‍💼</i><span>Admin</span></li>
-    </a>
+    <h2>
+      <span class="logo-full">🍴 <?= htmlspecialchars($nombreRestaurante) ?></span>
+      <span class="logo-mini">DELIX</span>
+    </h2>
+    <ul>
+      <li class="active"><i>🏠</i><span>Dashboard</span></li>
+      <li><i>🧾</i><span>Pedidos</span></li>
+      <li><i>🍔</i><span>Menú</span></li>
 
-  </ul>
+      <li>
+        <a href="../../gestion_mesas/view/resumen_mesas.php" class="menu-link">
+          <i class="fa-solid fa-chair">🪑</i> <span>Mesas</span>
+        </a>
+      </li>
+
+      <!-- 🔹 NUEVA OPCIÓN DE INVENTARIO -->
+      <li>
+        <a href="../../inventory/view/ingredient_manager.php" class="menu-link">
+          <i>🥦</i><span>Inventario</span>
+        </a>
+      </li>
+
+      <li><i>👥</i><span>Clientes</span></li>
+      <li><i>📊</i><span>Reportes</span></li>
+      <li><i>⚙️</i><span>Configuración</span></li>
+
+      <li>
+        <a href="../../gestor_empleado/view/gestor_empleados.php" class="menu-link">
+          <i>👨‍💼</i><span>Admin</span>
+        </a>
+      </li>
+    </ul>
   </aside>
 
+  <!-- ======= Overlay de transición ======= -->
   <div id="transitionOverlay" style="
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(255,255,255,0.9);
-  z-index: 9999;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.5rem;
-  color: #333;
-  font-weight: bold;
-">
-  Cargando...
-</div>
-
-  <main class="main">
-   <header>
-  <button id="toggleSidebar" class="toggle-btn">☰</button>
-  <h1>Panel de Control</h1>
-  <div class="user-info">
-    <img src="https://cdn-icons-png.flaticon.com/512/2202/2202112.png" alt="Usuario" id="openProfileModal">
-    <span><?= htmlspecialchars($_SESSION['usuario']['first_name'] ?? 'Usuario') ?></span>
-    <a href="../../../../src/auth/logout.php" class="logout-btn">Cerrar sesión</a>
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(255,255,255,0.9);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    color: #333;
+    font-weight: bold;
+  ">
+    Cargando...
   </div>
-</header>
+
+  <!-- ======= Main ======= -->
+  <main class="main">
+    <header>
+      <button id="toggleSidebar" class="toggle-btn">☰</button>
+      <h1>Panel de Control</h1>
+      <div class="user-info">
+        <img src="https://cdn-icons-png.flaticon.com/512/2202/2202112.png" alt="Usuario" id="openProfileModal">
+        <span><?= htmlspecialchars($_SESSION['usuario']['first_name'] ?? 'Usuario') ?></span>
+        <a href="../../../../src/auth/logout.php" class="logout-btn">Cerrar sesión</a>
+      </div>
+    </header>
 
     <section class="stats">
       <div class="stat">
@@ -129,46 +143,55 @@ $nombreRestaurante = $_SESSION['usuario']['restaurant_name'] ?? 'MiRestaurante';
         </tbody>
       </table>
     </section>
-    <!-- Modal Editar Perfil -->
-<div id="profileModal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h2>Editar Perfil</h2>
-  <form id="profileForm" method="POST" action="../php/profile.php">
-  <div class="form-group">
-    <label for="first_name">Nombre:</label>
-    <input type="text" id="first_name" name="first_name" 
-           value="<?= htmlspecialchars($_SESSION['usuario']['first_name'] ?? '') ?>" required>
-  </div>
 
-  <div class="form-group">
-    <label for="last_name">Apellido:</label>
-    <input type="text" id="last_name" name="last_name" 
-           value="<?= htmlspecialchars($_SESSION['usuario']['last_name'] ?? '') ?>" required>
-  </div>
+    <!-- ======= Modal Editar Perfil ======= -->
+    <div id="profileModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Editar Perfil</h2>
+        <form id="profileForm" method="POST" action="../php/profile.php">
+          <div class="form-group">
+            <label for="first_name">Nombre:</label>
+            <input type="text" id="first_name" name="first_name" 
+                   value="<?= htmlspecialchars($_SESSION['usuario']['first_name'] ?? '') ?>" required>
+          </div>
 
-  <div class="form-group">
-    <label for="email">Correo:</label>
-    <input type="email" id="email" name="email" 
-           value="<?= htmlspecialchars($_SESSION['usuario']['email'] ?? '') ?>" required>
-  </div>
+          <div class="form-group">
+            <label for="last_name">Apellido:</label>
+            <input type="text" id="last_name" name="last_name" 
+                   value="<?= htmlspecialchars($_SESSION['usuario']['last_name'] ?? '') ?>" required>
+          </div>
 
-  <div class="form-group">
-    <label for="restaurant_name">Restaurante:</label>
-    <input type="text" id="restaurant_name" name="restaurant_name" 
-           value="<?= htmlspecialchars($_SESSION['usuario']['restaurant_name'] ?? '') ?>" required>
-  </div>
+          <div class="form-group">
+            <label for="email">Correo:</label>
+            <input type="email" id="email" name="email" 
+                   value="<?= htmlspecialchars($_SESSION['usuario']['email'] ?? '') ?>" required>
+          </div>
 
-  <button type="submit" class="btn-save">Guardar Cambios</button>
-</form>
-  </div>
-</div>
+          <div class="form-group">
+            <label for="restaurant_name">Restaurante:</label>
+            <input type="text" id="restaurant_name" name="restaurant_name" 
+                   value="<?= htmlspecialchars($_SESSION['usuario']['restaurant_name'] ?? '') ?>" required>
+          </div>
 
+          <button type="submit" class="btn-save">Guardar Cambios</button>
+        </form>
+      </div>
+    </div>
   </main>
 
-
-
+  <!-- ======= Scripts ======= -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="../js/script.js"></script>
+
+  <script>
+    // 🌟 Efecto de carga antes de cambiar de página
+    document.querySelectorAll('.menu-link').forEach(link => {
+      link.addEventListener('click', e => {
+        const overlay = document.getElementById('transitionOverlay');
+        overlay.style.display = 'flex';
+      });
+    });
+  </script>
 </body>
 </html>

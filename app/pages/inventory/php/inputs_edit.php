@@ -1,4 +1,5 @@
 <?php
+session_start();
 $baseDir = dirname(__DIR__, 3);
 require_once($baseDir . '/pages/inventory/php/products.php');
 require_once($baseDir . '/pages/inventory/php/storage_crud.php');
@@ -11,14 +12,17 @@ try {
     }
 
     $id = intval($_POST['id']);
+    $id_user = $_SESSION['id_user'];
     $crud = new storage_crud();
 
-    $current = $crud->getProductById($id);
+    $current = $crud->getProductById($id, $id_user);
     if (!$current) {
-        throw new Exception("❌ Producto no encontrado en la base de datos.");
+        throw new Exception("❌ Producto no encontrado o no pertenece al usuario.");
     }
+
     $category = trim($_POST['category'] ?? $current['category']);
     $productName = trim($_POST['name'] ?? $current['name']);
+
     $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', $category);
     $safeProduct = preg_replace('/[^a-zA-Z0-9_-]/', '_', $productName);
 
@@ -37,8 +41,9 @@ try {
         if (!move_uploaded_file($_FILES["photo"]["tmp_name"], $targetPath)) {
             throw new Exception("❌ Error al guardar la nueva imagen.");
         }
+
         if (!empty($current['photo'])) {
-            $oldPhotoAbs = $baseDir . '/pages/inventory/' . ltrim($current['photo'], '/');
+            $oldPhotoAbs = $baseDir . '/pages/inventory/' . $current['photo'];
             if (file_exists($oldPhotoAbs)) @unlink($oldPhotoAbs);
         }
 
@@ -46,6 +51,7 @@ try {
     }
 
     $product = new Product(
+        $id_user,
         $productName,
         $_POST['amount'] ?? $current['amount'],
         $_POST['minimum_quantity'] ?? $current['minimum_quantity'],
