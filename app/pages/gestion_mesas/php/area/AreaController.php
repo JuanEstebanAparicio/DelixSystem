@@ -3,6 +3,8 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 include __DIR__ . '/../../../../config/supabase.php';
+require_once __DIR__ . '/../../../../middleware/role_guard.php';
+
 include_once __DIR__ . '/AreaModel.php';
 session_start(); // ✅ asegúrate de tener la sesión iniciada
 
@@ -19,6 +21,9 @@ switch ($accion) {
 
     // ✅ Crear área
     case 'crear':
+        require_once __DIR__ . '/../../../../middleware/role_guard.php';
+        canEmployeePerform(['GESTOR_MESAS', 'SUPERVISOR']); // 💡 Solo empleados con estos roles pueden crear
+
         $nombre = trim($_POST['nombre_area'] ?? '');
 
         if (empty($nombre)) {
@@ -40,6 +45,9 @@ switch ($accion) {
 
     // ✅ Editar área
     case 'editar':
+        require_once __DIR__ . '/../../../../middleware/role_guard.php';
+        canEmployeePerform(['GESTOR_MESAS', 'SUPERVISOR']); // 💡 Roles que pueden editar
+
         $id_area = $_POST['id_area'] ?? null;
         $nombre = trim($_POST['nombre_area'] ?? '');
 
@@ -61,6 +69,9 @@ switch ($accion) {
 
     // ✅ Eliminar área
     case 'eliminar':
+        require_once __DIR__ . '/../../../../middleware/role_guard.php';
+        canEmployeePerform(['GESTOR_MESAS']); // 💡 Solo este rol puede eliminar
+
         $id_area = $_POST['id_area'] ?? $_GET['id_area'] ?? null;
 
         if (!$id_area) {
@@ -73,6 +84,9 @@ switch ($accion) {
 
     // ✅ Ordenar áreas (Drag & Drop)
     case 'ordenar':
+        require_once __DIR__ . '/../../../../middleware/role_guard.php';
+        canEmployeePerform(['GESTOR_MESAS', 'SUPERVISOR']); // 💡 Permitir a ambos roles reordenar
+
         if (!isset($_POST['orden']) || !is_array($_POST['orden'])) {
             echo json_encode(['status' => 'error', 'message' => 'Datos inválidos']);
             exit;
@@ -90,6 +104,7 @@ switch ($accion) {
         returnJson($isAjax, 'error', 'Acción no válida.');
         break;
 }
+
 
 // --- Función auxiliar para respuestas JSON ---
 function returnJson($ajax, $status, $message, $data = [])

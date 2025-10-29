@@ -25,9 +25,10 @@ if ($usuario['tipo'] === 'propietario') {
 $nombreUsuario = $usuario['nombre'];
 
 // ✅ Filtrar las áreas por el restaurante correspondiente
-$areasStmt = $conexion->prepare("SELECT * FROM areas WHERE id_usuario = ? ORDER BY orden ASC, id_area ASC");
-$areasStmt->execute([$id_usuario]);
-$areas = $areasStmt->fetchAll(PDO::FETCH_ASSOC);
+require_once __DIR__ . '/../php/area/AreaModel.php';
+$areaModel = new AreaModel($conexion);
+$areas = $areaModel->obtenerAreasAdaptable($usuario['id'], $conexion);
+
 ?>
 
 <!DOCTYPE html>

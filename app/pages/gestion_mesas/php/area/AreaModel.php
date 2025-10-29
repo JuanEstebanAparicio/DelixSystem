@@ -7,11 +7,45 @@ class AreaModel {
     }
 
     /** Obtener áreas del usuario actual */
-    public function obtenerAreas($id_usuario) {
-        $stmt = $this->db->prepare("SELECT * FROM areas WHERE id_usuario = ? ORDER BY orden ASC, id_area ASC");
+    public function obtenerAreasAdaptable($id_usuario, $conexion)
+{
+    // 1️⃣ Verificar si el usuario es propietario
+    $stmt = $conexion->prepare("SELECT rol FROM usuarios WHERE id = ?");
+    $stmt->execute([$id_usuario]);
+    $rol = $stmt->fetchColumn();
+
+    if ($rol === 'propietario') {
+        // 🔹 Propietario → obtiene sus propias áreas
+        $stmt = $this->db->prepare("
+            SELECT * FROM areas 
+            WHERE id_usuario = ? 
+            ORDER BY orden ASC, id_area ASC
+        ");
         $stmt->execute([$id_usuario]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    // 2️⃣ Caso empleado → buscar el propietario al que pertenece
+    $stmt = $conexion->prepare("SELECT user_id FROM employees WHERE id = ?");
+    $stmt->execute([$id_usuario]);
+    $id_propietario = $stmt->fetchColumn();
+
+    if (!$id_propietario) {
+        return []; // 🚫 No tiene propietario asignado
+    }
+
+    // 🔹 Cargar las áreas del propietario
+    $stmt = $this->db->prepare("
+        SELECT * FROM areas 
+        WHERE id_usuario = ? 
+        ORDER BY orden ASC, id_area ASC
+    ");
+    $stmt->execute([$id_propietario]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+
 
     /** Crear nueva área */
     public function crearArea($nombre, $id_usuario) {
