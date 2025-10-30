@@ -1,17 +1,30 @@
 <?php
+session_start();
+if (!isset($_SESSION['usuario'])) {
+    header("Location: /DelixSystem/");
+    exit;
+}
+
+$id_usuario = $_SESSION['usuario']['id'];
+
 require_once __DIR__ . '/../../../config/supabase.php';
 
 try {
-    $stmt = $conexion->query("SELECT * FROM dish ORDER BY category, name_dish ASC");
+
+    $stmt = $conexion->prepare("SELECT * FROM dish WHERE id_user = :id_user ORDER BY category, name_dish ASC");
+    $stmt->bindParam(':id_user', $id_usuario, PDO::PARAM_INT);
+    $stmt->execute();
     $platos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $stmtIng = $conexion->query("SELECT id, name FROM storage ORDER BY name ASC");
+    $stmtIng = $conexion->prepare("SELECT id, name FROM storage WHERE id_user = :id_user ORDER BY name ASC");
+    $stmtIng->bindParam(':id_user', $id_usuario, PDO::PARAM_INT);
+    $stmtIng->execute();
     $ingredientes = $stmtIng->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($platos as $i => $dish) {
-        $stmt = $conexion->prepare("SELECT ingredient_id AS id, quantity_used, unit FROM dish_ingredient WHERE dish_id = ?");
-        $stmt->execute([$dish['id']]);
-        $platos[$i]['ingredients'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt2 = $conexion->prepare("SELECT ingredient_id AS id, quantity_used, unit FROM dish_ingredient WHERE dish_id = ?");
+        $stmt2->execute([$dish['id']]);
+        $platos[$i]['ingredients'] = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     }
 
     $categorias = [];
@@ -21,6 +34,7 @@ try {
     }
 
     $listaCategorias = array_keys($categorias);
+
 } catch (PDOException $e) {
     die("<p class='error-msg'>Error al obtener datos desde Supabase: " . htmlspecialchars($e->getMessage()) . "</p>");
 }

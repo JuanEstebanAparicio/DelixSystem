@@ -120,13 +120,8 @@ function editDish(data) {
     currentPhotoInput.value = "";
   }
 
-  if (data.ingredients && Array.isArray(data.ingredients)) {
-    let ingredientIds = [];
-    if (data.ingredients.length > 0 && typeof data.ingredients[0] === 'object') {
-      ingredientIds = data.ingredients.map(i => i.id);
-    } else {
-      ingredientIds = data.ingredients.map(i => i);
-    }
+  if (Array.isArray(data.ingredients)) {
+    const ingredientIds = data.ingredients.map(i => i.id);
 
     $('#ingredients').val(ingredientIds).trigger('change');
 
@@ -134,17 +129,18 @@ function editDish(data) {
       const container = $('#ingredientQuantities');
       container.empty();
 
-      ingredientIds.forEach(id => {
-        const name = $('#ingredients option[value="' + id + '"]').text();
-        const inputId = 'quantity_' + id;
+      data.ingredients.forEach(ing => {
+        const inputId = 'quantity_' + ing.id;
+        const name = ing.name;
+
         const block = `
           <div class="ingredient-quantity-block">
             <label for="${inputId}">${name} - Cantidad:</label>
-            <input type="number" step="0.01" name="quantity_${id}" id="${inputId}" placeholder="Ej: 2">
-            <select name="unit_${id}">
-              <option value="kg">kg</option>
-              <option value="litros">litros</option>
-              <option value="unidad" selected>unidad</option>
+            <input type="number" step="0.01" name="quantity_${ing.id}" id="${inputId}" value="${ing.quantity_used}">
+            <select name="unit_${ing.id}">
+              <option value="kg" ${ing.unit === "kg" ? "selected" : ""}>kg</option>
+              <option value="litros" ${ing.unit === "litros" ? "selected" : ""}>litros</option>
+              <option value="unidad" ${ing.unit === "unidad" ? "selected" : ""}>unidad</option>
             </select>
           </div>
         `;
@@ -162,6 +158,7 @@ function editDish(data) {
 
   showModal("formModal");
 }
+
 
 async function deleteDish(id) {
   if (!confirm("¿Seguro que deseas eliminar este plato?")) return;

@@ -10,15 +10,16 @@ try {
         throw new Exception("⚠️ ID no especificado o método inválido.");
     }
 
+    if (!isset($_SESSION['usuario'])) {
+        throw new Exception("⚠️ No hay usuario autenticado.");
+    }
+
     $id = intval($_GET['id']);
-    $id_user = $_SESSION['id_user'];
+    $id_user = $_SESSION['usuario']['id'];
     $crud = new storage_crud();
 
     $product = $crud->getProductById($id, $id_user);
-
-    if (!$product) {
-        throw new Exception("❌ Ingrediente no encontrado o no pertenece al usuario.");
-    }
+    if (!$product) throw new Exception("❌ El ingrediente no existe o no pertenece a este usuario.");
 
     if (!empty($product['photo'])) {
         $photoPath = $baseDir . '/pages/inventory/' . $product['photo'];

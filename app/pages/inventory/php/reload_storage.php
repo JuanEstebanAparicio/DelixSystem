@@ -1,16 +1,32 @@
 <?php
-require_once __DIR__ . '/../../../config/supabase.php';
+session_start();
+$baseDir = dirname(__DIR__, 3);
+require_once($baseDir . '/config/supabase.php');
+
+header('Content-Type: application/json');
 
 try {
-    $stmt = $conexion->query("SELECT DISTINCT category FROM storage WHERE category IS NOT NULL AND category != '' ORDER BY category ASC");
-    $categorias = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    if (!isset($_SESSION['usuario'])) {
+        throw new Exception("Usuario no autenticado.");
+    }
 
+    $id_user = $_SESSION['usuario']['id'];
+
+    $sql = "SELECT DISTINCT category 
+            FROM storage 
+            WHERE id_user = :id_user AND category IS NOT NULL AND category != '' 
+            ORDER BY category ASC";
+
+    $stmt = $conexion->prepare($sql);
+    $stmt->bindParam(':id_user', $id_user, PDO::PARAM_INT);
+    $stmt->execute();
+
+    $categorias = $stmt->fetchAll(PDO::FETCH_COLUMN);
     if (!$categorias) $categorias = [];
 
-    header('Content-Type: application/json');
+    // ✅ IMPORTANTE: devolver solo el array plano, no un objeto
     echo json_encode($categorias);
 
-} catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(["error" => $e->getMessage()]);
+} catch (Exception $e) {
+    echo json_encode([]);
 }

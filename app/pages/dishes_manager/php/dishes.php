@@ -2,6 +2,7 @@
 
 class dishes {
     private $id;
+    private $id_user;
     private $name_dish;
     private $price;
     private $category;
@@ -10,8 +11,9 @@ class dishes {
     private $created_at;
     private $photo;
 
-    public function __construct($id, $name_dish, $price, $category, $description, $state, $created_at, $photo) {
+    public function __construct($id, $id_user, $name_dish, $price, $category, $description, $state, $created_at, $photo) {
         $this->id = $id;
+        $this->id_user = $id_user;
         $this->name_dish = $name_dish;
         $this->price = $price;
         $this->category = $category;
@@ -22,6 +24,7 @@ class dishes {
     }
 
     public function getId() { return $this->id; }
+    public function getIdUser() { return $this->id_user; }
     public function getNameDish() { return $this->name_dish; }
     public function getPrice() { return $this->price; }
     public function getCategory() { return $this->category; }
@@ -31,6 +34,7 @@ class dishes {
     public function getPhoto() { return $this->photo; }
 
     public function setId($id) { $this->id = $id; }
+    public function setIdUser($id_user) { $this->id_user = $id_user; }
     public function setNameDish($name_dish) { $this->name_dish = $name_dish; }
     public function setPrice($price) { $this->price = $price; }
     public function setCategory($category) { $this->category = $category; }

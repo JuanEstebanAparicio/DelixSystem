@@ -1,52 +1,58 @@
 <?php
+ob_start();
 session_start();
-$baseDir = dirname(__DIR__, 3);
-require_once($baseDir . '/pages/inventory/php/products.php');
-require_once($baseDir . '/pages/inventory/php/storage_crud.php');
-
 header('Content-Type: application/json');
 
 try {
-    if ($_SERVER["REQUEST_METHOD"] !== "POST" || empty($_POST['id'])) {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['id'])) {
         throw new Exception("⚠️ Solicitud inválida o ID faltante.");
     }
 
-    $id = intval($_POST['id']);
-    $id_user = $_SESSION['id_user'];
-    $crud = new storage_crud();
+    if (!isset($_SESSION['usuario']['id'])) {
+        throw new Exception("No hay usuario autenticado.");
+    }
 
+    $id_user = intval($_SESSION['usuario']['id']);
+    $id = intval($_POST['id']);
+
+    $baseDir = dirname(__DIR__, 3);
+    require_once($baseDir . '/pages/inventory/php/products.php');
+    require_once($baseDir . '/pages/inventory/php/storage_crud.php');
+
+    $crud = new storage_crud();
     $current = $crud->getProductById($id, $id_user);
     if (!$current) {
         throw new Exception("❌ Producto no encontrado o no pertenece al usuario.");
     }
 
     $category = trim($_POST['category'] ?? $current['category']);
+    $newCategory = trim($_POST['new_category'] ?? '');
+    if ($category === '__new__' || $newCategory !== '') $category = $newCategory;
+
     $productName = trim($_POST['name'] ?? $current['name']);
 
-    $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', $category);
-    $safeProduct = preg_replace('/[^a-zA-Z0-9_-]/', '_', $productName);
+    $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', $category ?: 'sin_categoria');
+    $safeProduct = preg_replace('/[^a-zA-Z0-9_-]/', '_', $productName ?: 'producto');
 
-    $categoryDir = $baseDir . "/pages/inventory/media/$safeCategory";
+    $mediaRoot = $baseDir . "/pages/inventory/media";
+    $categoryDir = "$mediaRoot/$safeCategory";
     $productDir = "$categoryDir/$safeProduct";
 
     if (!is_dir($categoryDir)) mkdir($categoryDir, 0777, true);
     if (!is_dir($productDir)) mkdir($productDir, 0777, true);
 
-    $photoPath = $current['photo'];
+    $photoPath = $current['photo'] ?? null;
 
-    if (isset($_FILES["photo"]) && $_FILES["photo"]["error"] === UPLOAD_ERR_OK) {
-        $photoName = uniqid('photo_') . "_" . basename($_FILES["photo"]["name"]);
+    if (!empty($_FILES['photo']['name']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+        $photoName = uniqid('photo_') . "_" . basename($_FILES['photo']['name']);
         $targetPath = "$productDir/$photoName";
-
-        if (!move_uploaded_file($_FILES["photo"]["tmp_name"], $targetPath)) {
-            throw new Exception("❌ Error al guardar la nueva imagen.");
+        if (!move_uploaded_file($_FILES['photo']['tmp_name'], $targetPath)) {
+            throw new Exception("Error al guardar la nueva imagen.");
         }
-
         if (!empty($current['photo'])) {
-            $oldPhotoAbs = $baseDir . '/pages/inventory/' . $current['photo'];
+            $oldPhotoAbs = $baseDir . '/pages/inventory/' . ltrim($current['photo'], '/');
             if (file_exists($oldPhotoAbs)) @unlink($oldPhotoAbs);
         }
-
         $photoPath = "media/$safeCategory/$safeProduct/$photoName";
     }
 
@@ -68,10 +74,12 @@ try {
         $photoPath
     );
 
-    $crud->updateProduct($product, $id);
+    $ok = $crud->updateProduct($product, $id);
+    if (!$ok) throw new Exception("Error al actualizar el ingrediente en la base de datos.");
 
-    echo json_encode(["success" => true, "message" => "✏️ Ingrediente actualizado correctamente"]);
+    ob_clean();
+    echo json_encode(["success" => true, "message" => "✅ Ingrediente actualizado correctamente"]);
 } catch (Exception $e) {
+    ob_clean();
     echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }
-?>

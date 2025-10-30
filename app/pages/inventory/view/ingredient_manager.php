@@ -1,26 +1,34 @@
 <?php
 session_start();
 if (!isset($_SESSION['usuario'])) {
-  header("Location: /DelixSystem/");
-  exit;
+    header("Location: /DelixSystem/");
+    exit;
 }
+
 $id_usuario = $_SESSION['usuario']['id'];
+
 require_once __DIR__ . '/../../../config/supabase.php';
+
 try {
-    $query = $conexion->query("SELECT * FROM storage ORDER BY category, name ASC");
-    $insumos = $query->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $conexion->prepare("SELECT * FROM storage WHERE id_user = :id_user ORDER BY category, name ASC");
+    $stmt->bindParam(':id_user', $id_usuario, PDO::PARAM_INT);
+    $stmt->execute();
+
+    $insumos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $categorias = [];
 
     foreach ($insumos as $ing) {
-        $cat = $ing['category'] ?: 'Sin categoría';
+        $cat = !empty($ing['category']) ? $ing['category'] : 'Sin categoría';
         $categorias[$cat][] = $ing;
     }
 
     $listaCategorias = array_keys($categorias);
+
 } catch (PDOException $e) {
     die("<p class='error-msg'>Error al obtener datos desde Supabase: " . $e->getMessage() . "</p>");
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
