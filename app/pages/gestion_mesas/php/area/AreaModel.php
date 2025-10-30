@@ -6,46 +6,40 @@ class AreaModel {
         $this->db = $conexion;
     }
 
-    /** Obtener áreas del usuario actual */
-    public function obtenerAreasAdaptable($id_usuario, $conexion)
-{
-    // 1️⃣ Verificar si el usuario es propietario
-    $stmt = $conexion->prepare("SELECT rol FROM usuarios WHERE id = ?");
-    $stmt->execute([$id_usuario]);
-    $rol = $stmt->fetchColumn();
+    /** Obtener áreas del propietario o del empleado vinculado */
+    public function obtenerAreasAdaptable($id_usuario, $conexion) {
+        // 🔹 Determinar si es propietario
+        $stmt = $conexion->prepare("SELECT rol FROM usuarios WHERE id = ?");
+        $stmt->execute([$id_usuario]);
+        $rol = $stmt->fetchColumn();
 
-    if ($rol === 'propietario') {
-        // 🔹 Propietario → obtiene sus propias áreas
+        if ($rol === 'propietario') {
+            $stmt = $this->db->prepare("
+                SELECT * FROM areas 
+                WHERE id_usuario = ? 
+                ORDER BY orden ASC, id_area ASC
+            ");
+            $stmt->execute([$id_usuario]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        // 🔹 Si es empleado
+        $stmt = $conexion->prepare("SELECT user_id FROM employees WHERE id = ?");
+        $stmt->execute([$id_usuario]);
+        $id_propietario = $stmt->fetchColumn();
+
+        if (!$id_propietario) {
+            return [];
+        }
+
         $stmt = $this->db->prepare("
             SELECT * FROM areas 
             WHERE id_usuario = ? 
             ORDER BY orden ASC, id_area ASC
         ");
-        $stmt->execute([$id_usuario]);
+        $stmt->execute([$id_propietario]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
-    // 2️⃣ Caso empleado → buscar el propietario al que pertenece
-    $stmt = $conexion->prepare("SELECT user_id FROM employees WHERE id = ?");
-    $stmt->execute([$id_usuario]);
-    $id_propietario = $stmt->fetchColumn();
-
-    if (!$id_propietario) {
-        return []; // 🚫 No tiene propietario asignado
-    }
-
-    // 🔹 Cargar las áreas del propietario
-    $stmt = $this->db->prepare("
-        SELECT * FROM areas 
-        WHERE id_usuario = ? 
-        ORDER BY orden ASC, id_area ASC
-    ");
-    $stmt->execute([$id_propietario]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-
-
 
     /** Crear nueva área */
     public function crearArea($nombre, $id_usuario) {
@@ -54,7 +48,7 @@ class AreaModel {
 
         if ($ok) {
             $id_area = $this->db->lastInsertId();
-            $stmtOrden = $this->db->prepare("SELECT COALESCE(MAX(orden), 0) + 1 AS nuevo_orden FROM areas WHERE id_usuario = ?");
+            $stmtOrden = $this->db->prepare("SELECT COALESCE(MAX(orden), 0) + 1 FROM areas WHERE id_usuario = ?");
             $stmtOrden->execute([$id_usuario]);
             $nuevoOrden = (int)$stmtOrden->fetchColumn();
 
@@ -65,19 +59,19 @@ class AreaModel {
         return $ok;
     }
 
-    /** Editar área existente */
+    /** Editar área */
     public function editarArea($id_area, $nombre, $id_usuario) {
         $stmt = $this->db->prepare("UPDATE areas SET nombre = ? WHERE id_area = ? AND id_usuario = ?");
         return $stmt->execute([$nombre, $id_area, $id_usuario]);
     }
 
-    /** Eliminar área (solo del usuario actual) */
+    /** Eliminar área */
     public function eliminarArea($id_area, $id_usuario) {
         $stmt = $this->db->prepare("DELETE FROM areas WHERE id_area = ? AND id_usuario = ?");
         return $stmt->execute([$id_area, $id_usuario]);
     }
 
-    /** Verificar si un área ya existe (por usuario) */
+    /** Verificar duplicados */
     public function areaExiste($nombre, $id_usuario, $id_area = null) {
         $sql = "SELECT COUNT(*) FROM areas WHERE LOWER(nombre) = LOWER(?) AND id_usuario = ?";
         $params = [$nombre, $id_usuario];
@@ -92,21 +86,19 @@ class AreaModel {
         return $stmt->fetchColumn() > 0;
     }
 
-    /** Actualizar orden de las áreas (Drag & Drop) */
+    /** Actualizar orden */
     public function actualizarOrden(array $ids) {
         try {
             $this->db->beginTransaction();
             $stmt = $this->db->prepare("UPDATE areas SET orden = :orden WHERE id_area = :id");
             foreach ($ids as $index => $id_area) {
-                $orden = $index + 1;
-                $stmt->execute([':orden' => $orden, ':id' => $id_area]);
+                $stmt->execute([':orden' => $index + 1, ':id' => $id_area]);
             }
             $this->db->commit();
             return true;
         } catch (Exception $e) {
-            if ($this->db->inTransaction()) {
-                $this->db->rollBack();
-            }
+            if ($this->db->inTransaction()) $this->db->rollBack();
+            error_log("Error al actualizar orden: " . $e->getMessage());
             return false;
         }
     }
