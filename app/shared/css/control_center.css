@@ -1,0 +1,19 @@
+#controlCenter.active {
+  display: block;
+  opacity: 1;
+}
+
+#controlCenter.active #controlPanel {
+  transform: translateX(0);
+}
+
+.card-control {
+  @apply flex flex-col items-center justify-center text-center gap-2 py-6 rounded-xl shadow-sm transition-all duration-300;
+  cursor: pointer;
+}
+.card-control:hover {
+  @apply shadow-md scale-[1.02];
+}
+.card-control span {
+  @apply font-medium text-gray-700 text-sm;
+}

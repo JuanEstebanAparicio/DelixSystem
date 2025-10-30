@@ -188,23 +188,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ====== Render / update tabla ======
   const createRow = (emp) => {
-    const tr = document.createElement("tr");
-    tr.dataset.id = emp.id;
-    tr.innerHTML = `
-      <td>${emp.id}</td>
-      <td>${emp.full_name}</td>
-      <td>${emp.email}</td>
-      <td>${emp.role ?? ''}</td>
-      <td>${new Date(emp.created_at).toLocaleString()}</td>
-      <td class="acciones">
-        <button class="btn btn-primary btn-sm asignar-rol" 
-                data-id="${emp.id}" 
-                data-modal-target="#modalRoles">Asignar roles</button>
-        <button class="btn btn-danger btn-sm eliminar" data-id="${emp.id}">Eliminar</button>
-      </td>
-    `;
-    return tr;
-  };
+  const tr = document.createElement("tr");
+  tr.dataset.id = emp.id;
+
+  const estadoHTML = emp.is_online
+    ? `<span class="estado online"><span class="dot"></span> 🟢Conectado</span>`
+    : `<span class="estado offline"><span class="dot"></span> ⚫Desconectado</span>`;
+
+  tr.innerHTML = `
+    <td>${emp.full_name}</td>
+    <td>${emp.email}</td>
+    <td>${emp.documento ?? ''}</td>
+    <td>${emp.role ?? ''}</td>
+    <td>${estadoHTML}</td>
+    <td>${new Date(emp.created_at).toLocaleString()}</td>
+    <td class="acciones">
+      <button class="btn btn-primary btn-sm asignar-rol" 
+              data-id="${emp.id}" 
+              data-modal-target="#modalRoles">Asignar roles</button>
+      <button class="btn btn-danger btn-sm eliminar" data-id="${emp.id}">Eliminar</button>
+    </td>
+  `;
+  return tr;
+};
+
+
 
   const renderTable = (empleados) => {
     tablaBody.innerHTML = "";
@@ -232,20 +240,31 @@ document.addEventListener("DOMContentLoaded", () => {
       if (
         existente.full_name !== emp.full_name ||
         existente.email !== emp.email ||
-        existente.role !== emp.role
-      ) {
+        existente.role !== emp.role ||
+        existente.documento !== emp.documento ||
+        existente.is_online !== emp.is_online
+        ) {
         const row = tablaBody.querySelector(`tr[data-id="${emp.id}"]`);
-        if (row) {
-          row.children[1].textContent = emp.full_name;
-          row.children[2].textContent = emp.email;
-          row.children[3].textContent = emp.role;
-          highlightRow(row);
-        }
-        empleadosActuales.set(emp.id, emp);
-      }
+      if (row) {
+    // columnas:
+    // 0: Nombre, 1: Correo, 2: Documento, 3: Rol, 4: Estado, 5: Fecha, 6: Acciones
+        row.children[0].textContent = emp.full_name;
+        row.children[1].textContent = emp.email;
+        row.children[2].textContent = emp.documento ?? '';
+        row.children[3].textContent = emp.role ?? '';
+
+      const estadoHTML = emp.is_online
+        ? `<span class="estado online"><span class="dot"></span> 🟢Conectado</span>`
+        : `<span class="estado offline"><span class="dot"></span> ⚫Desconectado</span>`;
+      row.children[4].innerHTML = estadoHTML;
+
+    highlightRow(row);
+  }
+  empleadosActuales.set(emp.id, emp);
+}
+ 
     }
   });
-
   // 3️⃣ Eliminar empleados que ya no existan
   empleadosActuales.forEach((_, id) => {
     if (!nuevosMap.has(id)) {

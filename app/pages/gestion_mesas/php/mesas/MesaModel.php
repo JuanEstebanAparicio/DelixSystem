@@ -6,6 +6,11 @@ class MesaModel {
         $this->db = $conexion;
     }
 
+    /** 🔹 Retorna la conexión PDO (usada en controlador) */
+    public function getDB() {
+        return $this->db;
+    }
+
     /** Obtener todas las mesas de un área */
     public function obtenerMesasPorArea($id_area) {
         $stmt = $this->db->prepare("SELECT * FROM mesas WHERE id_area = ?");
@@ -13,7 +18,7 @@ class MesaModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /** Crear una nueva mesa y devolver sus datos */
+    /** Crear una nueva mesa */
     public function crearMesa($id_area, $nombre) {
         $stmt = $this->db->prepare("INSERT INTO mesas (id_area, nombre) VALUES (?, ?) RETURNING id_mesa, id_area, nombre");
         $stmt->execute([$id_area, $nombre]);
@@ -32,14 +37,16 @@ class MesaModel {
         return $stmt->execute([$id_mesa]);
     }
 
-    /** Verificar si ya existe una mesa con ese nombre en el área */
+    /** Verificar duplicado */
     public function mesaExiste($nombre, $id_area, $id_mesa = null) {
         $sql = "SELECT COUNT(*) FROM mesas WHERE LOWER(nombre) = LOWER(?) AND id_area = ?";
         $params = [$nombre, $id_area];
+
         if ($id_mesa) {
             $sql .= " AND id_mesa != ?";
             $params[] = $id_mesa;
         }
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchColumn() > 0;

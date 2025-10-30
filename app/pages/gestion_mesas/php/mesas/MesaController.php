@@ -1,130 +1,127 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/mesa_debug.log');
 
-// 🔹 CARGAMOS DEPENDENCIAS
-include __DIR__ . '/../../../../config/supabase.php';
-include __DIR__ . '/MesaConstructor.php'; // ✅ nuevo include para usar el constructor
+header('Content-Type: application/json');
 
-// 🔹 CREAMOS EL MODELO A TRAVÉS DEL CONSTRUCTOR
 try {
-    $mesaConstructor = new MesaConstructor(); // ✅ se encarga de instanciar correctamente
+    require_once __DIR__ . '/../../../../middleware/controller_bootstrap.php';
+    require_once __DIR__ . '/MesaConstructor.php';
+} catch (Throwable $e) {
+    echo json_encode([
+        'status'  => 'error',
+        'message' => 'Error al cargar dependencias',
+        'debug'   => $e->getMessage(),
+        'trace'   => $e->getFile() . ':' . $e->getLine()
+    ]);
+    exit;
+}
+
+// ✅ Inicializar modelo Mesa
+try {
+    $mesaConstructor = new MesaConstructor();
     $mesaModel = $mesaConstructor->getModel();
-} catch (Exception $e) {
-    die("Error al inicializar MesaModel: " . $e->getMessage());
+} catch (Throwable $e) {
+    echo json_encode([
+        'status'  => 'error',
+        'message' => 'Error al inicializar MesaModel',
+        'debug'   => $e->getMessage(),
+        'trace'   => $e->getFile() . ':' . $e->getLine()
+    ]);
+    exit;
 }
 
-// 🔹 DETECTAR SI ES UNA PETICIÓN AJAX
-$isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+$isAjax = isAjaxRequest();
+
+// ✅ Obtener propietario real
+[$id_propietario, $error] = getPropietarioID($mesaModel->getDB());
+if ($error) {
+    returnJson($isAjax, 'error', $error);
+}
+
+// ✅ Acción principal
+$accion = $_POST['accion'] ?? '';
 
 try {
-    // 🔹 ELIMINAR MESA
-    if (($_POST['accion'] ?? '') === 'eliminar') {
-        $id_mesa = $_POST['id_mesa'] ?? null;
+    switch ($accion) {
+        // 🟢 Crear mesa
+        case 'crear':
+            verifyRoleAccess('mesas', 'crear');
 
-        if ($id_mesa) {
-            $mesaModel->eliminarMesa($id_mesa);
-            $response = ['status' => 'success', 'message' => 'Mesa eliminada correctamente'];
-        } else {
-            $response = ['status' => 'error', 'message' => 'ID de mesa no proporcionado'];
-        }
+            $id_area = $_POST['id_area'] ?? null;
+            $nombre = trim($_POST['nombre_mesa'] ?? '');
 
-        if ($isAjax) {
-            echo json_encode($response);
-            exit;
-        }
-    }
+            if (empty($nombre) || empty($id_area)) {
+                returnJson($isAjax, 'error', 'Datos incompletos.');
+            }
 
-    // 🔹 CREAR o EDITAR MESA
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $accion = $_POST['accion'] ?? '';
-        $id_area = $_POST['id_area'] ?? null;
-        $nombre = trim($_POST['nombre_mesa'] ?? '');
-        $id_mesa = $_POST['id_mesa'] ?? null;
+            if ($mesaModel->mesaExiste($nombre, $id_area)) {
+                returnJson($isAjax, 'warning', 'Ya existe una mesa con ese nombre en esta área.');
+            }
 
-        // Validación básica
-        if (empty($nombre) || empty($id_area)) {
-            $response = ['status' => 'error', 'message' => 'Datos incompletos'];
-            echo json_encode($response);
-            exit;
-        }
-
-        // Evitar duplicados
-        if ($mesaModel->mesaExiste($nombre, $id_area, $accion === 'editar' ? $id_mesa : null)) {
-            $response = ['status' => 'warning', 'message' => 'Ya existe una mesa con ese nombre en esta área'];
-            echo json_encode($response);
-            exit;
-        }
-
-        // 🔹 Crear
-        if ($accion === 'crear') {
             $nuevaMesa = $mesaModel->crearMesa($id_area, $nombre);
-
-            if ($nuevaMesa && isset($nuevaMesa['id_mesa'])) {
-                $response = [
-                    'status' => 'success',
-                    'message' => 'Mesa creada correctamente',
-                    'data' => [
-                        'id_mesa' => $nuevaMesa['id_mesa'],
-                        'id_area' => $id_area,
-                        'nombre' => $nombre
-                    ]
-                ];
-            } else {
-                $response = ['status' => 'error', 'message' => 'No se pudo crear la mesa'];
+            if (!$nuevaMesa || !isset($nuevaMesa['id_mesa'])) {
+                returnJson($isAjax, 'error', 'No se pudo crear la mesa.');
             }
 
-            echo json_encode($response);
-            exit;
-        }
+            returnJson($isAjax, 'success', 'Mesa creada correctamente.', [
+                'id_mesa' => $nuevaMesa['id_mesa'],
+                'id_area' => $id_area,
+                'nombre'  => $nombre
+            ]);
+            break;
 
-        // 🔹 Editar
-        if ($accion === 'editar' && $id_mesa) {
+        // 🟠 Editar mesa
+        case 'editar':
+            verifyRoleAccess('mesas', 'editar');
+
+            $id_mesa = $_POST['id_mesa'] ?? null;
+            $id_area = $_POST['id_area'] ?? null;
+            $nombre  = trim($_POST['nombre_mesa'] ?? '');
+
+            if (!$id_mesa || empty($nombre) || empty($id_area)) {
+                returnJson($isAjax, 'error', 'Datos incompletos.');
+            }
+
+            if ($mesaModel->mesaExiste($nombre, $id_area, $id_mesa)) {
+                returnJson($isAjax, 'warning', 'Ya existe una mesa con ese nombre.');
+            }
+
             $mesaModel->editarMesa($id_mesa, $id_area, $nombre);
-            $response = [
-                'status' => 'success',
-                'message' => 'Mesa actualizada correctamente',
-                'data' => [
-                    'id_mesa' => $id_mesa,
-                    'id_area' => $id_area,
-                    'nombre' => $nombre
-                ]
-            ];
+            returnJson($isAjax, 'success', 'Mesa actualizada correctamente.', [
+                'id_mesa' => $id_mesa,
+                'id_area' => $id_area,
+                'nombre'  => $nombre
+            ]);
+            break;
 
-            if ($isAjax) {
-                echo json_encode($response);
-            } else {
-                header("Location: ../../view/gestion_mesas.php?success=mesa_editada");
+        // 🔴 Eliminar mesa
+        case 'eliminar':
+            verifyRoleAccess('mesas', 'eliminar');
+
+            $id_mesa = $_POST['id_mesa'] ?? null;
+            if (!$id_mesa) {
+                returnJson($isAjax, 'error', 'ID de mesa no proporcionado.');
             }
-            exit;
-        }
 
-        // Acción inválida
-        $response = ['status' => 'error', 'message' => 'Acción no válida'];
+            $mesaModel->eliminarMesa($id_mesa);
+            returnJson($isAjax, 'success', 'Mesa eliminada correctamente.', [
+                'id_mesa' => $id_mesa
+            ]);
+            break;
 
-        if ($isAjax) {
-            echo json_encode($response);
-        } else {
-            header("Location: ../../view/gestion_mesas.php?error=accion_invalida");
-        }
-        exit;
+        default:
+            returnJson($isAjax, 'error', 'Acción no válida o no reconocida.');
     }
-
-    // 🔹 Si llega aquí, no hay acción válida
-    if ($isAjax) {
-        echo json_encode(['status' => 'error', 'message' => 'Acción no reconocida']);
-        exit;
-    } else {
-        header("Location: ../../view/gestion_mesas.php");
-        exit;
-    }
-} catch (Exception $e) {
-    if ($isAjax) {
-        echo json_encode(['status' => 'error', 'message' => 'Error interno: ' . $e->getMessage()]);
-        exit;
-    } else {
-        header("Location: ../../view/gestion_mesas.php?error=excepcion");
-        exit;
-    }
+} catch (Throwable $e) {
+    error_log("⚠️ Error en MesaController: " . $e->getMessage() . " en " . $e->getFile() . ':' . $e->getLine());
+    echo json_encode([
+        'status'  => 'error',
+        'message' => 'Error interno en controlador',
+        'debug'   => $e->getMessage(),
+        'trace'   => $e->getFile() . ':' . $e->getLine()
+    ]);
+    exit;
 }
-?>

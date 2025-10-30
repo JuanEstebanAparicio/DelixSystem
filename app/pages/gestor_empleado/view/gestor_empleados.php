@@ -58,23 +58,23 @@ if (!$userId) {
       </div>
     </section>
 
-    <!-- 📋 Tabla de empleados -->
-    <section class="tabla-wrapper">
-      <table id="tablaEmpleados" class="tabla-empleados">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Correo</th>
-            <th>Rol</th>
-            <th>Fecha de Registro</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
-  </div>
+<section class="tabla-wrapper">
+  <table id="tablaEmpleados" class="tabla-empleados">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Correo</th>
+        <th>Documento</th>
+        <th>Rol</th>
+        <th>Estado</th>
+        <th>Fecha de Registro</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</section>
+
 
   <!-- 🧩 Modal para asignar roles -->
   <div id="modalRoles" class="modal">
@@ -102,13 +102,7 @@ if (!$userId) {
 
   <!-- 🔧 Variables globales -->
   <script>
-    // ID del usuario actual logueado (inyectado desde PHP)
     const userId = <?= json_encode($_SESSION['usuario']['id'] ?? null) ?>;
-    if (!userId) {
-      console.error("⚠️ No se encontró el ID del usuario en la sesión.");
-    } else {
-      console.log("👤 Usuario logueado ID:", userId);
-    }
   </script>
 
   <!-- 📜 JS logic -->

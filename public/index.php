@@ -6,7 +6,11 @@ echo "<!-- BASE_URL = " . BASE_URL . " -->";
 
 <!-- DelixSystem/public/index.php -->
 <?php
+require_once __DIR__ . '/../app/middleware/employee_guard.php';
 require_once __DIR__ . '/../app/middleware/session_guard.php';
+
+redirectIfEmpleadoLoggedIn();
+
 checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
 ?>
 
@@ -283,15 +287,15 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
     <h3>Inicio de Sesión de Empleado</h3>
 
     <form 
-      id="employeeLoginForm" 
-      method="POST" 
-      action="/DelixSystem/src/auth/login_empleado.php"
+        id="employeeLoginForm"
+        method="POST" 
+        action="/DelixSystem/src/auth/login_empleado.php"
     >
       <div class="form-group">
         <input 
           type="text" 
-          name="codigo_dinamico" 
-          placeholder="Código dinámico del restaurante"
+          name="restaurant_name" 
+          placeholder="Nombre del restaurante"
           required
         >
       </div>
@@ -301,7 +305,7 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
       <div class="form-group">
         <input 
           type="email" 
-          name="correo" 
+          name="email" 
           placeholder="Correo electrónico" 
           required
         >
@@ -312,7 +316,7 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
       <div class="form-group">
         <input 
           type="text" 
-          name="documento" 
+          name="document" 
           placeholder="Número de documento o cédula" 
           required
         >
@@ -324,12 +328,6 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
     </form>
   </div>
 </div>
-
-
-    </form>
-  </div>
-</div>
-
 
 
 
@@ -354,6 +352,7 @@ checkIfLoggedIn(); // Evita que un usuario logueado vuelva al login
 <script src="./js/register.js" defer></script>
 <script src="./js/login.js" defer></script>
 <script src="/DelixSystem/app/pages/gestor_empleado/js/empleadoAccess.js" defer></script>
+<script src="./js/login_empleado.js" defer></script>
 
 
 
