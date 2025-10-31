@@ -1,34 +1,34 @@
 <?php
-// DelixSystem/app/pages/gestion_mesas/view/gestion_mesas.php
-
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-require_once __DIR__ . '/../../../middleware/universal_guard.php';
+require_once __DIR__ . '/../../../middleware/employee_guard.php';
 require_once __DIR__ . '/../../../config/supabase.php';
+require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php';
+require_once __DIR__ . '/../php/area/AreaModel.php';
 
-// ✅ Protege acceso y obtiene datos de sesión
-$usuario = universalGuard();
 
-// Determinar el ID base para filtrar las áreas
-if ($usuario['tipo'] === 'propietario') {
-    $id_usuario = $usuario['id'];
-} elseif ($usuario['tipo'] === 'empleado') {
-    // el id del propietario asociado al restaurante del empleado
-    $id_usuario = $usuario['restaurant_id'];
-} else {
-    header("Location: /DelixSystem/public/index.php");
-    exit;
+// 🔐 Protección del empleado
+protectEmpleado();
+
+// 🧠 Sesión y datos del empleado autenticado
+if (session_status() === PHP_SESSION_NONE) session_start();
+
+$empleadoAuth = $_SESSION['empleado_auth'] ?? null;
+if (!$empleadoAuth || !isset($empleadoAuth['id'])) {
+  header('Location: /DelixSystem/public/index.php');
+  exit;
 }
 
-// Nombre del usuario actual (solo para mostrar)
-$nombreUsuario = $usuario['nombre'];
+// ⚙️ Determinar el propietario
+$id_empleado = $empleadoAuth['id'];
+$stmt = $conexion->prepare("SELECT user_id FROM employees WHERE id = ?");
+$stmt->execute([$id_empleado]);
+$id_propietario = $stmt->fetchColumn();
 
-// ✅ Filtrar las áreas por el restaurante correspondiente
-require_once __DIR__ . '/../php/area/AreaModel.php';
+// ⚙️ Obtener las áreas del propietario
 $areaModel = new AreaModel($conexion);
-$areas = $areaModel->obtenerAreasAdaptable($usuario['id'], $conexion);
-
+$areas = $areaModel->obtenerAreasAdaptable($id_propietario, $conexion);
 ?>
 
 <!DOCTYPE html>
@@ -38,6 +38,7 @@ $areas = $areaModel->obtenerAreasAdaptable($usuario['id'], $conexion);
   <title>Gestión de Mesas</title>
   <link rel="stylesheet" href="../css/gestion_mesas.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
 
@@ -236,6 +237,6 @@ $areas = $areaModel->obtenerAreasAdaptable($usuario['id'], $conexion);
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="/DelixSystem/public/js/alert.js"></script>
   <script src="../js/areas.js"></script>
-
+  <script src="/DelixSystem/app/shared/js/control_center.js"></script>
 </body>
 </html>
