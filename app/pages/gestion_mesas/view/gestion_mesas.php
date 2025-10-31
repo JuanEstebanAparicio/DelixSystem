@@ -47,8 +47,8 @@ $areas = $areaModel->obtenerAreasAdaptable($usuario['id'], $conexion);
   </header>
     <!-- 🔹 BOTÓN IR AL RESUMEN -->
   <div class="resumen-btn-container" style="text-align:right; margin: 15px 30px;">
-    <a href="resumen_mesas.php" class="btn-summary" title="Ver resumen general">
-      <i class="fa-solid fa-chart-pie"></i> Volver al resumen general
+    <a href="../../../../../DelixSystem/app/pages/dashboard_propietario/view/index.php" class="btn-summary" title="Ver resumen general">
+      <i class="fa-solid fa-chart-pie"></i> Volver al Dashboard
     </a>
   </div>
 

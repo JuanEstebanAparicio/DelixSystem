@@ -18,5 +18,5 @@ if (ini_get("session.use_cookies")) {
 session_destroy();
 
 // Redirigir al inicio (login o home)
-header('Location: ../../public/index.php');
+header('Location: /DelixSystem/public/index.php');
 exit;

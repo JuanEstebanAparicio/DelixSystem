@@ -1,174 +1,264 @@
-<!-- -- DelixSystem/app/pages/dashboard_propietario/view/index.php -->
 <?php
 require_once __DIR__ . '/../../../middleware/session_guard.php';
-protectPage('propietario'); // Evita que accedan al dashboard sin login
+protectPage('propietario');
 
-// Iniciamos sesión solo si no está activa (por seguridad extra)
+// ✅ Incluimos el Control Center
+ include __DIR__ . '/../../../components/header_propietario.php'; 
+ include __DIR__ . '/../../../components/control_center_propietario.php'; 
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+require_once __DIR__ . '/../../../config/supabase.php';
 
-//🪑 Obtenemos el nombre del usuario desde la sesión
-$nombreUsuario = $_SESSION['usuario']['nombre'] ?? 'Usuario';
-$nombreRestaurante = $_SESSION['usuario']['restaurant_name'] ?? 'MiRestaurante';
+$usuario = $_SESSION['usuario'] ?? [];
+$id_usuario = $usuario['id'] ?? null;
+$nombreUsuario = $usuario['first_name'] ?? 'Usuario';
+$apellidoUsuario = $usuario['last_name'] ?? '';
+$email = $usuario['email'] ?? 'Sin correo';
+$nombreRestaurante = $usuario['restaurant_name'] ?? 'Mi Restaurante';
+
+$totalAreas = 0;
+$totalMesas = 0;
+
+if ($id_usuario) {
+    try {
+        // 🔹 Total de áreas del propietario
+        $stmtAreas = $conexion->prepare("SELECT COUNT(*) AS total FROM areas WHERE id_usuario = ?");
+        $stmtAreas->execute([$id_usuario]);
+        $totalAreas = $stmtAreas->fetch(PDO::FETCH_ASSOC)['total'];
+
+        // 🔹 Total de mesas (unidas a sus áreas)
+        $stmtMesas = $conexion->prepare("
+            SELECT COUNT(*) AS total 
+            FROM mesas m
+            INNER JOIN areas a ON m.id_area = a.id_area 
+            WHERE a.id_usuario = ?
+        ");
+        $stmtMesas->execute([$id_usuario]);
+        $totalMesas = $stmtMesas->fetch(PDO::FETCH_ASSOC)['total'];
+    } catch (Exception $e) {
+        $error = $e->getMessage();
+    }
+}
 
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Restaurante</title>
-  <link rel="stylesheet" href="../css/style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <title>Delix | Propietario</title>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/DelixSystem/app/shared/css/globals.css">
+  <link rel="stylesheet" href="/DelixSystem/app/shared/css/control_center.css">
+  <style>
+    .fade-in {
+      opacity: 0;
+      transform: translateY(15px);
+      animation: fadeInUp 0.8s ease-out forwards;
+    }
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 </head>
-<body>
 
-  <aside class="sidebar">
-  <h2>
-    <span class="logo-full">🍴 <?= htmlspecialchars($nombreRestaurante) ?></span>
-    <span class="logo-mini">DELIX</span>
-  </h2>
-  <ul>
-    <li class="active"><i>🏠</i><span>Dashboard</span></li>
-    <li><i>🧾</i><span>Pedidos</span></li>
-    <li><i>🍔</i><span>Menú</span></li>
-  <a href="../../gestion_mesas/view/resumen_mesas.php" class="menu-link">
-    <i class="fa-solid fa-chair">🪑</i> <span>Mesas</span>
-  </a>
-</li>
-    <li><i>👥</i><span>Clientes</span></li>
-    <li><i>📊</i><span>Reportes</span></li>
-    <li><i>⚙️</i><span>Configuración</span></li>
-    <a href="../../gestor_empleado/view/gestor_empleados.php">
-    <li><i>👨‍💼</i><span>Admin</span></li>
-    </a>
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800">
 
-  </ul>
-  </aside>
+  <!-- 🧭 Control Center -->
+   <?php include __DIR__ . '/../../../components/control_center_propietario.php'; ?>
 
-  <div id="transitionOverlay" style="
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(255,255,255,0.9);
-  z-index: 9999;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.5rem;
-  color: #333;
-  font-weight: bold;
-">
-  Cargando...
+
+  <!-- 🌟 Contenido Principal -->
+  <main class="pt-28 px-6 flex justify-center items-center">
+    <section class="bg-white shadow-lg rounded-2xl p-10 w-full max-w-5xl fade-in">
+      
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800">
+            ¡Bienvenido, <?= htmlspecialchars($nombreUsuario . ' ' . $apellidoUsuario) ?>! 👋
+          </h1>
+          <p class="text-gray-600 text-lg">
+            Nos alegra verte de nuevo en <strong><?= htmlspecialchars($nombreRestaurante) ?></strong>.
+          </p>
+        </div>
+
+        <!-- Botón de perfil -->
+        <button id="openProfileModal"
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-full flex items-center gap-2 transition">
+          <i class="ri-user-3-line text-xl"></i>
+          Perfil
+        </button>
+      </div>
+
+      <!-- 📋 Información del propietario -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-gray-50 rounded-xl p-5">
+          <p class="text-gray-500 text-sm">Correo</p>
+          <p class="font-medium text-gray-800"><?= htmlspecialchars($email) ?></p>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-5">
+          <p class="text-gray-500 text-sm">Restaurante</p>
+          <p class="font-medium text-gray-800"><?= htmlspecialchars($nombreRestaurante) ?></p>
+        </div>
+      </div>
+
+      <!-- 📊 Estadísticas Rápidas -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+        <div class="bg-emerald-100 p-6 rounded-xl text-center">
+          <h3 class="text-emerald-800 text-lg font-semibold">Pedidos del Día</h3>
+          <p class="text-3xl font-bold text-emerald-700 mt-2">45</p>
+        </div>
+        <div class="bg-sky-100 p-6 rounded-xl text-center">
+          <h3 class="text-sky-800 text-lg font-semibold">Ventas Totales</h3>
+          <p class="text-3xl font-bold text-sky-700 mt-2">$1,250.000</p>
+        </div>
+        <div class="bg-amber-100 p-6 rounded-xl text-center">
+  <h3 class="text-amber-800 text-lg font-semibold">Resumen de Mesas</h3>
+  <p class="text-lg text-amber-700 mt-2 font-medium">Áreas: <?= $totalAreas ?></p>
+  <p class="text-3xl font-bold text-amber-700 mt-1"><?= $totalMesas ?> Mesas</p>
 </div>
 
-  <main class="main">
-   <header>
-  <button id="toggleSidebar" class="toggle-btn">☰</button>
-  <h1>Panel de Control</h1>
-  <div class="user-info">
-    <img src="https://cdn-icons-png.flaticon.com/512/2202/2202112.png" alt="Usuario" id="openProfileModal">
-    <span><?= htmlspecialchars($_SESSION['usuario']['first_name'] ?? 'Usuario') ?></span>
-    <a href="../../../../src/auth/logout.php" class="logout-btn">Cerrar sesión</a>
-  </div>
-</header>
+      </div>
 
-    <section class="stats">
-      <div class="stat">
-        <h3>Pedidos del Día</h3>
-        <p>45</p>
+      <!-- 🔗 Accesos directos -->
+      <div class="flex flex-wrap gap-4 justify-center">
+        <a href="/DelixSystem/app/pages/gestion_pedidos/view/index.php"
+           class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-lg font-medium transition-all">
+          Pedidos
+        </a>
+        <a href="/DelixSystem/app/pages/gestion_mesas/view/gestion_mesas.php"
+           class="bg-sky-500 hover:bg-sky-600 text-white px-5 py-2 rounded-lg font-medium transition-all">
+          Mesas
+        </a>
+        <a href="/DelixSystem/app/pages/gestor_empleado/view/gestor_empleados.php"
+           class="bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2 rounded-lg font-medium transition-all">
+          Empleados
+        </a>
+        <a href="/DelixSystem/app/pages/dishes_manager/view/index.php"
+           class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-lg font-medium transition-all">
+          Gestor Menú
+        </a>
+        <a href="/DelixSystem/app/pages/reports/view/index.php"
+           class="bg-rose-500 hover:bg-rose-600 text-white px-5 py-2 rounded-lg font-medium transition-all">
+          Reportes
+        </a>
       </div>
-      <div class="stat">
-        <h3>Ventas Totales</h3>
-        <p>$1,250.000</p>
+
+      <!-- 📈 Tabla de pedidos recientes -->
+      <div class="mt-12">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Pedidos Recientes</h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
+            <thead class="bg-gray-100 text-gray-700">
+              <tr>
+                <th class="py-3 px-4 text-left">ID Pedido</th>
+                <th class="py-3 px-4 text-left">Cliente</th>
+                <th class="py-3 px-4 text-left">Mesa</th>
+                <th class="py-3 px-4 text-left">Estado</th>
+                <th class="py-3 px-4 text-left">Total</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="py-3 px-4">#1021</td>
+                <td class="py-3 px-4">Carlos Pérez</td>
+                <td class="py-3 px-4">5</td>
+                <td class="py-3 px-4">
+                  <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">Pendiente</span>
+                </td>
+                <td class="py-3 px-4">$45.000</td>
+              </tr>
+              <tr>
+                <td class="py-3 px-4">#1020</td>
+                <td class="py-3 px-4">Ana Torres</td>
+                <td class="py-3 px-4">2</td>
+                <td class="py-3 px-4">
+                  <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm">Entregado</span>
+                </td>
+                <td class="py-3 px-4">$72.000</td>
+              </tr>
+              <tr>
+                <td class="py-3 px-4">#1019</td>
+                <td class="py-3 px-4">Luis García</td>
+                <td class="py-3 px-4">1</td>
+                <td class="py-3 px-4">
+                  <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm">Entregado</span>
+                </td>
+                <td class="py-3 px-4">$33.000</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div class="stat">
-        <h3>Mesas Ocupadas</h3>
-        <p>8 / 12</p>
-      </div>
+
     </section>
-
-    <section class="table-section">
-      <h2>Pedidos Recientes</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>ID Pedido</th>
-            <th>Cliente</th>
-            <th>Mesa</th>
-            <th>Estado</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>#1021</td>
-            <td>Carlos Pérez</td>
-            <td>5</td>
-            <td><span class="badge pendiente">Pendiente</span></td>
-            <td>$45.000</td>
-          </tr>
-          <tr>
-            <td>#1020</td>
-            <td>Ana Torres</td>
-            <td>2</td>
-            <td><span class="badge entregado">Entregado</span></td>
-            <td>$72.000</td>
-          </tr>
-          <tr>
-            <td>#1019</td>
-            <td>Luis García</td>
-            <td>1</td>
-            <td><span class="badge entregado">Entregado</span></td>
-            <td>$33.000</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-    <!-- Modal Editar Perfil -->
-<div id="profileModal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h2>Editar Perfil</h2>
-  <form id="profileForm" method="POST" action="../php/profile.php">
-  <div class="form-group">
-    <label for="first_name">Nombre:</label>
-    <input type="text" id="first_name" name="first_name" 
-           value="<?= htmlspecialchars($_SESSION['usuario']['first_name'] ?? '') ?>" required>
-  </div>
-
-  <div class="form-group">
-    <label for="last_name">Apellido:</label>
-    <input type="text" id="last_name" name="last_name" 
-           value="<?= htmlspecialchars($_SESSION['usuario']['last_name'] ?? '') ?>" required>
-  </div>
-
-  <div class="form-group">
-    <label for="email">Correo:</label>
-    <input type="email" id="email" name="email" 
-           value="<?= htmlspecialchars($_SESSION['usuario']['email'] ?? '') ?>" required>
-  </div>
-
-  <div class="form-group">
-    <label for="restaurant_name">Restaurante:</label>
-    <input type="text" id="restaurant_name" name="restaurant_name" 
-           value="<?= htmlspecialchars($_SESSION['usuario']['restaurant_name'] ?? '') ?>" required>
-  </div>
-
-  <button type="submit" class="btn-save">Guardar Cambios</button>
-</form>
-  </div>
-</div>
-
   </main>
 
+  <!-- 🧑 Modal de Edición de Perfil -->
+  <div id="profileModal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
+    <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-8 relative">
+      <button id="closeProfileModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Editar Perfil</h2>
 
+      <form id="profileForm" method="POST" action="../php/profile.php" class="space-y-5">
+        <div>
+          <label for="first_name" class="block text-sm font-medium text-gray-600">Nombre</label>
+          <input type="text" id="first_name" name="first_name"
+                 value="<?= htmlspecialchars($usuario['first_name'] ?? '') ?>"
+                 class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-emerald-500 focus:border-emerald-500" required>
+        </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="../js/script.js"></script>
+        <div>
+          <label for="last_name" class="block text-sm font-medium text-gray-600">Apellido</label>
+          <input type="text" id="last_name" name="last_name"
+                 value="<?= htmlspecialchars($usuario['last_name'] ?? '') ?>"
+                 class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-emerald-500 focus:border-emerald-500" required>
+        </div>
+
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-600">Correo</label>
+          <input type="email" id="email" name="email"
+                 value="<?= htmlspecialchars($usuario['email'] ?? '') ?>"
+                 class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-emerald-500 focus:border-emerald-500" required>
+        </div>
+
+        <div>
+          <label for="restaurant_name" class="block text-sm font-medium text-gray-600">Restaurante</label>
+          <input type="text" id="restaurant_name" name="restaurant_name"
+                 value="<?= htmlspecialchars($usuario['restaurant_name'] ?? '') ?>"
+                 class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-emerald-500 focus:border-emerald-500" required>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 rounded-lg transition-all">
+          Guardar Cambios
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- JS Global -->
+ <script src="/DelixSystem/app/shared/js/control_center_propietario.js"></script>
+
+  <!-- Modal Script -->
+  <script>
+    const profileModal = document.getElementById('profileModal');
+    const openProfileModal = document.getElementById('openProfileModal');
+    const closeProfileModal = document.getElementById('closeProfileModal');
+
+    openProfileModal.addEventListener('click', () => profileModal.classList.remove('hidden'));
+    closeProfileModal.addEventListener('click', () => profileModal.classList.add('hidden'));
+    profileModal.addEventListener('click', (e) => {
+      if (e.target === profileModal) profileModal.classList.add('hidden');
+    });
+  </script>
+
 </body>
 </html>
