@@ -16,6 +16,29 @@ document.addEventListener("DOMContentLoaded", () => {
       placeholder: 'Selecciona los ingredientes...',
       width: '100%'
     });
+
+    $('#ingredients').on('change', function () {
+      const selected = $(this).val() || [];
+      const container = $('#ingredientQuantities');
+      container.empty();
+
+      selected.forEach(id => {
+        const name = $('#ingredients option[value="' + id + '"]').text();
+        const inputId = 'quantity_' + id;
+        const block = `
+          <div class="ingredient-quantity-block">
+            <label for="${inputId}">${name} - Cantidad:</label>
+            <input type="number" step="0.01" name="quantity_${id}" id="${inputId}" placeholder="Ej: 2">
+            <select name="unit_${id}">
+              <option value="kg">kg</option>
+              <option value="litros">litros</option>
+              <option value="unidad">unidad</option>
+            </select>
+          </div>
+        `;
+        container.append(block);
+      });
+    });
   }
 
   const form = document.getElementById("dishForm");
@@ -63,11 +86,11 @@ function newDish() {
   const currentPhotoContainer = document.getElementById("currentPhotoContainer");
   if (currentPhotoContainer) currentPhotoContainer.classList.add("hidden");
 
-  // ✅ Limpiar foto actual
   const currentPhotoInput = document.getElementById("current_photo_input");
   if (currentPhotoInput) currentPhotoInput.value = "";
 
   $('#ingredients').val(null).trigger('change');
+  $('#ingredientQuantities').empty();
 
   showModal("formModal");
 }
@@ -97,10 +120,36 @@ function editDish(data) {
     currentPhotoInput.value = "";
   }
 
-  if (data.ingredients && Array.isArray(data.ingredients)) {
-    $('#ingredients').val(data.ingredients).trigger('change');
+  if (Array.isArray(data.ingredients)) {
+    const ingredientIds = data.ingredients.map(i => i.id);
+
+    $('#ingredients').val(ingredientIds).trigger('change');
+
+    setTimeout(() => {
+      const container = $('#ingredientQuantities');
+      container.empty();
+
+      data.ingredients.forEach(ing => {
+        const inputId = 'quantity_' + ing.id;
+        const name = ing.name;
+
+        const block = `
+          <div class="ingredient-quantity-block">
+            <label for="${inputId}">${name} - Cantidad:</label>
+            <input type="number" step="0.01" name="quantity_${ing.id}" id="${inputId}" value="${ing.quantity_used}">
+            <select name="unit_${ing.id}">
+              <option value="kg" ${ing.unit === "kg" ? "selected" : ""}>kg</option>
+              <option value="litros" ${ing.unit === "litros" ? "selected" : ""}>litros</option>
+              <option value="unidad" ${ing.unit === "unidad" ? "selected" : ""}>unidad</option>
+            </select>
+          </div>
+        `;
+        container.append(block);
+      });
+    }, 100);
   } else {
     $('#ingredients').val(null).trigger('change');
+    $('#ingredientQuantities').empty();
   }
 
   document.getElementById("modalTitle").textContent = "Editar Plato";
@@ -109,6 +158,7 @@ function editDish(data) {
 
   showModal("formModal");
 }
+
 
 async function deleteDish(id) {
   if (!confirm("¿Seguro que deseas eliminar este plato?")) return;

@@ -1,17 +1,30 @@
 <?php
+session_start();
+if (!isset($_SESSION['usuario'])) {
+    header("Location: /DelixSystem/");
+    exit;
+}
+
+$id_usuario = $_SESSION['usuario']['id'];
+
 require_once __DIR__ . '/../../../config/supabase.php';
 
 try {
-    $stmt = $conexion->query("SELECT * FROM dish ORDER BY category, name_dish ASC");
+
+    $stmt = $conexion->prepare("SELECT * FROM dish WHERE id_user = :id_user ORDER BY category, name_dish ASC");
+    $stmt->bindParam(':id_user', $id_usuario, PDO::PARAM_INT);
+    $stmt->execute();
     $platos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $stmtIng = $conexion->query("SELECT id, name FROM storage ORDER BY name ASC");
+    $stmtIng = $conexion->prepare("SELECT id, name FROM storage WHERE id_user = :id_user ORDER BY name ASC");
+    $stmtIng->bindParam(':id_user', $id_usuario, PDO::PARAM_INT);
+    $stmtIng->execute();
     $ingredientes = $stmtIng->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($platos as $i => $dish) {
-        $stmt = $conexion->prepare("SELECT ingredient_id FROM dish_ingredient WHERE dish_id = ?");
-        $stmt->execute([$dish['id']]);
-        $platos[$i]['ingredients'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $stmt2 = $conexion->prepare("SELECT ingredient_id AS id, quantity_used, unit FROM dish_ingredient WHERE dish_id = ?");
+        $stmt2->execute([$dish['id']]);
+        $platos[$i]['ingredients'] = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     }
 
     $categorias = [];
@@ -46,7 +59,9 @@ try {
 
   <nav class="sidebar hidden" id="sidebarMenu">
     <h3 class="sidebar-title">Categorías</h3>
-    <ul class="sidebar-list">
+    <button id="reloadBtn" class="reload-btn" onclick="reloadCategories()">🔄 Recargar</button>
+
+    <ul class="sidebar-list" id="categoryList">
       <li class="sidebar-item" onclick="mostrarCategoria('Todos')">Todos</li>
       <?php foreach ($categorias as $categoria => $items): ?>
         <li class="sidebar-item" onclick="mostrarCategoria('<?= htmlspecialchars($categoria) ?>')">
@@ -85,17 +100,17 @@ try {
               <?php if (!empty($dish['ingredients'])): ?>
                 <p><strong>Ingredientes:</strong></p>
                 <ul>
-                  <?php foreach ($dish['ingredients'] as $ing_id): ?>
+                  <?php foreach ($dish['ingredients'] as $ing): ?>
                     <?php
                       $nombreIng = '';
-                      foreach ($ingredientes as $ing) {
-                        if ($ing['id'] == $ing_id) {
-                          $nombreIng = $ing['name'];
+                      foreach ($ingredientes as $i) {
+                        if ($i['id'] == $ing['id']) {
+                          $nombreIng = $i['name'];
                           break;
                         }
                       }
                     ?>
-                    <li><?= htmlspecialchars($nombreIng) ?></li>
+                    <li><?= htmlspecialchars($nombreIng) ?> (<?= $ing['quantity_used'] . ' ' . $ing['unit'] ?>)</li>
                   <?php endforeach; ?>
                 </ul>
               <?php endif; ?>
@@ -150,6 +165,8 @@ try {
           </select>
           <input type="text" id="newCategoryInput" name="new_category" placeholder="Nueva categoría" class="hidden">
         </div>
+        
+        <div id="previousIngredients" style="margin-bottom: 10px; font-size: 14px;"></div>
 
         <div class="form-group">
           <label for="ingredients">Ingredientes:</label>
@@ -160,6 +177,8 @@ try {
           </select>
         </div>
 
+        <div id="ingredientQuantities"></div>
+
         <div class="form-group">
           <label for="description">Descripción:</label>
           <textarea name="description" id="description" rows="3" placeholder="Breve descripción del plato..."></textarea>
@@ -169,6 +188,7 @@ try {
           <label for="state">Estado:</label>
           <select name="state" id="state">
             <option value="Activo">Activo</option>
+            <option value="Agotado">Agotado</option>
             <option value="Inactivo">Inactivo</option>
           </select>
         </div>
@@ -191,11 +211,11 @@ try {
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script src="../js/form_handler.js"></script>
   <script src="../js/category_handler.js"></script>
   <script src="../js/sidebar_handler.js"></script>
   <script src="../js/dish_dynamic_loader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 <?php
 
 class Product {
+    private $id_user;
     private $name;
     private $amount;
     private $minimum_quantity;
@@ -16,7 +17,8 @@ class Product {
     private $supplier;
     private $photo;
 
-    public function __construct($name, $amount, $minimum_quantity, $unit, $unit_cost, $category, $entrance_date, $expiration_date, $batch, $description, $location, $state, $supplier, $photo) {
+    public function __construct($id_user,$name, $amount, $minimum_quantity, $unit, $unit_cost, $category, $entrance_date, $expiration_date, $batch, $description, $location, $state, $supplier, $photo) {
+        $this->id_user = $id_user;
         $this->name = $name;
         $this->amount = $amount;
         $this->minimum_quantity = $minimum_quantity;
@@ -32,6 +34,8 @@ class Product {
         $this->supplier = $supplier;
         $this->photo = $photo;
     }
+
+    public function getIdUser() { return $this->id_user; }
     public function getName() { return $this->name; }
     public function getAmount() { return $this->amount; }
     public function getMinimumQuantity() { return $this->minimum_quantity; }
@@ -47,6 +51,7 @@ class Product {
     public function getSupplier() { return $this->supplier; }
     public function getPhoto() { return $this->photo; }
 
+    public function setIdUser($id_user) { $this->id_user = $id_user; }
     public function setName($name) { $this->name = $name; }
     public function setAmount($amount) { $this->amount = $amount; }
     public function setMinimumQuantity($minimum_quantity) { $this->minimum_quantity = $minimum_quantity; }

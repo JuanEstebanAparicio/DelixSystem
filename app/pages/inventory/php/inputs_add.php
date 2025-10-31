@@ -1,64 +1,75 @@
 <?php
-$baseDir = dirname(__DIR__, 3);
+ob_start();
+session_start();
+header('Content-Type: application/json');
 
-require_once($baseDir . '/config/supabase.php');
-require_once(__DIR__ . '/products.php');
-require_once(__DIR__ . '/storage_crud.php');
+try {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        throw new Exception("Solo se permiten solicitudes POST.");
+    }
 
-$pdo = $conexion ?? null;
+    if (!isset($_SESSION['usuario']['id'])) {
+        throw new Exception("No hay usuario autenticado.");
+    }
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $photoPath = null;
+    $id_user = intval($_SESSION['usuario']['id']);
 
-    $category = trim($_POST['category']);
-    $productName = trim($_POST['name']);
-    $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', $category);
-    $safeProduct = preg_replace('/[^a-zA-Z0-9_-]/', '_', $productName);
-    $categoryDir = $baseDir . "/pages/inventory/media/$safeCategory";
+    $baseDir = dirname(__DIR__, 3);
+    require_once($baseDir . '/pages/inventory/php/products.php');
+    require_once($baseDir . '/pages/inventory/php/storage_crud.php');
+
+    $category = trim($_POST['category'] ?? '');
+    $newCategory = trim($_POST['new_category'] ?? '');
+    if ($category === '__new__' || $newCategory !== '') $category = $newCategory;
+
+    $productName = trim($_POST['name'] ?? '');
+
+    $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', $category ?: 'sin_categoria');
+    $safeProduct = preg_replace('/[^a-zA-Z0-9_-]/', '_', $productName ?: 'producto');
+
+    $mediaRoot = $baseDir . "/pages/inventory/media";
+    $categoryDir = "$mediaRoot/$safeCategory";
     $productDir = "$categoryDir/$safeProduct";
 
     if (!is_dir($categoryDir)) mkdir($categoryDir, 0777, true);
     if (!is_dir($productDir)) mkdir($productDir, 0777, true);
 
-    if (isset($_FILES["photo"]) && $_FILES["photo"]["error"] === 0) {
-        $photoName = uniqid() . "_" . basename($_FILES["photo"]["name"]);
+    $photoPath = null;
+    if (!empty($_FILES['photo']['name']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+        $photoName = uniqid('photo_') . "_" . basename($_FILES['photo']['name']);
         $targetPath = "$productDir/$photoName";
-
-        if (move_uploaded_file($_FILES["photo"]["tmp_name"], $targetPath)) {
-            $photoPath = "media/$safeCategory/$safeProduct/$photoName";
-        } else {
-            die("❌ Error al mover la imagen al destino.");
+        if (!move_uploaded_file($_FILES['photo']['tmp_name'], $targetPath)) {
+            throw new Exception("Error al guardar la imagen.");
         }
+        $photoPath = "media/$safeCategory/$safeProduct/$photoName";
     }
 
     $product = new Product(
+        $id_user,
         $productName,
-        $_POST['amount'],
-        $_POST['minimum_quantity'],
-        $_POST['unit'],
-        $_POST['unit_cost'],
+        $_POST['amount'] ?? 0,
+        $_POST['minimum_quantity'] ?? 0,
+        $_POST['unit'] ?? '',
+        $_POST['unit_cost'] ?? 0,
         $category,
-        $_POST['entrance_date'] ?? null,
-        $_POST['expiration_date'] ?? null,
+        $_POST['fecha_ingreso'] ?? null,
+        $_POST['fecha_vencimiento'] ?? null,
         $_POST['batch'] ?? null,
         $_POST['description'] ?? null,
         $_POST['location'] ?? null,
         $_POST['state'] ?? 'Activo',
-        $_POST['supplier'],
+        $_POST['supplier'] ?? null,
         $photoPath
     );
 
-    try {
-        $crud = new storage_crud($pdo);
-        $crud->createProduct($product);
+    $crud = new storage_crud();
+    $ok = $crud->insertProduct($product);
+    if (!$ok) throw new Exception("Error al insertar el ingrediente en la base de datos.");
 
-        header("Location: ../view/ingredient_manager.php?success=1");
-        exit();
-    } catch (Exception $e) {
-        die("❌ Error al registrar producto: " . $e->getMessage());
-    }
-} else {
-    http_response_code(403);
-    echo "🚫 Este recurso solo acepta solicitudes POST.";
+    ob_clean();
+    echo json_encode(["success" => true, "message" => "✅ Ingrediente agregado correctamente"]);
+} catch (Exception $e) {
+    ob_clean();
+    echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }
 ?>

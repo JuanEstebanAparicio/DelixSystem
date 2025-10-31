@@ -15,11 +15,12 @@ class dishes_crud {
             $this->pdo->beginTransaction();
 
             $sql = "INSERT INTO dish 
-                    (name_dish, price, category, description, state, created_at, photo)
-                    VALUES (:name_dish, :price, :category, :description, :state, :created_at, :photo)";
+                    (id_user, name_dish, price, category, description, state, created_at, photo)
+                    VALUES (:id_user, :name_dish, :price, :category, :description, :state, :created_at, :photo)";
             
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([
+                ':id_user'     => $dish->getIdUser(),
                 ':name_dish'   => $dish->getNameDish(),
                 ':price'       => $dish->getPrice(),
                 ':category'    => $dish->getCategory(),
@@ -40,48 +41,47 @@ class dishes_crud {
                     $stmtIng->execute([
                         ':dish_id' => $dishId,
                         ':ingredient_id' => $ing['id'],
-                        ':quantity_used' => $ing['quantity'] ?? 1,
-                        ':unit' => $ing['unit'] ?? 'unidad'
+                        ':quantity_used' => $ing['quantity'],
+                        ':unit' => $ing['unit']
                     ]);
                 }
             }
 
             $this->pdo->commit();
             return true;
+
         } catch (PDOException $e) {
             $this->pdo->rollBack();
-            die("Error al crear plato: " . $e->getMessage());
+            throw new Exception("Error al crear plato: " . $e->getMessage());
         }
     }
-
     public function updateDish(dishes $dish, $id, $ingredients = []) {
         try {
             $this->pdo->beginTransaction();
 
-            $sql = "UPDATE dish SET 
-                name_dish = :name_dish,
-                price = :price,
-                category = :category,
-                description = :description,
-                state = :state,
-                created_at = :created_at,
-                photo = :photo
-                WHERE id = :id";
+            $sql = "UPDATE dish SET
+                        name_dish = :name_dish,
+                        price = :price,
+                        category = :category,
+                        description = :description,
+                        state = :state,
+                        photo = :photo
+                    WHERE id = :id AND id_user = :id_user";
             
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([
+                ':id'          => $dish->getId(),
+                ':id_user'     => $dish->getIdUser(),
                 ':name_dish'   => $dish->getNameDish(),
                 ':price'       => $dish->getPrice(),
                 ':category'    => $dish->getCategory(),
                 ':description' => $dish->getDescription(),
                 ':state'       => $dish->getState(),
-                ':created_at'  => $dish->getCreatedAt(),
-                ':photo'       => $dish->getPhoto(),
-                ':id'          => $id
+                ':photo'       => $dish->getPhoto()
             ]);
 
             $this->pdo->prepare("DELETE FROM dish_ingredient WHERE dish_id = :id")
-                      ->execute([':id' => $id]);
+                ->execute([':id' => $id]);
 
             if (!empty($ingredients)) {
                 $sqlIng = "INSERT INTO dish_ingredient (dish_id, ingredient_id, quantity_used, unit)
@@ -92,51 +92,37 @@ class dishes_crud {
                     $stmtIng->execute([
                         ':dish_id' => $id,
                         ':ingredient_id' => $ing['id'],
-                        ':quantity_used' => $ing['quantity'] ?? 1,
-                        ':unit' => $ing['unit'] ?? 'unidad'
+                        ':quantity_used' => $ing['quantity'],
+                        ':unit' => $ing['unit']
                     ]);
                 }
             }
 
             $this->pdo->commit();
             return true;
+
         } catch (PDOException $e) {
             $this->pdo->rollBack();
-            die("Error al actualizar plato: " . $e->getMessage());
+            throw new Exception("Error al actualizar plato: " . $e->getMessage());
         }
     }
 
-    public function deleteDish($id) {
+    public function deleteDish($id, $id_user) {
         try {
             $this->pdo->beginTransaction();
-            $this->pdo->prepare("DELETE FROM dish_ingredient WHERE dish_id = :id")->execute([':id' => $id]);
-            $this->pdo->prepare("DELETE FROM dish WHERE id = :id")->execute([':id' => $id]);
+
+            $this->pdo->prepare("DELETE FROM dish_ingredient WHERE dish_id = :id")
+                      ->execute([':id' => $id]);
+
+            $this->pdo->prepare("DELETE FROM dish WHERE id = :id AND id_user = :id_user")
+                      ->execute([':id' => $id, ':id_user' => $id_user]);
+
             $this->pdo->commit();
             return true;
+
         } catch (PDOException $e) {
             $this->pdo->rollBack();
-            die("Error al eliminar plato: " . $e->getMessage());
-        }
-    }
-
-    public function getAllDishes() {
-        try {
-            $sql = "SELECT * FROM dish ORDER BY category, name_dish ASC";
-            $stmt = $this->pdo->query($sql);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            die("Error al obtener platos: " . $e->getMessage());
-        }
-    }
-
-    public function getDishById($id) {
-        try {
-            $sql = "SELECT * FROM dish WHERE id = :id";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':id' => $id]);
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            die("Error al obtener plato: " . $e->getMessage());
+            throw new Exception("Error al eliminar plato: " . $e->getMessage());
         }
     }
 }

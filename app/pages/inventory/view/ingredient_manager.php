@@ -1,20 +1,34 @@
 <?php
+session_start();
+if (!isset($_SESSION['usuario'])) {
+    header("Location: /DelixSystem/");
+    exit;
+}
+
+$id_usuario = $_SESSION['usuario']['id'];
+
 require_once __DIR__ . '/../../../config/supabase.php';
+
 try {
-    $query = $conexion->query("SELECT * FROM storage ORDER BY category, name ASC");
-    $insumos = $query->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $conexion->prepare("SELECT * FROM storage WHERE id_user = :id_user ORDER BY category, name ASC");
+    $stmt->bindParam(':id_user', $id_usuario, PDO::PARAM_INT);
+    $stmt->execute();
+
+    $insumos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $categorias = [];
 
     foreach ($insumos as $ing) {
-        $cat = $ing['category'] ?: 'Sin categoría';
+        $cat = !empty($ing['category']) ? $ing['category'] : 'Sin categoría';
         $categorias[$cat][] = $ing;
     }
 
     $listaCategorias = array_keys($categorias);
+
 } catch (PDOException $e) {
     die("<p class='error-msg'>Error al obtener datos desde Supabase: " . $e->getMessage() . "</p>");
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -32,9 +46,11 @@ try {
     <button class="create-btn" onclick="newIngredient()">+ Crear Ingrediente</button>
   </header>
 
-  <nav class="sidebar hidden" id="sidebarMenu">
+    <nav class="sidebar hidden" id="sidebarMenu">
     <h3 class="sidebar-title">Categorías</h3>
-    <ul class="sidebar-list">
+    <button id="reloadBtn" class="reload-btn" onclick="reloadCategories()">🔄 Recargar</button>
+
+    <ul class="sidebar-list" id="categoryList">
       <li class="sidebar-item" onclick="mostrarCategoria('Todos')">Todos</li>
       <?php foreach ($categorias as $categoria => $items): ?>
         <li class="sidebar-item" onclick="mostrarCategoria('<?= htmlspecialchars($categoria) ?>')">
@@ -44,19 +60,18 @@ try {
     </ul>
   </nav>
 
+
   <main class="main-content container">
     <h2 class="page-title">Gestor de Ingredientes</h2>
 
-    <div class="card-container" id="ingredientGrid">
+    <div class="card-container" id="ingredientGrid" data-user="<?= $id_usuario ?>">
 
       <?php foreach ($categorias as $categoria => $items): ?>
         <?php foreach ($items as $ing): ?>
           <?php
-            $imgPath = !empty($ing['photo'])
-              ? "../" . htmlspecialchars($ing['photo'])
-              : "../img/default.png";
-
-            if (!file_exists(__DIR__ . "/../" . $ing['photo'])) {
+            $imgPath = !empty($ing['photo']) ? "../" . htmlspecialchars($ing['photo']) : "../img/default.png";
+            $photoAbs = __DIR__ . "/../" . ($ing['photo'] ?? '');
+            if (empty($ing['photo']) || !file_exists($photoAbs)) {
               $imgPath = "../img/default.png";
             }
           ?>
@@ -68,18 +83,14 @@ try {
             <div class="card-body">
               <h4 class="ingredient-name"><?= htmlspecialchars($ing['name']) ?></h4>
               <p class="ingredient-cost">$<?= number_format($ing['unit_cost'], 0, ',', '.') ?></p>
-              <p class="ingredient-state <?= strtolower($ing['state']) ?>">
-                <?= htmlspecialchars($ing['state']) ?>
-              </p>
+              <p class="ingredient-state <?= strtolower($ing['state']) ?>"><?= htmlspecialchars($ing['state']) ?></p>
               <p class="ingredient-amount"><?= htmlspecialchars($ing['amount']) ?> <?= htmlspecialchars($ing['unit']) ?></p>
               <p class="ingredient-desc"><?= htmlspecialchars($ing['description'] ?: 'Sin descripción') ?></p>
             </div>
 
             <div class="card-footer">
-              <button class="btn btn-edit" onclick='editIngredient(<?= json_encode($ing) ?>)'>✏️</button>
-              <a href="../php/inputs_delete.php?id=<?= $ing['id'] ?>"
-                  class="btn btn-delete"
-                  onclick="return confirm('¿Eliminar ingrediente?')">🗑️</a>
+              <button class="btn btn-edit" onclick='editIngredient(<?= json_encode($ing, JSON_HEX_APOS|JSON_HEX_QUOT) ?>)'>✏️</button>
+              <a href="../php/inputs_delet.php?id=<?= $ing['id'] ?>" class="btn btn-delete" onclick="return confirm('¿Eliminar ingrediente?')">🗑️</a>
             </div>
           </div>
         <?php endforeach; ?>
@@ -99,12 +110,7 @@ try {
       <span class="close" onclick="hideModal('formModal')">&times;</span>
       <h2 id="modalTitle" class="modal-title">Registrar Ingrediente</h2>
 
-      <form id="ingredientForm"
-            action="../php/inputs_add.php"
-            method="POST"
-            enctype="multipart/form-data"
-            onsubmit="return validarFechas()">
-
+      <form id="ingredientForm" action="../php/inputs_add.php" method="POST" enctype="multipart/form-data" onsubmit="return validarFechas()">
         <input type="hidden" name="id" id="ingredient_id">
 
         <div class="form-group">
@@ -164,8 +170,8 @@ try {
         </div>
 
         <div class="form-group">
-          <label for="status">Estado:</label>
-          <select name="status" id="status">
+          <label for="state">Estado:</label>
+          <select name="state" id="state">
             <option value="Activo">Activo</option>
             <option value="Agotado">Agotado</option>
           </select>
@@ -189,7 +195,6 @@ try {
         <div class="form-group">
           <label for="photo">Foto:</label>
           <input type="file" name="photo" id="photo" accept="image/*">
-
           <div id="currentPhotoContainer" class="photo-preview hidden">
             <p>Foto actual:</p>
             <img id="currentPhoto" src="" alt="Foto actual del ingrediente" class="preview-img">
@@ -206,5 +211,6 @@ try {
   <script src="../js/form_handler.js"></script>
   <script src="../js/category_handler.js"></script>
   <script src="../js/sidebar_handler.js"></script>
+  <script src="../js/storage_dynamic_loader.js"></script>
 </body>
 </html>
