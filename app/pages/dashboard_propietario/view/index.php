@@ -141,7 +141,7 @@ if ($id_usuario) {
            class="bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2 rounded-lg font-medium transition-all">
           Empleados
         </a>
-        <a href="/DelixSystem/app/pages/dishes_manager/view/index.php"
+        <a href="/DelixSystem/app/pages/dishes_manager/view/dishes_manager.php"
            class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-lg font-medium transition-all">
           Gestor Menú
         </a>

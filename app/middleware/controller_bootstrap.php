@@ -1,6 +1,6 @@
 <?php
 // === Bootstrap común para todos los controladores ===
-
+// DelixSystem/app/middleware/controller_bootstrap.php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ini_set('log_errors', 1);

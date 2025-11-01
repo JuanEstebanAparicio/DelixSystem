@@ -217,3 +217,43 @@ body {
 .reload-btn:hover {
   background-color: #3e8e41;
 }
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.inventory-btn {
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.inventory-btn:hover {
+  background-color: #005fa3;
+}
+
+.button-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dashboard-btn {
+  background-color: #22c55e;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dashboard-btn:hover {
+  background-color: #16a34a;
+}
+

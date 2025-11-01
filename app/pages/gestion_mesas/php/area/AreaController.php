@@ -43,29 +43,36 @@ if ($error) {
 try {
     switch ($accion) {
         // 🟢 Crear área
-        case 'crear':
-            verifyRoleAccess('areas', 'crear');
+       case 'crear':
+    verifyRoleAccess('areas', 'crear');
 
-            $nombre = trim($_POST['nombre_area'] ?? '');
-            if (empty($nombre)) {
-                returnJson($isAjax, 'error', 'El nombre del área es obligatorio.');
-            }
+    $nombre = trim($_POST['nombre_area'] ?? '');
+    if (empty($nombre)) {
+        returnJson($isAjax, 'error', 'El nombre del área es obligatorio.');
+    }
 
-            if ($areaModel->areaExiste($nombre, $id_propietario)) {
-                returnJson($isAjax, 'error', 'Ya existe un área con ese nombre en tu cuenta.');
-            }
+    if ($areaModel->areaExiste($nombre, $id_propietario)) {
+        returnJson($isAjax, 'error', 'Ya existe un área con ese nombre en tu cuenta.');
+    }
 
-            $ok = $areaModel->crearArea($nombre, $id_propietario);
-            $id_area = $conexion->lastInsertId();
+    $ok = $areaModel->crearArea($nombre, $id_propietario);
+    $id_area = $conexion->lastInsertId();
 
-            if (!$ok) {
-                returnJson($isAjax, 'error', 'Error al crear el área.');
-            }
+    if (!$ok) {
+        returnJson($isAjax, 'error', 'Error al crear el área.');
+    }
 
-            returnJson($isAjax, 'success', 'Área creada correctamente.', [
-                'id_area' => $id_area,
-                'nombre'  => $nombre
-            ]);
+    // ◀️ aquí consultamos el nombre del restaurante
+    $stmtR = $conexion->prepare("SELECT restaurant_name FROM areas WHERE id_area = ?");
+    $stmtR->execute([$id_area]);
+    $restaurant_name = $stmtR->fetchColumn();
+
+    returnJson($isAjax, 'success', 'Área creada correctamente.', [
+        'id_area' => $id_area,
+        'nombre'  => $nombre,
+        'restaurant_name' => $restaurant_name
+    ]);
+
             break;
 
         // 🟠 Editar área
