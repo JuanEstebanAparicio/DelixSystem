@@ -1,6 +1,4 @@
 <?php
-// DelixSystem/app/pages/gestor_empleado/php/employee/EmpleadoListController.php
-
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 header("Content-Type: application/json; charset=UTF-8");
@@ -11,27 +9,35 @@ require_once __DIR__ . '/../../../../middleware/universal_guard.php';
 try {
     if (session_status() === PHP_SESSION_NONE) session_start();
 
-    // ✅ Obtener sesión (sin redirigir en caso de AJAX)
+    // ✅ Permitir ejecución silenciosa para peticiones AJAX
     $usuario = universalGuard(true);
 
     if (!$usuario) {
         throw new Exception("Usuario no autenticado.");
     }
 
-    // ✅ Determinar ID base (propietario o restaurante del empleado)
+    // ✅ Determinar el user_id (del propietario)
     if ($usuario['tipo'] === 'propietario') {
         $userId = $usuario['id'];
     } elseif ($usuario['tipo'] === 'empleado') {
-        $userId = $usuario['restaurant_id'];
+        // Primero intentamos leerlo de la sesión
+        $userId = $usuario['restaurant_id'] ?? null;
+
+        // 🧠 Si no viene, lo consultamos directamente desde la base
+        if (!$userId && isset($usuario['id'])) {
+            $stmtOwner = $conexion->prepare("SELECT user_id FROM employees WHERE id = :id LIMIT 1");
+            $stmtOwner->execute(['id' => $usuario['id']]);
+            $userId = $stmtOwner->fetchColumn();
+        }
+
+        if (!$userId) {
+            throw new Exception("No se pudo determinar el restaurante asociado al empleado.");
+        }
     } else {
         throw new Exception("Tipo de usuario no reconocido.");
     }
 
-    // ✅ Configurar conexión (ya incluida por Supabase)
-    $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $conexion->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-
-    // ✅ Consulta empleados + roles asociados
+    // ✅ Ejecutar la consulta principal
     $stmt = $conexion->prepare("
         SELECT 
             e.id,
@@ -48,7 +54,6 @@ try {
         GROUP BY e.id, e.full_name, e.email, e.document, e.is_online, e.created_at
         ORDER BY e.created_at DESC
     ");
-
     $stmt->execute(['user_id' => $userId]);
     $empleados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -62,7 +67,7 @@ try {
     http_response_code(500);
     echo json_encode([
         "status" => "error",
-        "message" => $e->getMessage()
+        "message" => "⚠️ " . $e->getMessage()
     ]);
     exit;
 }
