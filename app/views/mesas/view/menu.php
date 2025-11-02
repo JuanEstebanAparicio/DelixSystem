@@ -4,6 +4,21 @@ session_start();
 
 include __DIR__ . '/../../../config/supabase.php';
 
+
+$id_user = $_GET['u'] ?? null;
+
+if(!$id_user){
+    die("Falta owner");
+}
+
+// traer platillos activos
+// traer platillos activos directo BD local (temporal)
+$stmtDish = $conexion->prepare("SELECT * FROM dish WHERE id_user = :id_user AND state = 'Activo'");
+$stmtDish->bindParam(":id_user", $id_user, PDO::PARAM_INT);
+$stmtDish->execute();
+$platillos = $stmtDish->fetchAll(PDO::FETCH_ASSOC);
+
+
 // nombre default (evita warning)
 $restaurant_name = "Restaurante";
 
@@ -101,37 +116,20 @@ try {
 </header>
 
 <main>
-  <h2>Ofertas del Día</h2>
-  <div class="menu-section">
-    <div class="item">
-      <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" alt="Hamburguesa">
-      <h3>Hamburguesa Doble</h3>
-      <p>$18.000</p>
-      <button class="add-btn" data-nombre="Hamburguesa Doble" data-precio="18000">Agregar</button>
-    </div>
-    <div class="item">
-      <img src="https://cdn-icons-png.flaticon.com/512/3075/3075975.png" alt="Pizza">
-      <h3>Pizza Personal</h3>
-      <p>$20.000</p>
-      <button class="add-btn" data-nombre="Pizza Personal" data-precio="20000">Agregar</button>
-    </div>
-  </div>
+<?php foreach($platillos as $p): ?>
+<div class="card-platillo">
+    <img src="/DelixSystem/media/<?= htmlspecialchars($p['photo']) ?>" alt="">
+    <h3><?= htmlspecialchars($p['name_dish']) ?></h3>
+    <p>$<?= number_format($p['price'], 0, ',', '.') ?></p>
 
-  <h2>Menú Regular</h2>
-  <div class="menu-section">
-    <div class="item">
-      <img src="https://cdn-icons-png.flaticon.com/512/1046/1046784.png" alt="Pasta">
-      <h3>Pasta Carbonara</h3>
-      <p>$22.000</p>
-      <button class="add-btn" data-nombre="Pasta Carbonara" data-precio="22000">Agregar</button>
-    </div>
-    <div class="item">
-      <img src="https://cdn-icons-png.flaticon.com/512/3075/3075979.png" alt="Bebida">
-      <h3>Jugo Natural</h3>
-      <p>$6.000</p>
-      <button class="add-btn" data-nombre="Jugo Natural" data-precio="6000">Agregar</button>
-    </div>
-  </div>
+    <button class="add-btn"
+        data-id="<?=$p['id']?>"
+        data-nombre="<?=htmlspecialchars($p['name_dish'])?>"
+        data-precio="<?=$p['price']?>"
+    >Agregar</button>
+</div>
+<?php endforeach; ?>
+
 </main>
 
 <!-- Modal Carrito -->
