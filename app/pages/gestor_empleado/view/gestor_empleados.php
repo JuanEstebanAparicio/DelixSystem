@@ -1,17 +1,21 @@
 <?php
-require_once __DIR__ . '/../../../middleware/session_guard.php';
-protectPage(); // Asegura que el usuario esté logueado
+// DelixSystem/app/pages/gestor_empleado/view/gestor_empleados.php
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-$userId = $_SESSION['usuario']['id'] ?? null;
+require_once __DIR__ . '/../../../middleware/universal_guard.php';
+require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php'; // carga header si es empleado
 
-if (!$userId) {
-    die("⚠️ No se encontró el ID de usuario en la sesión.");
-}
+// ✅ Protege el acceso (propietario o empleado)
+$usuario = universalGuard();
+
+// 🧠 Datos base
+$userId = $usuario['id'];
+$nombreUsuario = $usuario['nombre'];
+$tipoUsuario = $usuario['tipo'];
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -102,8 +106,10 @@ if (!$userId) {
 
   <!-- 🔧 Variables globales -->
   <script>
-    const userId = <?= json_encode($_SESSION['usuario']['id'] ?? null) ?>;
-  </script>
+  const userId = <?= json_encode($usuario['id'] ?? null) ?>;
+  const tipoUsuario = <?= json_encode($usuario['tipo'] ?? 'desconocido') ?>;
+</script>
+
 
   <!-- 📜 JS logic -->
   <script defer src="../js/empleados.js"></script>
