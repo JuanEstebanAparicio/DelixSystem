@@ -1,5 +1,4 @@
 <?php
-// DelixSystem/app/pages/dishes_manager/view/dishes_manager.php
 session_start();
 if (!isset($_SESSION['usuario'])) {
     header("Location: /DelixSystem/");
@@ -64,7 +63,7 @@ try {
 </header>
 
 
-  <nav class="sidebar hidden" id="sidebarMenu">
+  <nav class="sidebar" id="sidebarMenu">
     <h3 class="sidebar-title">Categorías</h3>
     <button id="reloadBtn" class="reload-btn" onclick="reloadCategories()">🔄 Recargar</button>
 
