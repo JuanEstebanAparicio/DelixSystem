@@ -1,5 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    const APP = {
+      id_user: parseInt(document.body.dataset.id_user),
+      restaurant_name: document.body.dataset.restaurant_name,
+      id_area: parseInt(document.body.dataset.id_area),
+      area: document.body.dataset.area,
+      id_mesa: parseInt(document.body.dataset.id_mesa),
+      mesa: document.body.dataset.mesa,
+      nombre_cliente: localStorage.getItem("nombre_cliente") || null
+  };
+
 // 🛒 Manejo del carrito de compras
 let carrito = [];
 const carritoBtn = document.getElementById("verCarritoBtn");
@@ -200,7 +210,6 @@ confirmarPago.onclick = async () => {
   }
 };
 
-
 // ---------- Guardar cliente OPCIONAL ----------
 const guardarClienteBtn = document.getElementById("guardarClienteBtn");
 
@@ -212,6 +221,9 @@ if (guardarClienteBtn) {
             return;
         }
 
+        // Guardar en localStorage
+        localStorage.setItem("nombre_cliente", nombre);
+
         fetch("../php/guardar_cliente.php", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -219,11 +231,11 @@ if (guardarClienteBtn) {
         })
         .then(res => res.text())
         .then(data => {
-            location.reload();
+            location.reload(); // APP.nombre_cliente tendrá valor
         });
-
     });
 }
+
 
 // ==== abrir bottom sheet premium ====
 const sheet = document.getElementById("bottomSheetPago");
@@ -235,49 +247,57 @@ pagarBtn.onclick = () => {
 };
 
 // seleccionar método (CREA PEDIDO REAL YA)
-document.querySelectorAll(".bs-item").forEach(b=>{
-    b.addEventListener("click", async ()=>{
+document.querySelectorAll(".bs-item").forEach(b => {
+    b.addEventListener("click", async () => {
         const metodo = b.dataset.metodo;
         sheet.classList.remove("show");
 
         if(carrito.length === 0) return alert("🛒 Carrito vacío.");
 
+ APP.nombre_cliente = localStorage.getItem("nombre_cliente") || null;
+
         const body = {
-            id_user: "<?php echo $id_user ?>",
-            restaurant_name: "<?php echo $restaurant_name ?>",
-            id_area: "<?php echo $mesa['id_area'] ?>",
-            area: "<?php echo $mesa['area'] ?>",
-            id_mesa: "<?php echo $mesa['id_mesa'] ?>",
-            mesa: "<?php echo $mesa['mesa'] ?>",
-            nombre_cliente: localStorage.getItem("nombre_cliente"),
-            total: carrito.reduce((a,i)=>a+(i.precio*i.cantidad),0),
-            metodo_pago: metodo,
-            items: carrito.map(i=>({
-                id_platillo: i.id,
-                nombre_platillo: i.nombre,
-                precio: i.precio,
-                cantidad: i.cantidad
-            }))
-        };
+    id_user: APP.id_user,
+    restaurant_name: APP.restaurant_name,
+    id_area: APP.id_area,
+    area: APP.area,
+    id_mesa: APP.id_mesa,
+    mesa: APP.mesa,
+   nombre_cliente: APP.nombre_cliente,
+    total: carrito.reduce((a,i)=>a+(i.precio*i.cantidad),0),
+    metodo_pago: metodo,
+    items: carrito.map(i=>({
+        id_platillo: i.id,
+        nombre_platillo: i.nombre,
+        precio: i.precio,
+        cantidad: i.cantidad
+    }))
+};
 
-        const r = await fetch("/DelixSystem/app/pages/pedidos/php/pedidosController.php",{
-            method:"POST",
-            headers:{ "Content-Type":"application/json" },
-            body:JSON.stringify(body)
-        });
 
-        const res = await r.json();
+        try {
+            const res = await fetch("/DelixSystem/app/pages/pedidos/php/pedidosController.php", {
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify(body)
+            });
+            const data = await res.json();
 
-        if(res.ok){
-            alert("✅ Pedido creado! Método: "+metodo);
-            carrito = [];
-            actualizarCarrito();
-            actualizarContadorCarrito();
-        }else{
-            alert("❌ Error creando pedido.");
+            if(data.success){
+                alert("✅ Pedido creado! Método: "+metodo);
+                carrito = [];
+                actualizarCarrito();
+                actualizarContadorCarrito();
+            } else {
+                alert("❌ Error creando pedido: "+(data.error || "Intenta de nuevo."));
+            }
+        } catch(err){
+            console.error(err);
+            alert("⚠️ Error de conexión con el servidor.");
         }
     });
 });
+
 
 
 

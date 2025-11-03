@@ -103,7 +103,15 @@ try {
 </div>
 <?php endif; ?>
 
-<body>
+<body
+    data-id_user="<?= htmlspecialchars($id_user) ?>"
+    data-restaurant_name="<?= htmlspecialchars($restaurant_name) ?>"
+    data-id_area="<?= htmlspecialchars($mesa['id_area']) ?>"
+    data-area="<?= htmlspecialchars($mesa['area']) ?>"
+    data-id_mesa="<?= htmlspecialchars($mesa['id_mesa']) ?>"
+    data-mesa="<?= htmlspecialchars($mesa['mesa']) ?>"
+>
+
 <header>
   <div class="header-info">
     <h1>🍽 <strong>DELIX SYSTEM</strong></h1>
