@@ -86,6 +86,14 @@ function getRoleAccess(): array
             'crear'    => ['GESTOR_MESAS', 'SUPERVISOR'],
             'editar'   => ['GESTOR_MESAS', 'SUPERVISOR'],
             'eliminar' => ['GESTOR_MESAS']
+        ],
+        // 🧩 Nuevo bloque
+        'empleados' => [
+            'ver'           => ['ADMIN_LOCAL', 'SUPERVISOR'],
+            'crear'         => ['ADMIN_LOCAL'],          // solo admin
+            'eliminar'      => ['ADMIN_LOCAL'],          // solo admin
+            'asignar_roles' => ['ADMIN_LOCAL'],          // solo admin
+            'generar_codigo'=> ['ADMIN_LOCAL'],          // solo admin
         ]
     ];
 }
