@@ -4,7 +4,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-require_once __DIR__ . '/../../../middleware/universal_guard.php';
+
 require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php'; // carga header si es empleado
 require_once __DIR__ . '/../../../middleware/employee_extended_guard.php';
 
@@ -12,7 +12,7 @@ require_once __DIR__ . '/../../../middleware/employee_extended_guard.php';
 $usuario = employeeExtendedGuard(['ADMIN_LOCAL', 'SUPERVISOR']);
 
 // ✅ Protege el acceso (propietario o empleado)
-$usuario = universalGuard();
+
 
 // 🧠 Datos base
 $userId = $usuario['id'];
