@@ -85,7 +85,7 @@ try {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- ✅ Compatible con móviles -->
   <title><?php echo htmlspecialchars($restaurant_name); ?> — Menú</title>
-  <link rel="stylesheet" href="../css/menu.css">
+ <link rel="stylesheet" href="/DelixSystem/app/views/mesas/css/menu.css">
 </head>
 
 <?php if ($requiere_cliente_login): ?>
@@ -112,36 +112,81 @@ try {
       <strong>Mesa:</strong> <?php echo htmlspecialchars($mesa['mesa']); ?>
     </p>
   </div>
-  <button id="verCarritoBtn">🛒</button>
+ <button id="verCarritoBtn">
+  🛒 <span id="cartCount" style="background:red;color:white;padding:2px 6px;border-radius:12px;font-size:12px;position:absolute;margin-left:4px;top:6px;right:10px;">0</span>
+</button>
 </header>
 
-<main>
-<?php foreach($platillos as $p): ?>
-<div class="card-platillo">
-    <img src="/DelixSystem/media/<?= htmlspecialchars($p['photo']) ?>" alt="">
-    <h3><?= htmlspecialchars($p['name_dish']) ?></h3>
-    <p>$<?= number_format($p['price'], 0, ',', '.') ?></p>
+<main class="menu-container">
 
-    <button class="add-btn"
-        data-id="<?=$p['id']?>"
-        data-nombre="<?=htmlspecialchars($p['name_dish'])?>"
-        data-precio="<?=$p['price']?>"
-    >Agregar</button>
-</div>
+<?php foreach($platillos as $p): ?>
+    <div class="platillo-card">
+        
+        <div class="img-box">
+            <img src="/DelixSystem/app/pages/dishes_manager/<?= htmlspecialchars($p['photo']) ?>" alt="<?= htmlspecialchars($p['name_dish']) ?>">
+        </div>
+
+        <div class="info-box">
+            <h3><?= htmlspecialchars($p['name_dish']) ?></h3>
+            <p class="price">$<?= number_format($p['price'], 0, ',', '.') ?></p>
+
+            <button class="add-btn"
+                data-id="<?= $p['id'] ?>"
+                data-nombre="<?= htmlspecialchars($p['name_dish']) ?>"
+                data-precio="<?= $p['price'] ?>"
+            >Agregar al carrito</button>
+        </div>
+
+    </div>
 <?php endforeach; ?>
 
 </main>
 
+
 <!-- Modal Carrito -->
 <div id="carritoModal" class="modal">
-  <div class="modal-content">
-    <h2>🛒 Tu Pedido</h2>
-    <ul id="carritoLista"></ul>
-    <p><strong>Total: </strong>$<span id="totalCarrito">0</span></p>
-    <button id="pagarBtn">Proceder al Pago</button>
-    <button id="cerrarCarrito" class="secundario">Cerrar</button>
+  <div class="carrito-sheet">
+     <div class="cart-top">
+        <h2>🛒 Tu Pedido</h2>
+        <span id="cerrarCarrito" class="close-x">✕</span>
+     </div>
+
+     <ul id="carritoLista" class="cart-items"></ul>
+
+     <div class="cart-footer">
+        <p><strong>Total:</strong> $<span id="totalCarrito">0</span></p>
+        <button id="pagarBtn" class="btn-pay">Proceder al Pago</button>
+     </div>
   </div>
 </div>
+
+<!-- Bottom Sheet pago Premium -->
+<div id="bottomSheetPago" class="bottom-sheet">
+    <div class="bs-header">
+        <div class="bs-handle"></div>
+        <h3>Selecciona método de pago</h3>
+    </div>
+
+    <div class="bs-options">
+
+        <div class="bs-item" data-metodo="tarjeta">
+            <span class="bs-icon">💳</span>
+            <span>Tarjeta</span>
+        </div>
+
+        <div class="bs-item" data-metodo="efectivo">
+            <span class="bs-icon">💵</span>
+            <span>Efectivo</span>
+        </div>
+
+        <div class="bs-item" data-metodo="nequi">
+            <span class="bs-icon">📱</span>
+            <span>Nequi</span>
+        </div>
+
+    </div>
+</div>
+
 
 <!-- Modal Pago -->
 <div id="pagoModal" class="modal">
@@ -161,9 +206,14 @@ try {
   </div>
 </div>
 
+
 <script>
   const idMesa = "<?php echo $mesa['id_mesa']; ?>";
 </script>
-<script src="../js/menu.js"></script>
+
+
+<script src="/DelixSystem/app/views/mesas/js/menu.js"></script>
+
+
 </body>
 </html>

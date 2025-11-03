@@ -8,7 +8,23 @@ const carritoLista = document.getElementById("carritoLista");
 const totalCarrito = document.getElementById("totalCarrito");
 const cerrarCarrito = document.getElementById("cerrarCarrito");
 
-// 🔹 Agregar platillo al carrito
+// badge numero carrito
+const badgeCarrito = document.getElementById("cartCount");
+
+// ---------- FUNCIONES AUX ----------
+
+// actualizar contador REAL = suma cantidades
+function actualizarContadorCarrito(){
+  let totalCantidad = carrito.reduce((acc,i)=> acc + i.cantidad, 0);
+  badgeCarrito.textContent = totalCantidad;
+
+  // pequeña animacion
+  badgeCarrito.classList.add("bump");
+  setTimeout(()=> badgeCarrito.classList.remove("bump"), 250);
+}
+
+
+// ---------- AGREGAR PLATILLO ----------
 document.querySelectorAll(".add-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     const id = parseInt(btn.dataset.id);
@@ -23,11 +39,35 @@ document.querySelectorAll(".add-btn").forEach(btn => {
       carrito.push({ id, nombre, precio, cantidad: 1 });
     }
 
+    // ANIMACION vuelo hacia carrito
+    const img = btn.closest(".platillo-card").querySelector("img");
+    const imgClone = img.cloneNode(true);
+    const rect = img.getBoundingClientRect();
+
+    imgClone.style.position="absolute";
+    imgClone.style.width="80px";
+    imgClone.style.zIndex="9999";
+    imgClone.style.left = rect.left+"px";
+    imgClone.style.top = rect.top+"px";
+    document.body.appendChild(imgClone);
+
+    const cartPos = carritoBtn.getBoundingClientRect();
+
+    imgClone.animate([
+      { transform:`translate(0,0)`, opacity:1 },
+      { transform:`translate(${cartPos.left-rect.left}px, ${cartPos.top-rect.top}px) scale(0.2)`, opacity:0 }
+    ],{
+      duration:600,
+      easing:"ease-in-out"
+    }).onfinish = ()=> imgClone.remove();
+
+    actualizarContadorCarrito();
     actualizarCarrito();
   });
 });
 
-// 🔹 Actualizar contenido del carrito
+
+// ---------- ACTUALIZAR CARRITO ----------
 function actualizarCarrito() {
   carritoLista.innerHTML = "";
   let total = 0;
@@ -37,19 +77,28 @@ function actualizarCarrito() {
     total += subtotal;
 
     const li = document.createElement("li");
-    li.innerHTML = `
-      ${item.nombre} — $${item.precio.toLocaleString()} x 
-      <button class="cantidad-btn" data-index="${i}" data-action="menos">−</button>
-      ${item.cantidad}
-      <button class="cantidad-btn" data-index="${i}" data-action="mas">+</button>
-      = <strong>$${subtotal.toLocaleString()}</strong>
-    `;
+   li.innerHTML = `
+  <div class="cart-item-left">
+    <span class="cart-item-name">${item.nombre}</span>
+    <span class="cart-item-price">$${item.precio.toLocaleString()}</span>
+  </div>
+
+  <div class="cart-qty">
+    <button class="cantidad-btn" data-index="${i}" data-action="menos">−</button>
+    <span>${item.cantidad}</span>
+    <button class="cantidad-btn" data-index="${i}" data-action="mas">+</button>
+  </div>
+
+  <div class="cart-sub">
+    <strong>$${subtotal.toLocaleString()}</strong>
+  </div>
+`;
+
     carritoLista.appendChild(li);
   });
 
   totalCarrito.textContent = total.toLocaleString();
 
-  // Asignar eventos a botones + y -
   document.querySelectorAll(".cantidad-btn").forEach(btn => {
     btn.addEventListener("click", e => {
       const index = parseInt(e.target.dataset.index);
@@ -61,15 +110,18 @@ function actualizarCarrito() {
       if (carrito[index].cantidad <= 0) carrito.splice(index, 1);
 
       actualizarCarrito();
+      actualizarContadorCarrito();
     });
   });
 }
 
-// 🔹 Mostrar y cerrar carrito
+
+// ---------- Mostrar / Ocultar Carrito ----------
 carritoBtn.onclick = () => carritoModal.style.display = "block";
 cerrarCarrito.onclick = () => carritoModal.style.display = "none";
 
-// 💳 Manejo del pago
+
+// ---------- Pago ----------
 const pagoModal = document.getElementById("pagoModal");
 const pagarBtn = document.getElementById("pagarBtn");
 const cancelarPago = document.getElementById("cancelarPago");
@@ -77,7 +129,6 @@ const confirmarPago = document.getElementById("confirmarPagoBtn");
 const metodoPago = document.getElementById("metodoPago");
 const tarjetaInfo = document.getElementById("tarjetaInfo");
 
-// 🔸 Abrir modal de pago
 pagarBtn.onclick = () => {
   if (carrito.length === 0) {
     alert("🛒 El carrito está vacío.");
@@ -88,23 +139,22 @@ pagarBtn.onclick = () => {
   pagoModal.style.display = "block";
 };
 
-// 🔸 Cancelar pago
 cancelarPago.onclick = () => pagoModal.style.display = "none";
 
-// 🔸 Mostrar datos de tarjeta
 metodoPago.onchange = () => {
   tarjetaInfo.style.display = metodoPago.value === "tarjeta" ? "block" : "none";
 };
 
-// 🧾 Confirmar y enviar pedido real al backend
+
+// ---------- Confirmar Pedido ----------
 confirmarPago.onclick = async () => {
   if (carrito.length === 0) {
     alert("El carrito está vacío.");
     return;
   }
 
-  const idMesa = document.body.dataset.mesa || 1; // ⚙️ temporal, asigna el ID real de la mesa
-  const idUser = document.body.dataset.user || 1; // ⚙️ temporal, asigna el ID real del propietario
+  const idMesa = document.body.dataset.mesa || 1;
+  const idUser = document.body.dataset.user || 1;
 
   const items = carrito.map(item => ({
     id: item.id,
@@ -115,10 +165,22 @@ confirmarPago.onclick = async () => {
   const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
 
   try {
-    const res = await fetch("/DelixSystem/app/pages/orders/php/add_order.php", {
+    const res = await fetch("/DelixSystem/app/pages/pedidos/php/pedidosController.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id_mesa: idMesa, id_user: idUser, items, total })
+     body: JSON.stringify({
+  id_user: APP.id_user,
+  restaurant_name: APP.restaurant_name,
+  id_area: APP.id_area,
+  area: APP.area,
+  id_mesa: APP.id_mesa,
+  mesa: APP.mesa,
+  nombre_cliente: APP.nombre_cliente,
+  total: total,
+  metodo_pago: metodo_pago_seleccionado, // el que hicimos arriba
+  items: items
+})
+
     });
 
     const data = await res.json();
@@ -127,6 +189,7 @@ confirmarPago.onclick = async () => {
       alert("✅ Pedido realizado con éxito. ¡Tu orden está en preparación!");
       carrito = [];
       actualizarCarrito();
+      actualizarContadorCarrito();
       pagoModal.style.display = "none";
     } else {
       alert("❌ Error al procesar el pedido: " + (data.error || "Intenta de nuevo."));
@@ -137,6 +200,8 @@ confirmarPago.onclick = async () => {
   }
 };
 
+
+// ---------- Guardar cliente OPCIONAL ----------
 const guardarClienteBtn = document.getElementById("guardarClienteBtn");
 
 if (guardarClienteBtn) {
@@ -160,4 +225,62 @@ if (guardarClienteBtn) {
     });
 }
 
+// ==== abrir bottom sheet premium ====
+const sheet = document.getElementById("bottomSheetPago");
+
+pagarBtn.onclick = () => {
+  if (carrito.length === 0) return alert("🛒 El carrito está vacío.");
+  carritoModal.style.display="none";
+  sheet.classList.add("show");
+};
+
+// seleccionar método (CREA PEDIDO REAL YA)
+document.querySelectorAll(".bs-item").forEach(b=>{
+    b.addEventListener("click", async ()=>{
+        const metodo = b.dataset.metodo;
+        sheet.classList.remove("show");
+
+        if(carrito.length === 0) return alert("🛒 Carrito vacío.");
+
+        const body = {
+            id_user: "<?php echo $id_user ?>",
+            restaurant_name: "<?php echo $restaurant_name ?>",
+            id_area: "<?php echo $mesa['id_area'] ?>",
+            area: "<?php echo $mesa['area'] ?>",
+            id_mesa: "<?php echo $mesa['id_mesa'] ?>",
+            mesa: "<?php echo $mesa['mesa'] ?>",
+            nombre_cliente: localStorage.getItem("nombre_cliente"),
+            total: carrito.reduce((a,i)=>a+(i.precio*i.cantidad),0),
+            metodo_pago: metodo,
+            items: carrito.map(i=>({
+                id_platillo: i.id,
+                nombre_platillo: i.nombre,
+                precio: i.precio,
+                cantidad: i.cantidad
+            }))
+        };
+
+        const r = await fetch("/DelixSystem/app/pages/pedidos/php/pedidosController.php",{
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify(body)
+        });
+
+        const res = await r.json();
+
+        if(res.ok){
+            alert("✅ Pedido creado! Método: "+metodo);
+            carrito = [];
+            actualizarCarrito();
+            actualizarContadorCarrito();
+        }else{
+            alert("❌ Error creando pedido.");
+        }
+    });
+});
+
+
+
 }); // cierre DOMContentLoaded
+
+
