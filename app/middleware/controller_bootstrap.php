@@ -91,12 +91,12 @@ function getRoleAccess(): array
         'empleados' => [
             'ver'           => ['ADMIN_LOCAL', 'SUPERVISOR'],
             'crear'         => ['ADMIN_LOCAL'],          
-            'eliminar'      => ['ADMIN_LOCAL'],          
+            'eliminar'      => ['ADMIN_LOCAL'],
             'generar_codigo'=> ['ADMIN_LOCAL'],          
         ],
          'roles' => [
             'ver'      => ['ADMIN_LOCAL', 'SUPERVISOR'],
-            'listar'   => ['ADMIN_LOCAL'],
+            'listar'   => ['ADMIN_LOCAL', 'SUPERVISOR'],
             'asignar'  => ['ADMIN_LOCAL']
         ]
     ];
