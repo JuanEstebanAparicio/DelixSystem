@@ -407,3 +407,19 @@ button.secundario {
 .bs-icon{
     font-size:28px;
 }
+
+/* Efecto shake */
+.input-error {
+  animation: shake 0.3s;
+  border: 1px solid red !important;
+  color: red !important;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
+}

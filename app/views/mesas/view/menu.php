@@ -112,17 +112,19 @@ try {
     data-mesa="<?= htmlspecialchars($mesa['mesa']) ?>"
 >
 
+
 <header>
   <div class="header-info">
-    <h1>🍽 <strong>DELIX SYSTEM</strong></h1>
+    <h1>🍽 <strong>Restaurante <?php echo htmlspecialchars($restaurant_name); ?></strong></h1>
     <p>
       <strong>Área:</strong> <?php echo htmlspecialchars($mesa['area']); ?> |
       <strong>Mesa:</strong> <?php echo htmlspecialchars($mesa['mesa']); ?>
     </p>
+    <p id="nombreClienteHeader" style="font-style:italic; color:#555;"></p>
   </div>
- <button id="verCarritoBtn">
-  🛒 <span id="cartCount" style="background:red;color:white;padding:2px 6px;border-radius:12px;font-size:12px;position:absolute;margin-left:4px;top:6px;right:10px;">0</span>
-</button>
+  <button id="verCarritoBtn">
+    🛒 <span id="cartCount" style="background:red;color:white;padding:2px 6px;border-radius:12px;font-size:12px;position:absolute;margin-left:4px;top:6px;right:10px;">0</span>
+  </button>
 </header>
 
 <main class="menu-container">
@@ -214,12 +216,28 @@ try {
   </div>
 </div>
 
+<!-- Modal Tarjeta Simulada -->
+<div id="simulacionTarjetaModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h2>💳 Pagar con Tarjeta</h2>
+    <p>Simulación de Google Pay / Apple Pay</p>
+    <div style="margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 10px; text-align:center;">
+      <p style="font-weight:bold;">💳 Tarjeta</p>
+      <p>Número: **** **** **** 1234</p>
+      <p>Total a pagar: $<span id="totalTarjeta"></span></p>
+    </div>
+    <button id="confirmarPagoTarjetaBtn" class="btn-pay">Pagar</button>
+    <button id="cancelarPagoTarjeta" class="secundario">Cancelar</button>
+  </div>
+</div>
+
 
 <script>
   const idMesa = "<?php echo $mesa['id_mesa']; ?>";
 </script>
 
-
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/DelixSystem/app/views/mesas/js/menu.js"></script>
 
 
