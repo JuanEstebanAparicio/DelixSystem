@@ -77,15 +77,15 @@ function getRoleAccess(): array
 {
     return [
         'areas' => [
-            'crear'    => ['GESTOR_MESAS', 'SUPERVISOR'],
-            'editar'   => ['GESTOR_MESAS', 'SUPERVISOR'],
-            'eliminar' => ['GESTOR_MESAS'],
-            'ordenar'  => ['GESTOR_MESAS', 'SUPERVISOR']
+            'crear'    => ['GESTOR_MESAS','ADMIN_LOCAL'],
+            'editar'   => ['GESTOR_MESAS','ADMIN_LOCAL'],
+            'eliminar' => ['GESTOR_MESAS','ADMIN_LOCAL'],
+            'ordenar'  => ['GESTOR_MESAS','ADMIN_LOCAL']
         ],
         'mesas' => [
-            'crear'    => ['GESTOR_MESAS', 'SUPERVISOR'],
-            'editar'   => ['GESTOR_MESAS', 'SUPERVISOR'],
-            'eliminar' => ['GESTOR_MESAS']
+            'crear'    => ['GESTOR_MESAS','ADMIN_LOCAL'],
+            'editar'   => ['GESTOR_MESAS','ADMIN_LOCAL'],
+            'eliminar' => ['GESTOR_MESAS','ADMIN_LOCAL']
         ],
         // 🧩 Nuevo bloque
         'empleados' => [
