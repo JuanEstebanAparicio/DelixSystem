@@ -1,6 +1,5 @@
 <?php
 // DelixSystem/app/pages/pedidos/php/pedidosController.php
-// Controlador para crear pedido + items (devuelta siempre JSON)
 
 header("Content-Type: application/json; charset=utf-8");
 ini_set('display_errors', 0);
@@ -25,13 +24,15 @@ foreach($required as $r){
     }
 }
 
-// pagado puede venir o no, si no viene queda false por defecto
-$pagado = isset($data['pagado']) ? (bool)$data['pagado'] : false;
+// regla final general
+// si paga tarjeta = TRUE
+// otros metodos = FALSE
+$pagado = ($data['metodo_pago'] === 'tarjeta') ? 1 : 0;
+
 
 try {
     $conexion->beginTransaction();
 
-    // Insertar orden con campo pagado
     $stmt = $conexion->prepare("INSERT INTO orders
         (id_user, restaurant_name, id_area, area, id_mesa, mesa, nombre_cliente, total_pedido, metodo_pago, pagado)
         VALUES (:id_user,:restaurant_name,:id_area,:area,:id_mesa,:mesa,:nombre_cliente,:total_pedido,:metodo_pago,:pagado)
@@ -55,7 +56,6 @@ try {
 
     $order_id = $order['id'];
 
-    // Insertar items
     $stmtItem = $conexion->prepare("INSERT INTO order_items
         (order_id,id_platillo,nombre_platillo,precio,cantidad)
         VALUES(:order_id,:id_platillo,:nombre_platillo,:precio,:cantidad)");

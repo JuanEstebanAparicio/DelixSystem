@@ -165,7 +165,6 @@ async function crearPedido(metodo_pago, pagado = false){
         nombre_cliente: APP.nombre_cliente,
         total: carrito.reduce((a,i)=>a+(i.precio*i.cantidad),0),
         metodo_pago: metodo_pago,
-        pagado: pagado, // <-- aquí agregamos
         items: carrito.map(i=>({
             id_platillo: i.id,
             nombre_platillo: i.nombre,
