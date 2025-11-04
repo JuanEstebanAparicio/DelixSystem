@@ -93,6 +93,11 @@ function getRoleAccess(): array
             'crear'         => ['ADMIN_LOCAL'],          // solo admin
             'eliminar'      => ['ADMIN_LOCAL'],          // solo admin
             'generar_codigo'=> ['ADMIN_LOCAL'],          // solo admin
+        ],
+         'roles' => [
+            'ver'      => ['ADMIN_LOCAL', 'SUPERVISOR'],
+            'listar'   => ['ADMIN_LOCAL', 'SUPERVISOR'],
+            'asignar'  => ['ADMIN_LOCAL']
         ]
     ];
 }
