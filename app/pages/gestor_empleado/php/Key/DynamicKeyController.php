@@ -4,7 +4,8 @@ ini_set('display_errors', 1);
 header("Content-Type: application/json");
 
 // ✅ Include DB connection
-require_once __DIR__ . '/../../../../config/supabase.php';
+
+require_once __DIR__ . '/../../../../middleware/controller_bootstrap.php';
 // ✅ Include the model
 require_once __DIR__ . '/DynamicKeyModel.php';
 
@@ -36,6 +37,8 @@ try {
 
     switch ($action) {
         case 'get':
+            verifyRoleAccess('empleados', 'ver'); // Solo admin o supervisor pueden ver
+
             // 1️⃣ Limpia claves expiradas
             $model->expireKey($userId);
 
@@ -62,6 +65,9 @@ try {
             break;
 
         case 'generate':
+
+             verifyRoleAccess('empleados', 'generar_codigo'); // 🔐 Protección fuerte
+
             // 1️⃣ Desactiva claves previas activas
             $model->deactivateOldKeys($userId);
 
