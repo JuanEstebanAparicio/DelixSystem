@@ -13,7 +13,7 @@ if(!$id_user){
 
 // traer platillos activos
 // traer platillos activos directo BD local (temporal)
-$stmtDish = $conexion->prepare("SELECT * FROM dish WHERE id_user = :id_user AND state = 'Activo'");
+$stmtDish = $conexion->prepare("SELECT id, name_dish, price, photo, description FROM dish WHERE id_user = :id_user AND state = 'Activo'");
 $stmtDish->bindParam(":id_user", $id_user, PDO::PARAM_INT);
 $stmtDish->execute();
 $platillos = $stmtDish->fetchAll(PDO::FETCH_ASSOC);
@@ -132,20 +132,34 @@ try {
 <?php foreach($platillos as $p): ?>
     <div class="platillo-card">
         
-        <div class="img-box">
-            <img src="/DelixSystem/app/pages/dishes_manager/<?= htmlspecialchars($p['photo']) ?>" alt="<?= htmlspecialchars($p['name_dish']) ?>">
-        </div>
+       <div class="img-box" 
+     onclick="openDishModal(
+         '<?= htmlspecialchars(addslashes($p['name_dish'])) ?>',
+         '<?= htmlspecialchars(addslashes($p['description'])) ?>',
+         '<?= htmlspecialchars($p['photo']) ?>',
+         '<?= $p['price'] ?>',
+         '<?= $p['id'] ?>'
+     )">
+    <img src="/DelixSystem/app/pages/dishes_manager/<?= htmlspecialchars($p['photo']) ?>" alt="<?= htmlspecialchars($p['name_dish']) ?>">
+</div>
 
         <div class="info-box">
-            <h3><?= htmlspecialchars($p['name_dish']) ?></h3>
-            <p class="price">$<?= number_format($p['price'], 0, ',', '.') ?></p>
+    <h3><?= htmlspecialchars($p['name_dish']) ?></h3>
 
-            <button class="add-btn"
-                data-id="<?= $p['id'] ?>"
-                data-nombre="<?= htmlspecialchars($p['name_dish']) ?>"
-                data-precio="<?= $p['price'] ?>"
-            >Agregar al carrito</button>
-        </div>
+    <?php if (!empty($p['description'])): ?>
+        <p class="dish-desc"><?= htmlspecialchars($p['description']) ?></p>
+    <?php endif; ?>
+
+    <p class="price">$<?= number_format($p['price'], 0, ',', '.') ?></p>
+
+    <button class="add-btn"
+        data-id="<?= $p['id'] ?>"
+        data-nombre="<?= htmlspecialchars($p['name_dish']) ?>"
+        data-precio="<?= $p['price'] ?>"
+        data-descripcion="<?= htmlspecialchars($p['description'] ?? '') ?>"
+    >Agregar al carrito</button>
+</div>
+
 
     </div>
 <?php endforeach; ?>
@@ -230,6 +244,24 @@ try {
     <button id="cancelarPagoTarjeta" class="secundario">Cancelar</button>
   </div>
 </div>
+
+<!-- Modal PLATO -->
+<div id="dishModal" class="modal">
+  <div class="modal-content dish-modal-content">
+    <span class="close-x" onclick="closeDishModal()">✕</span>
+
+    <img id="dishModalImg" class="dish-big-img" src="" alt="">
+
+    <h2 id="dishModalName"></h2>
+    <p id="dishModalDesc" style="font-style:italic;color:#333;"></p>
+    <p style="font-weight:bold;font-size:18px;">$<span id="dishModalPrice"></span></p>
+
+    <button id="dishModalAdd" class="add-btn" data-id="" data-nombre="" data-precio="">
+        
+    </button>
+  </div>
+</div>
+
 
 
 <script>

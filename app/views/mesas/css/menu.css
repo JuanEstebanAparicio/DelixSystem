@@ -423,3 +423,24 @@ button.secundario {
   80% { transform: translateX(5px); }
   100% { transform: translateX(0); }
 }
+
+.dish-desc {
+  color: #555;
+  font-size: 13px;
+  margin: 6px 0;
+  line-height: 1.2em;
+}
+
+
+.dish-modal-content{
+  max-width: 340px;
+  width:90%;
+  border-radius: 15px;
+  padding: 15px;
+}
+
+.dish-big-img{
+  width:100%;
+  border-radius:12px;
+  margin-bottom:15px;
+}

@@ -239,3 +239,24 @@ async function crearPedido(metodo_pago, pagado = false){
     };
 
 });
+
+
+// ====== MODAL INFO PLATO ======
+function openDishModal(name, desc, photo, price, id){
+    document.getElementById("dishModalImg").src = "/DelixSystem/app/pages/dishes_manager/" + photo;
+    document.getElementById("dishModalName").innerText = name;
+    document.getElementById("dishModalDesc").innerText = desc || "Sin descripción";
+    document.getElementById("dishModalPrice").innerText = price;
+
+    const btn = document.getElementById("dishModalAdd");
+    btn.dataset.id = id;
+    btn.dataset.nombre = name;
+    btn.dataset.precio = price;
+
+    document.getElementById("dishModal").style.display = "block";
+}
+
+function closeDishModal(){
+    document.getElementById("dishModal").style.display = "none";
+}
+
