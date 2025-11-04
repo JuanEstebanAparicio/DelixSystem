@@ -44,28 +44,44 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // 📤 Request con user_id incluido
-  const request = async (action) => {
-    try {
-      const res = await fetch("../php/key/DynamicKeyController.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          action,
-          user_id: userId, // 👈 se envía el ID real del usuario logueado
-        }),
-      });
+  // 📤 Request con manejo de permisos (403) y alertas elegantes
+const request = async (action) => {
+  try {
+    const res = await fetch("../php/key/DynamicKeyController.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        action,
+        user_id: userId, // 👈 ID del usuario logueado
+      }),
+    });
 
-      const text = await res.text();
-      try {
-        return JSON.parse(text);
-      } catch {
-        throw new Error("Invalid JSON: " + text);
-      }
-    } catch (err) {
-      console.error("🚨 Error en request:", err);
-      return { status: "error", message: "Error de red" };
+    // --- Detectar 403 Forbidden ---
+    if (res.status === 403) {
+      const data = await res.json().catch(() => ({
+        message: "No tienes permisos suficientes para realizar esta acción.",
+      }));
+
+      Alerts.warning(data.message || "No tienes permisos para esta acción.", "Acceso denegado");
+      return { status: "error", message: data.message };
     }
-  };
+
+    // --- Otras respuestas ---
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error("Respuesta inválida del servidor: " + text);
+    }
+
+    return data;
+  } catch (err) {
+    console.error("🚨 Error en request:", err);
+    Alerts.error("Error de conexión con el servidor.", "Error de red");
+    return { status: "error", message: "Error de red" };
+  }
+};
 
   // 🧩 Obtener código
   const getCode = async () => {

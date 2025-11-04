@@ -4,7 +4,6 @@ ini_set('display_errors', 1);
 header("Content-Type: application/json");
 
 // ✅ Include DB connection
-
 require_once __DIR__ . '/../../../../middleware/controller_bootstrap.php';
 // ✅ Include the model
 require_once __DIR__ . '/DynamicKeyModel.php';
@@ -23,30 +22,38 @@ try {
 
     $action = $_POST['action'] ?? null;
 
-    // ✅ Prioriza el user_id del POST, pero usa el de sesión si existe
-    $userId = isset($_POST['user_id']) ? intval($_POST['user_id']) : (
-        $_SESSION['usuario']['id'] ?? null
-    );
+    // ✅ Obtener el ID real del propietario (desde bootstrap)
+    list($userId, $userError) = getPropietarioID($conexion);
 
-    if (!$action || !$userId) {
-        throw new Exception("Missing parameters: action or user_id");
+    if ($userError || !$userId) {
+        http_response_code(400);
+        echo json_encode([
+            "status" => "error",
+            "message" => "⚠️ {$userError}"
+        ]);
+        exit;
+    }
+
+    if (!$action) {
+        throw new Exception("Missing parameter: action");
     }
 
     // ✅ Crear modelo
     $model = new DynamicKeyModel($conexion);
 
     switch ($action) {
+        // 🔹 OBTENER CÓDIGO ACTIVO
         case 'get':
             verifyRoleAccess('empleados', 'ver'); // Solo admin o supervisor pueden ver
 
             // 1️⃣ Limpia claves expiradas
             $model->expireKey($userId);
 
-            // 2️⃣ Busca si hay clave activa en memoria (mejora de velocidad)
+            // 2️⃣ Busca si hay clave activa en sesión o BD
             if (!isset($_SESSION['active_key'][$userId])) {
                 $key = $model->getActiveKey($userId);
                 if ($key) {
-                    $_SESSION['active_key'][$userId] = $key; // Cache temporal
+                    $_SESSION['active_key'][$userId] = $key;
                 }
             } else {
                 $key = $_SESSION['active_key'][$userId];
@@ -64,9 +71,9 @@ try {
             ]);
             break;
 
+        // 🔹 GENERAR NUEVO CÓDIGO
         case 'generate':
-
-             verifyRoleAccess('empleados', 'generar_codigo'); // 🔐 Protección fuerte
+            verifyRoleAccess('empleados', 'generar_codigo'); // 🔐 Protección fuerte
 
             // 1️⃣ Desactiva claves previas activas
             $model->deactivateOldKeys($userId);
