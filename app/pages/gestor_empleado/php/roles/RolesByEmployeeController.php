@@ -2,8 +2,9 @@
 header("Content-Type: application/json; charset=UTF-8");
 
 require_once __DIR__ . '/../../../../config/supabase.php';
-
+require_once __DIR__ . '/../../../../middleware/controller_bootstrap.php';
 try {
+    verifyRoleAccess('roles', 'ver');
     if (!isset($_GET['id'])) {
         echo json_encode([
             "status" => "error",

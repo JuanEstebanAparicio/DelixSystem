@@ -1,8 +1,9 @@
 <?php
 header("Content-Type: application/json");
 require_once __DIR__ . '/../../../../config/supabase.php';
-
+require_once __DIR__ . '/../../../../middleware/controller_bootstrap.php'; 
 try {
+    verifyRoleAccess('roles', 'asignar');
     // ============================
     // 🔹 Validar entrada
     // ============================
