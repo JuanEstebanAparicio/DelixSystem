@@ -90,13 +90,13 @@ function getRoleAccess(): array
         // 🧩 Nuevo bloque
         'empleados' => [
             'ver'           => ['ADMIN_LOCAL', 'SUPERVISOR'],
-            'crear'         => ['ADMIN_LOCAL'],          // solo admin
-            'eliminar'      => ['ADMIN_LOCAL'],          // solo admin
-            'generar_codigo'=> ['ADMIN_LOCAL'],          // solo admin
+            'crear'         => ['ADMIN_LOCAL'],          
+            'eliminar'      => ['ADMIN_LOCAL'],          
+            'generar_codigo'=> ['ADMIN_LOCAL'],          
         ],
          'roles' => [
             'ver'      => ['ADMIN_LOCAL', 'SUPERVISOR'],
-            'listar'   => ['ADMIN_LOCAL', 'SUPERVISOR'],
+            'listar'   => ['ADMIN_LOCAL'],
             'asignar'  => ['ADMIN_LOCAL']
         ]
     ];
