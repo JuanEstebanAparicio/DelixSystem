@@ -2,7 +2,6 @@
 // DelixSystem/app/pages/pedidos/php/pedidosController.php
 // Controlador para crear pedido + items (devuelta siempre JSON)
 
-
 header("Content-Type: application/json; charset=utf-8");
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
@@ -26,13 +25,16 @@ foreach($required as $r){
     }
 }
 
+// pagado puede venir o no, si no viene queda false por defecto
+$pagado = isset($data['pagado']) ? (bool)$data['pagado'] : false;
+
 try {
     $conexion->beginTransaction();
 
-    // Insertar orden
+    // Insertar orden con campo pagado
     $stmt = $conexion->prepare("INSERT INTO orders
-        (id_user, restaurant_name, id_area, area, id_mesa, mesa, nombre_cliente, total_pedido, metodo_pago)
-        VALUES (:id_user,:restaurant_name,:id_area,:area,:id_mesa,:mesa,:nombre_cliente,:total_pedido,:metodo_pago)
+        (id_user, restaurant_name, id_area, area, id_mesa, mesa, nombre_cliente, total_pedido, metodo_pago, pagado)
+        VALUES (:id_user,:restaurant_name,:id_area,:area,:id_mesa,:mesa,:nombre_cliente,:total_pedido,:metodo_pago,:pagado)
         RETURNING id");
 
     $stmt->execute([
@@ -44,7 +46,8 @@ try {
         ":mesa"=>$data['mesa'],
         ":nombre_cliente"=>$data['nombre_cliente'] ?? null,
         ":total_pedido"=>$data['total'],
-        ":metodo_pago"=>$data['metodo_pago']
+        ":metodo_pago"=>$data['metodo_pago'],
+        ":pagado"=>$pagado
     ]);
 
     $order = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -75,4 +78,3 @@ try {
     error_log("pedidoController error: ".$e->getMessage());
     echo json_encode(["success"=>false,"error"=>$e->getMessage()]);
 }
-
