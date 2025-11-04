@@ -77,27 +77,27 @@ function getRoleAccess(): array
 {
     return [
         'areas' => [
-            'crear'    => ['GESTOR_MESAS','ADMIN_LOCAL'],
-            'editar'   => ['GESTOR_MESAS','ADMIN_LOCAL'],
-            'eliminar' => ['GESTOR_MESAS','ADMIN_LOCAL'],
-            'ordenar'  => ['GESTOR_MESAS','ADMIN_LOCAL']
+            'crear'    => ['GESTOR_MESAS', 'ADMIN_LOCAL'],
+            'editar'   => ['GESTOR_MESAS', 'ADMIN_LOCAL'],
+            'eliminar' => ['GESTOR_MESAS', 'ADMIN_LOCAL'],
+            'ordenar'  => ['GESTOR_MESAS', 'ADMIN_LOCAL']
         ],
         'mesas' => [
-            'crear'    => ['GESTOR_MESAS','ADMIN_LOCAL'],
-            'editar'   => ['GESTOR_MESAS','ADMIN_LOCAL'],
-            'eliminar' => ['GESTOR_MESAS','ADMIN_LOCAL']
+            'crear'    => ['GESTOR_MESAS', 'ADMIN_LOCAL'],
+            'editar'   => ['GESTOR_MESAS', 'ADMIN_LOCAL'],
+            'eliminar' => ['GESTOR_MESAS', 'ADMIN_LOCAL']
         ],
         // 🧩 Nuevo bloque
         'empleados' => [
-            'ver'           => ['ADMIN_LOCAL', 'SUPERVISOR'],
-            'crear'         => ['ADMIN_LOCAL'],          
-            'eliminar'      => ['ADMIN_LOCAL'],
-            'generar_codigo'=> ['ADMIN_LOCAL'],          
+            'ver'           => ['ADMIN_LOCAL', 'GESTOR_EMPLEADOS', 'SUPERVISOR'],
+            'crear'         => ['ADMIN_LOCAL', 'GESTOR_EMPLEADOS'],          
+            'eliminar'      => ['ADMIN_LOCAL', 'GESTOR_EMPLEADOS'],
+            'generar_codigo'=> ['ADMIN_LOCAL', 'GESTOR_EMPLEADOS'],          
         ],
          'roles' => [
-            'ver'      => ['ADMIN_LOCAL', 'SUPERVISOR'],
-            'listar'   => ['ADMIN_LOCAL', 'SUPERVISOR'],
-            'asignar'  => ['ADMIN_LOCAL']
+            'ver'      => ['ADMIN_LOCAL', 'GESTOR_EMPLEADOS', 'SUPERVISOR'],
+            'listar'   => ['ADMIN_LOCAL', 'GESTOR_EMPLEADOS', 'SUPERVISOR'],
+            'asignar'  => ['ADMIN_LOCAL', 'GESTOR_EMPLEADOS']
         ]
     ];
 }
