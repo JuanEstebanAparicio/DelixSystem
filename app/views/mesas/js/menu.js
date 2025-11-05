@@ -1,22 +1,31 @@
+let categoriaActual = "all";
+
 document.addEventListener("DOMContentLoaded", () => {
+
+
 
     // ==== FILTRO CATEGORIAS NAV ====
 document.querySelectorAll(".nav-cat").forEach(btn=>{
     btn.addEventListener("click", ()=>{
-        document.querySelectorAll(".nav-cat").forEach(b=>b.classList.remove("active"));
-        btn.classList.add("active");
+    document.querySelectorAll(".nav-cat").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
 
-        const cat = btn.dataset.cat;
+    categoriaActual = btn.dataset.cat; // <===== guardar
 
-        document.querySelectorAll(".platillo-card").forEach(card=>{
-            if(cat === "all"){ 
-                card.style.display = "block";
-            } else {
-                card.style.display = (card.dataset.cat === cat) ? "block" : "none";
-            }
-        });
-    });
+    filtrarCategoria();
 });
+
+});
+
+function filtrarCategoria(){
+    document.querySelectorAll(".platillo-card").forEach(card=>{
+        if(categoriaActual === "all"){
+            card.style.display = "block";
+        } else {
+            card.style.display = (card.dataset.cat === categoriaActual) ? "block" : "none";
+        }
+    });
+}
 
 
     // ====== APP INFO ======
@@ -40,6 +49,7 @@ async function refrescarPlatos(){
 
         const data = JSON.parse(text);
         renderPlatos(data);
+        filtrarCategoria();
         function renderPlatos(data){
     const cont = document.getElementById("contenedorPlatillos");
     if(!cont) return;

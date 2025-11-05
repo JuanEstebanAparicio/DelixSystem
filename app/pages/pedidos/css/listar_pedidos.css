@@ -1,0 +1,92 @@
+/* /DelixSystem/app/pages/pedidos/css/pedidos.css */
+/* ===== RESET GENERAL ===== */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background:#f6f7fb;
+  color:#333;
+}
+
+/* ===== CONTAINER PRINCIPAL LISTADO ===== */
+.page-container{
+  padding:30px;
+  animation: fadeIn .3s ease-in-out;
+}
+
+/* TITULO */
+.page-title{
+  font-size:1.8rem;
+  font-weight:600;
+  margin-bottom:25px;
+  color:#2d3b47;
+}
+
+/* CARD TABLA */
+.card-table{
+  background:white;
+  border-radius:12px;
+  padding:20px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.06);
+}
+
+/* TABLA */
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+thead{
+  background:#eef1f5;
+  font-weight:600;
+}
+
+th,td{
+  padding:12px 10px;
+  border-bottom:1px solid #e3e3e3;
+  font-size:.95rem;
+}
+
+/* badge pagado / no pagado */
+.badge-paid{
+  background:#27ae60;
+  color:white;
+  padding:6px 12px;
+  border-radius:8px;
+  font-size:.85rem;
+  font-weight:600;
+}
+.badge-unpaid{
+  background:#ff9800;
+  color:white;
+  padding:6px 12px;
+  border-radius:8px;
+  font-size:.85rem;
+  font-weight:600;
+}
+
+/* ACCIONES */
+.btn-action{
+  padding:7px 12px;
+  background:#2a9d8f;
+  color:white;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  transition:.2s;
+  font-size:.85rem;
+  text-decoration:none;
+}
+.btn-action:hover{
+  background:#21867a;
+}
+
+/* ANIM */
+@keyframes fadeIn {
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
