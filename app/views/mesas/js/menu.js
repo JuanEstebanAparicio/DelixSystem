@@ -1,5 +1,24 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    // ==== FILTRO CATEGORIAS NAV ====
+document.querySelectorAll(".nav-cat").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+        document.querySelectorAll(".nav-cat").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+
+        const cat = btn.dataset.cat;
+
+        document.querySelectorAll(".platillo-card").forEach(card=>{
+            if(cat === "all"){ 
+                card.style.display = "block";
+            } else {
+                card.style.display = (card.dataset.cat === cat) ? "block" : "none";
+            }
+        });
+    });
+});
+
+
     // ====== APP INFO ======
     const APP = {
         id_user: parseInt(document.body.dataset.id_user),
@@ -10,6 +29,103 @@ document.addEventListener("DOMContentLoaded", () => {
         mesa: document.body.dataset.mesa,
         nombre_cliente: localStorage.getItem("nombre_cliente") || null
     };
+
+    // ====== REFRESCAR PLATOS ======
+async function refrescarPlatos(){
+    try{
+        const r = await fetch(`/DelixSystem/app/api/get_dishes.php?u=${APP.id_user}`);
+        const text = await r.text();  // <-- primero leer texto
+
+        if(!text.trim()) return; // evita error cuando viene vacío
+
+        const data = JSON.parse(text);
+        renderPlatos(data);
+        function renderPlatos(data){
+    const cont = document.getElementById("contenedorPlatillos");
+    if(!cont) return;
+
+    cont.innerHTML = "";
+
+    data.forEach(p => {
+        cont.innerHTML += renderDishCard(p);
+    });
+
+    attachAddCartEvents(); // << para reactivar eventos a los botones nuevos renderizados
+}
+
+    }catch(e){
+        console.error("Error refresco platos:",e);
+    }
+}
+
+function renderDishCard(p){
+    return `
+    <div class="platillo-card" data-cat="${p.category}">
+        <div class="img-box"
+            onclick="openDishModal('${p.name_dish.replace(/'/g,"\\'")}', '${p.description?.replace(/'/g,"\\'") || ''}', '${p.photo}', '${p.price}', '${p.id}')">
+            <img src="/DelixSystem/app/pages/dishes_manager/${p.photo}" alt="${p.name_dish}">
+        </div>
+
+        <div class="info-box">
+            <h3>${p.name_dish}</h3>
+
+            ${p.description ? `<p class="dish-desc">${p.description}</p>` : ""}
+
+            <p class="price">$${new Intl.NumberFormat().format(p.price)}</p>
+
+            <button class="add-btn"
+                data-id="${p.id}"
+                data-nombre="${p.name_dish}"
+                data-precio="${p.price}"
+            >
+                Agregar al carrito
+            </button>
+        </div>
+    </div>`;
+}
+
+function attachAddCartEvents(){
+    document.querySelectorAll(".add-btn").forEach(btn=>{
+        btn.onclick = ()=>{
+            const id = parseInt(btn.dataset.id);
+            const nombre = btn.dataset.nombre;
+            const precio = parseFloat(btn.dataset.precio);
+
+            const existente = carrito.find(item => item.id === id);
+            if (existente) existente.cantidad++;
+            else carrito.push({ id, nombre, precio, cantidad: 1 });
+
+            // animación carrito
+            const img = btn.closest(".platillo-card").querySelector("img");
+            const imgClone = img.cloneNode(true);
+            const rect = img.getBoundingClientRect();
+            imgClone.style.position = "absolute";
+            imgClone.style.width = "80px";
+            imgClone.style.zIndex = "9999";
+            imgClone.style.left = rect.left+"px";
+            imgClone.style.top = rect.top+"px";
+            document.body.appendChild(imgClone);
+            const cartPos = document.getElementById("verCarritoBtn").getBoundingClientRect();
+            imgClone.animate([
+                { transform:`translate(0,0)`, opacity:1 },
+                { transform:`translate(${cartPos.left-rect.left}px, ${cartPos.top-rect.top}px) scale(0.2)`, opacity:0 }
+            ],{
+                duration:600,
+                easing:"ease-in-out"
+            }).onfinish = ()=> imgClone.remove();
+
+            actualizarContadorCarrito();
+            actualizarCarrito();
+        }
+    })
+}
+
+
+
+
+// iniciamos intervalo
+setInterval(refrescarPlatos, 6000);
+
 
     // ====== CARRITO ======
     let carrito = [];
@@ -53,7 +169,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         totalCarrito.textContent = total.toLocaleString();
-
         document.querySelectorAll(".cantidad-btn").forEach(btn => {
             btn.addEventListener("click", e => {
                 const index = parseInt(e.target.dataset.index);
@@ -67,43 +182,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ====== AGREGAR PLATILLO ======
-    document.querySelectorAll(".add-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            const id = parseInt(btn.dataset.id);
-            const nombre = btn.dataset.nombre;
-            const precio = parseFloat(btn.dataset.precio);
-
-            const existente = carrito.find(item => item.id === id);
-            if (existente) {
-                existente.cantidad++;
-            } else {
-                carrito.push({ id, nombre, precio, cantidad: 1 });
-            }
-
-            // Animación hacia carrito
-            const img = btn.closest(".platillo-card").querySelector("img");
-            const imgClone = img.cloneNode(true);
-            const rect = img.getBoundingClientRect();
-            imgClone.style.position = "absolute";
-            imgClone.style.width = "80px";
-            imgClone.style.zIndex = "9999";
-            imgClone.style.left = rect.left+"px";
-            imgClone.style.top = rect.top+"px";
-            document.body.appendChild(imgClone);
-            const cartPos = carritoBtn.getBoundingClientRect();
-            imgClone.animate([
-                { transform:`translate(0,0)`, opacity:1 },
-                { transform:`translate(${cartPos.left-rect.left}px, ${cartPos.top-rect.top}px) scale(0.2)`, opacity:0 }
-            ],{
-                duration:600,
-                easing:"ease-in-out"
-            }).onfinish = ()=> imgClone.remove();
-
-            actualizarContadorCarrito();
-            actualizarCarrito();
-        });
-    });
 
     // ====== MOSTRAR / OCULTAR CARRITO ======
     carritoBtn.onclick = () => carritoModal.style.display = "block";
@@ -237,6 +315,8 @@ async function crearPedido(metodo_pago, pagado = false){
         const ok = await crearPedido("tarjeta", true);
         if(ok) Swal.fire("✅ Pago exitoso", "Tu pedido ha sido pagado correctamente.", "success");
     };
+
+
 
 });
 

@@ -175,18 +175,32 @@ button.secundario {
 }
 
 .platillo-card {
+    width: 100%;
+    border-radius: 16px;
     background: #fff;
-    border-radius: 18px;
-    overflow: hidden;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.10);
+    cursor: pointer;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
-    transition: transform .15s ease;
+    gap: 8px;
+    transition: transform .15s ease, box-shadow .15s ease;
 }
 
+/* micro feedback */
 .platillo-card:active {
     transform: scale(.97);
+    box-shadow: 0 1px 4px rgba(0,0,0,.20);
 }
+
+
+.platillo-card img {
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
 .img-box img {
     width: 100%;
     height: 135px;
@@ -443,4 +457,59 @@ button.secundario {
   width:100%;
   border-radius:12px;
   margin-bottom:15px;
+}
+
+
+.menu-nav{
+  width:100%;
+  display:flex;
+  overflow-x:auto;
+  gap:10px;
+  padding:10px;
+  position:sticky;
+  top:0;
+  background:white;
+  z-index:999;
+  border-bottom:1px solid #ddd;
+}
+
+.menu-nav .nav-cat{
+  padding:8px 14px;
+  border-radius:12px;
+  border:1px solid #aaa;
+  background:white;
+  cursor:pointer;
+  font-size:14px;
+  white-space:nowrap;
+}
+
+.menu-nav .nav-cat.active{
+  border-color:black;
+  font-weight:bold;
+}
+
+/* FIX imágenes nuevas platillos */
+.platillo-card img {
+    width: 100% !important;
+    max-width: 180px;     /* puedes subir o bajar */
+    height: 140px !important;
+    object-fit: cover;
+    border-radius: 12px;
+    display:block;
+    margin: 0 auto;
+}
+
+
+.menu-container{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px,1fr));
+    gap: 14px;
+    padding: 14px;
+}
+
+#contenedorPlatillos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(45%, 1fr));
+    gap: 14px;
+    padding-bottom: 90px;
 }

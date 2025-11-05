@@ -13,7 +13,10 @@ if(!$id_user){
 
 // traer platillos activos
 // traer platillos activos directo BD local (temporal)
-$stmtDish = $conexion->prepare("SELECT id, name_dish, price, photo, description FROM dish WHERE id_user = :id_user AND state = 'Activo'");
+$stmtDish = $conexion->prepare("SELECT id, name_dish, price, photo, description, category 
+                                FROM dish 
+                                WHERE id_user = :id_user AND state = 'Activo'");
+
 $stmtDish->bindParam(":id_user", $id_user, PDO::PARAM_INT);
 $stmtDish->execute();
 $platillos = $stmtDish->fetchAll(PDO::FETCH_ASSOC);
@@ -127,10 +130,32 @@ try {
   </button>
 </header>
 
+<?php
+// armamos categorias desde el arreglo ya existente $platillos
+$categoriasMenu = [];
+foreach($platillos as $p){
+    if(!isset($categoriasMenu[$p['category']])){
+        $categoriasMenu[$p['category']] = [];
+    }
+    $categoriasMenu[$p['category']][] = $p;
+}
+?>
+
+<nav class="menu-nav">
+    <button class="nav-cat" data-cat="all">Todos</button>
+    <?php foreach(array_keys($categoriasMenu) as $c): ?>
+        <button class="nav-cat" data-cat="<?= htmlspecialchars($c) ?>"><?= htmlspecialchars($c) ?></button>
+    <?php endforeach; ?>
+</nav>
+
+
 <main class="menu-container">
+  
+<div id="contenedorPlatillos">
 
 <?php foreach($platillos as $p): ?>
-    <div class="platillo-card">
+
+        <div class="platillo-card" data-cat="<?= htmlspecialchars($p['category']) ?>">
         
        <div class="img-box" 
      onclick="openDishModal(
@@ -163,6 +188,8 @@ try {
 
     </div>
 <?php endforeach; ?>
+
+</div>
 
 </main>
 
