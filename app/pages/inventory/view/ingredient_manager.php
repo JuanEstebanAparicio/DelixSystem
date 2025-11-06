@@ -1,5 +1,4 @@
 <?php
-// DelixSystem/app/pages/inventory/view/ingredient_manager.php
 session_start();
 if (!isset($_SESSION['usuario'])) {
     header("Location: /DelixSystem/");
@@ -157,7 +156,7 @@ try {
           <?php endforeach; ?>
           <option value="__new__">+ Nueva categoría...</option>
         </select>
-        <input type="text" id="newCategoryInput" name="new_category" placeholder="Nueva categoría" class="hidden">
+        <input type="text" id="newCategoryInput" name="new_category" placeholder="Nueva categoría" class="hidden-input">
       </div>
 
       <div class="form-group">

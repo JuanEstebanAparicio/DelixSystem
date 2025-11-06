@@ -1,11 +1,7 @@
-/* ===============================
-🔹 MANEJO DE SIDEBAR FLOTANTE
-=============================== */
 function toggleSidebar() {
   const sidebar = document.getElementById("sidebarMenu");
   let overlay = document.getElementById("sidebarOverlay");
 
-  // Crear overlay si no existe
   if (!overlay) {
     overlay = document.createElement("div");
     overlay.id = "sidebarOverlay";
@@ -18,7 +14,6 @@ function toggleSidebar() {
   overlay.classList.toggle("active");
 }
 
-// Cierra el sidebar al hacer clic fuera de él
 document.addEventListener("click", (e) => {
   const sidebar = document.getElementById("sidebarMenu");
   const hamburger = document.querySelector(".hamburger");
@@ -34,9 +29,6 @@ document.addEventListener("click", (e) => {
   }
 });
 
-/* ===============================
-🔹 FILTRO DE CATEGORÍAS
-=============================== */
 function mostrarCategoria(cat) {
   const cards = document.querySelectorAll(".ingredient-card");
 
@@ -57,9 +49,6 @@ function mostrarCategoria(cat) {
   });
 }
 
-/* ===============================
-🔹 RECARGAR CATEGORÍAS DINÁMICAMENTE
-=============================== */
 async function reloadCategories() {
   try {
     const response = await fetch("../php/utilidades/reload_storage.php");
@@ -82,9 +71,6 @@ async function reloadCategories() {
   }
 }
 
-/* ===============================
-🔹 MOSTRAR / OCULTAR NUEVA CATEGORÍA EN FORMULARIO
-=============================== */
 document.addEventListener("DOMContentLoaded", () => {
   const categorySelect = document.getElementById("category");
   const newCategoryInput = document.getElementById("newCategoryInput");
@@ -104,9 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-/* ===============================
-🔹 RECARGAR INVENTARIO (OPCIONAL)
-=============================== */
 async function reloadInventory() {
   try {
     const response = await fetch("../php/utilidades/reload_inventory.php");

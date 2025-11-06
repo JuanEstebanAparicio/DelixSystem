@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(__DIR__, 3) . '/config/supabase.php');
+require_once(dirname(__DIR__, 4) . '/config/supabase.php');
 require_once(__DIR__ . '/dishes.php');
 
 class dishes_crud {
@@ -55,6 +55,7 @@ class dishes_crud {
             throw new Exception("Error al crear plato: " . $e->getMessage());
         }
     }
+
     public function updateDish(dishes $dish, $id, $ingredients = []) {
         try {
             $this->pdo->beginTransaction();
@@ -67,10 +68,10 @@ class dishes_crud {
                         state = :state,
                         photo = :photo
                     WHERE id = :id AND id_user = :id_user";
-            
+
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([
-                ':id'          => $dish->getId(),
+                ':id'          => $id, // ← AQUÍ ESTABA EL ERROR
                 ':id_user'     => $dish->getIdUser(),
                 ':name_dish'   => $dish->getNameDish(),
                 ':price'       => $dish->getPrice(),
@@ -80,6 +81,7 @@ class dishes_crud {
                 ':photo'       => $dish->getPhoto()
             ]);
 
+            // Reemplazar ingredientes
             $this->pdo->prepare("DELETE FROM dish_ingredient WHERE dish_id = :id")
                 ->execute([':id' => $id]);
 

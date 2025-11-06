@@ -145,8 +145,8 @@ try {
     <div class="modal-content">
       <span class="close" onclick="hideModal('formModal')">&times;</span>
       <h2 id="modalTitle" class="modal-title">Registrar Plato</h2>
-
-      <form id="dishForm" action="../php/dish_add.php" method="POST" enctype="multipart/form-data">
+      <form id="dishForm" enctype="multipart/form-data">
+        <input type="hidden" name="action" id="action" value="add">
         <input type="hidden" name="id" id="dish_id">
         <input type="hidden" name="created_at" id="created_at">
 
@@ -169,7 +169,7 @@ try {
             <?php endforeach; ?>
             <option value="__new__">+ Nueva categoría...</option>
           </select>
-          <input type="text" id="newCategoryInput" name="new_category" placeholder="Nueva categoría" class="hidden">
+          <input type="text" id="newCategoryInput" name="new_category" placeholder="Nueva categoría" class="hidden-input">
         </div>
         
         <div id="previousIngredients" style="margin-bottom: 10px; font-size: 14px;"></div>
@@ -220,9 +220,7 @@ try {
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script src="../js/form_handler.js"></script>
-  <script src="../js/category_handler.js"></script>
   <script src="../js/sidebar_handler.js"></script>
-  <script src="../js/dish_dynamic_loader.js"></script>
 <script>
   function goToInventory() {
     window.location.href = "/DelixSystem/app/pages/inventory/view/ingredient_manager.php";

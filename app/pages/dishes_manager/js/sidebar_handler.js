@@ -27,7 +27,7 @@ document.addEventListener('click', function(e) {
 
 async function reloadCategories() {
   try {
-    const response = await fetch("../php/reload_categories.php");
+    const response = await fetch("../php/utilidades/reload_categories.php");
     const categorias = await response.json();
 
     const list = document.getElementById("categoryList");
@@ -47,3 +47,20 @@ async function reloadCategories() {
     console.error("Error al recargar categorías:", err);
   }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const categorySelect = document.getElementById("category");
+  const newCategoryInput = document.getElementById("newCategoryInput");
+
+  categorySelect.addEventListener("change", () => {
+    if (categorySelect.value === "__new__") {
+      newCategoryInput.classList.remove("hidden");
+      newCategoryInput.required = true;
+      newCategoryInput.focus();
+    } else {
+      newCategoryInput.classList.add("hidden");
+      newCategoryInput.required = false;
+      newCategoryInput.value = "";
+    }
+  });
+});

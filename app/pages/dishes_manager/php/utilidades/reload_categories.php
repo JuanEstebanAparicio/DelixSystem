@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../../config/supabase.php';
+require_once __DIR__ . '/../../../../config/supabase.php';
 
 try {
     $stmt = $conexion->query("SELECT DISTINCT category FROM dish WHERE category IS NOT NULL AND category != '' ORDER BY category ASC");

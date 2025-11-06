@@ -37,22 +37,17 @@ try {
         throw new Exception("Acción no válida.");
     }
 
-    // ✅ Función para limpiar carpeta antes de guardar imagen
+    // ✅ Vaciar carpeta antes de guardar imagen (si existe)
     $clearDirectory = function ($dir) {
         if (!is_dir($dir)) return;
-        $files = scandir($dir);
-        foreach ($files as $file) {
-            if ($file === "." || $file === "..") continue;
-            $path = $dir . "/" . $file;
-            if (is_dir($path)) {
-                @rmdir($path);
-            } else {
-                @unlink($path);
-            }
+        foreach (scandir($dir) as $file) {
+            if ($file == "." || $file == "..") continue;
+            $path = "$dir/$file";
+            if (is_file($path)) @unlink($path);
         }
     };
 
-    // ✅ Subida de imagen siguiendo formato del storage
+    // ✅ Manejo de carga de imagen
     $uploadPhoto = function ($file, $safeCategory, $safeDish, $mediaRoot, $clearDirectory) {
 
         if (empty($file['name']) || $file['error'] !== UPLOAD_ERR_OK) return null;
@@ -62,7 +57,7 @@ try {
 
         if (!is_dir($dishDir)) mkdir($dishDir, 0777, true);
 
-        // Eliminar imágenes previas de ese plato
+        // Eliminar imágenes previas
         $clearDirectory($dishDir);
 
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
@@ -120,6 +115,7 @@ try {
         $id = intval($_POST['id']);
         if ($id <= 0) throw new Exception("ID inválido.");
 
+        // Obtener plato actual
         $current = $crud->getDishById($id, $id_user);
         if (!$current) throw new Exception("Plato no encontrado.");
 
@@ -135,6 +131,7 @@ try {
         $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($category));
         $safeDish = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($name));
 
+        // Si sube nueva imagen → reemplazar
         if (!empty($_FILES['photo']['name'])) {
             $newPhoto = $uploadPhoto($_FILES['photo'], $safeCategory, $safeDish, $mediaRoot, $clearDirectory);
             if ($newPhoto) $photo = $newPhoto;

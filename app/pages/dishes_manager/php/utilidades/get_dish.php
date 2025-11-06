@@ -12,6 +12,7 @@ $id_user = $_SESSION['usuario']['id'];
 require_once __DIR__ . '/../../../../config/supabase.php';
 
 try {
+    // Obtener platos
     $stmt = $conexion->prepare("
         SELECT * 
         FROM dish
@@ -22,6 +23,7 @@ try {
     $stmt->execute();
     $platos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // Obtener lista de ingredientes disponibles
     $stmtIng = $conexion->prepare("
         SELECT id, name 
         FROM storage 
@@ -32,14 +34,16 @@ try {
     $stmtIng->execute();
     $ingredientes = $stmtIng->fetchAll(PDO::FETCH_ASSOC);
 
+    // Obtener ingredientes asignados a cada plato (con nombre y unidad)
     foreach ($platos as $i => $dish) {
         $stmt2 = $conexion->prepare("
-            SELECT ingredient_id 
-            FROM dish_ingredient
-            WHERE dish_id = ?
+            SELECT di.ingredient_id AS id, di.quantity_used, di.unit, s.name
+            FROM dish_ingredient di
+            INNER JOIN storage s ON di.ingredient_id = s.id
+            WHERE di.dish_id = ?
         ");
         $stmt2->execute([$dish['id']]);
-        $platos[$i]['ingredients'] = $stmt2->fetchAll(PDO::FETCH_COLUMN);
+        $platos[$i]['ingredients'] = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     }
 
     echo json_encode([
@@ -54,4 +58,3 @@ try {
         "error" => $e->getMessage()
     ]);
 }
-?>

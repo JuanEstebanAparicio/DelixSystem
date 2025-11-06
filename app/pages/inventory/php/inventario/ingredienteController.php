@@ -9,7 +9,6 @@ require_once(__DIR__ . '/products.php');
 require_once(__DIR__ . '/storage_crud.php');
 
 try {
-    // Verificar autenticación
     if (empty($_SESSION['usuario']['id'])) {
         throw new Exception("⚠️ No hay usuario autenticado.");
     }
@@ -17,11 +16,9 @@ try {
     $id_user = intval($_SESSION['usuario']['id']);
     $crud = new storage_crud();
 
-    // Definir rutas base
     $baseDir = dirname(__DIR__, 2);
     $mediaRoot = $baseDir . '/media';
 
-    // Acción solicitada
     $roundAction = $_POST['action'] ?? '';
     $actionMap = [
         'create' => 'add',
@@ -36,13 +33,11 @@ try {
         throw new Exception("Acción no válida.");
     }
 
-    // Conversión de fecha
     $toDate = function ($d) {
         if (empty($d)) return null;
         return (new DateTime($d))->format("Y-m-d H:i:s");
     };
 
-    // Función para eliminar todo el contenido de un directorio
     $clearDirectory = function ($dir) {
         if (!is_dir($dir)) return;
         $files = scandir($dir);
@@ -58,7 +53,6 @@ try {
         }
     };
 
-    // Subida de foto
     $uploadPhoto = function ($file, $safeCategory, $safeProduct, $mediaRoot, $clearDirectory) {
         if (empty($file['name']) || $file['error'] !== UPLOAD_ERR_OK) return null;
 
@@ -68,8 +62,6 @@ try {
         if (!is_dir($productDir) && !mkdir($productDir, 0777, true)) {
             throw new Exception("No se pudo crear el directorio del producto.");
         }
-
-        // Limpiar directorio del producto antes de subir la nueva imagen
         $clearDirectory($productDir);
 
         $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
@@ -83,7 +75,6 @@ try {
         return "media/$safeCategory/$safeProduct/$name";
     };
 
-    // ========== AGREGAR ==========
     if ($method === 'add') {
         $category = trim($_POST['category'] ?? '');
         $newCategory = trim($_POST['new_category'] ?? '');
@@ -96,7 +87,6 @@ try {
             throw new Exception("El nombre del ingrediente es obligatorio.");
         }
 
-        // Sanitizar rutas
         $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', $category ?: 'sin_categoria');
         $safeProduct = preg_replace('/[^a-zA-Z0-9_-]/', '_', $name);
 
@@ -125,7 +115,6 @@ try {
         exit;
     }
 
-    // ========== EDITAR ==========
     if ($method === 'edit') {
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) throw new Exception("ID inválido.");
@@ -174,7 +163,6 @@ try {
         exit;
     }
 
-    // ========== ELIMINAR ==========
     if ($method === 'delete') {
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) throw new Exception("ID inválido.");

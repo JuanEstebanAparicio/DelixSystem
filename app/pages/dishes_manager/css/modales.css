@@ -9,12 +9,17 @@
   align-items: center;
   backdrop-filter: blur(8px);
   background: rgba(0, 0, 0, 0.4);
-  z-index: 1000;
-  transition: opacity 0.3s ease;
+    z-index: 1000;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
 }
 
 .modal.hidden {
-  display: none;
+  opacity: 0;
+  transform: scale(0.95);
+  pointer-events: none;
 }
 
 .modal-content {

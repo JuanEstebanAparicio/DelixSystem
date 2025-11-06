@@ -24,7 +24,6 @@ try {
     $categorias = $stmt->fetchAll(PDO::FETCH_COLUMN);
     if (!$categorias) $categorias = [];
 
-    // ✅ IMPORTANTE: devolver solo el array plano, no un objeto
     echo json_encode($categorias);
 
 } catch (Exception $e) {

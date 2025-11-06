@@ -1,10 +1,3 @@
-// ================================
-// 🌿 form_handler.js - Versión Final Corregida ✅
-// ================================
-
-// ================================
-// 🔍 VALIDAR FECHAS ANTES DE ENVIAR
-// ================================
 function validarFechas() {
   const ingreso = document.getElementById("fecha_ingreso").value;
   const vencimiento = document.getElementById("fecha_vencimiento").value;
@@ -26,9 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const currentPhoto = document.getElementById("currentPhoto");
   const grid = document.getElementById("ingredientGrid");
 
-  // ================================
-  // 🔁 CARGAR INGREDIENTES DESDE EL SERVIDOR
-  // ================================
   loadStorage();
 
   async function loadStorage() {
@@ -102,9 +92,6 @@ document.addEventListener("DOMContentLoaded", () => {
     grid.appendChild(createCard);
   }
 
-  // ================================
-  // 🟢 NUEVO INGREDIENTE
-  // ================================
   window.newIngredient = function () {
     modalTitle.textContent = "Registrar Ingrediente";
     submitBtn.textContent = "Guardar";
@@ -117,9 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.classList.remove("hidden");
   };
 
-  // ================================
-  // 🟡 EDITAR INGREDIENTE
-  // ================================
   window.editIngredient = function (data) {
     modalTitle.textContent = "Editar Ingrediente";
     submitBtn.textContent = "Actualizar";
@@ -151,9 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.classList.remove("hidden");
   };
 
-  // ================================
-  // 📤 ENVIAR FORMULARIO (CREAR / EDITAR)
-  // ================================
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!validarFechas()) return;
@@ -183,9 +164,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // ================================
-  // 🗑️ ELIMINAR INGREDIENTE (USANDO CONTROLADOR)
-  // ================================
   window.deleteIngredient = async function (id) {
     if (!confirm("¿Seguro que deseas eliminar este ingrediente?")) return;
 
@@ -212,9 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 });
-// ================================
-// 🔴 FUNCIÓN PARA CERRAR EL MODAL
-// ================================
+
 window.hideModal = function (modalId = "formModal") {
   const modal = document.getElementById(modalId);
   if (modal) {
