@@ -448,6 +448,12 @@ rolesContainer.addEventListener('click', (e) => {
         if (data.status === "success") {
           Alerts.success("✅ Roles actualizados correctamente");
 
+          // ✨ Efecto visual de confirmación
+          rolesContainer.querySelectorAll('.role-card.active').forEach(card => {
+          card.classList.add('pulse-success');
+          setTimeout(() => card.classList.remove('pulse-success'), 800);
+          });
+
           // 🔁 Volver a marcar correctamente según la nueva asignación
           setTimeout(async () => {
             const empReload = await fetch(`../php/roles/RolesByEmployeeController.php?id=${empleadoId}`);

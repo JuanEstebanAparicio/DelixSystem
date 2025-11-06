@@ -400,3 +400,11 @@ td span:hover {
   opacity: 0.9;
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
 }
+@keyframes pulseSuccess {
+  0% { box-shadow: 0 0 0 0 rgba(0, 255, 100, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 255, 100, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 255, 100, 0); }
+}
+.pulse-success {
+  animation: pulseSuccess 0.8s ease;
+}
