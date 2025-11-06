@@ -10,7 +10,6 @@ require_once(__DIR__ . '/dishes_crud.php');
 
 try {
 
-    // ✅ Verificar sesión
     if (empty($_SESSION['usuario']['id'])) {
         throw new Exception("⚠️ No autorizado.");
     }
@@ -18,11 +17,9 @@ try {
     $id_user = intval($_SESSION['usuario']['id']);
     $crud = new dishes_crud();
 
-    // ✅ Definir rutas base
     $baseDir = dirname(__DIR__, 2);
     $mediaRoot = $baseDir . '/media';
 
-    // ✅ Normalizar acción
     $roundAction = $_POST['action'] ?? '';
     $actionMap = [
         'create' => 'add',
@@ -37,7 +34,6 @@ try {
         throw new Exception("Acción no válida.");
     }
 
-    // ✅ Vaciar carpeta antes de guardar imagen (si existe)
     $clearDirectory = function ($dir) {
         if (!is_dir($dir)) return;
         foreach (scandir($dir) as $file) {
@@ -47,7 +43,6 @@ try {
         }
     };
 
-    // ✅ Manejo de carga de imagen
     $uploadPhoto = function ($file, $safeCategory, $safeDish, $mediaRoot, $clearDirectory) {
 
         if (empty($file['name']) || $file['error'] !== UPLOAD_ERR_OK) return null;

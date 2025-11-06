@@ -71,7 +71,7 @@ class dishes_crud {
 
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([
-                ':id'          => $id, // ← AQUÍ ESTABA EL ERROR
+                ':id'          => $id,
                 ':id_user'     => $dish->getIdUser(),
                 ':name_dish'   => $dish->getNameDish(),
                 ':price'       => $dish->getPrice(),
@@ -80,8 +80,6 @@ class dishes_crud {
                 ':state'       => $dish->getState(),
                 ':photo'       => $dish->getPhoto()
             ]);
-
-            // Reemplazar ingredientes
             $this->pdo->prepare("DELETE FROM dish_ingredient WHERE dish_id = :id")
                 ->execute([':id' => $id]);
 
@@ -108,6 +106,16 @@ class dishes_crud {
             throw new Exception("Error al actualizar plato: " . $e->getMessage());
         }
     }
+    public function getDishById($id, $id_user) {
+        try {
+            $stmt = $this->pdo->prepare("SELECT * FROM dish WHERE id = :id AND id_user = :id_user");
+            $stmt->execute([':id' => $id, ':id_user' => $id_user]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Error al obtener plato: " . $e->getMessage());
+        }
+    }
+
 
     public function deleteDish($id, $id_user) {
         try {
