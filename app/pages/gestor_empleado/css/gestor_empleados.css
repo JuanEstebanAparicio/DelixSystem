@@ -275,3 +275,128 @@ td span:hover {
   transform: scale(1.05);
   box-shadow: 0 0 5px rgba(0,0,0,0.1);
 }
+/* =========================================================
+   🎨 NUEVO DISEÑO ELEGANTE Y COLORIDO PARA ROLES (MODAL)
+   ========================================================= */
+
+.roles-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+/* 🧩 Tarjeta base */
+.role-card {
+  position: relative;
+  border-radius: 14px;
+  padding: 16px 18px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ffffff, #f7f9fc);
+  border: 2px solid transparent;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+.role-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #0091c2, #005a8d);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 0;
+}
+
+.role-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0, 90, 141, 0.2);
+}
+
+.role-card:hover::before {
+  opacity: 0.15;
+}
+
+/* ✅ Estado seleccionado */
+.role-card.active {
+  background: linear-gradient(135deg, #e8f5ff, #d4ebff);
+  border-color: var(--color-primary);
+  box-shadow: 0 6px 14px rgba(0, 90, 141, 0.25);
+}
+
+/* 🌟 ADMIN LOCAL — estilo VIP */
+.role-card.admin-local {
+  background: linear-gradient(135deg, #fff3cd, #ffecb5);
+  border-color: #ffca28;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+.role-card.admin-local:hover {
+  background: linear-gradient(135deg, #ffe69c, #fff2b3);
+}
+.role-card.admin-local.active {
+  background: linear-gradient(135deg, #ffeb80, #ffe066);
+  border-color: #ffb300;
+  box-shadow: 0 6px 18px rgba(255, 171, 0, 0.4);
+}
+
+/* ✳️ Encabezado del rol */
+.role-name {
+  position: relative;
+  z-index: 1;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.role-card.active .role-name {
+  color: var(--color-accent);
+}
+
+/* 📝 Descripción */
+.role-desc {
+  position: relative;
+  z-index: 1;
+  font-size: 0.83rem;
+  color: var(--color-muted);
+  margin-top: 4px;
+  line-height: 1.35;
+}
+
+.role-card.admin-local .role-desc {
+  color: #7b5b00;
+}
+
+/* ✨ Animación */
+.role-card {
+  animation: fadeInRole 0.3s ease forwards;
+}
+@keyframes fadeInRole {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Ocultar checkbox real */
+.role-card input[type="checkbox"] {
+  display: none;
+}
+
+/* Pequeño efecto de "tick" visual */
+.role-card.active::after {
+  content: "✔";
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  color: var(--color-success);
+  font-weight: 700;
+  font-size: 1rem;
+  z-index: 2;
+  opacity: 0.9;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
+}

@@ -397,18 +397,32 @@ document.addEventListener("click", async (e) => {
 
     // 3️⃣ Renderizar checkboxes
     rolesContainer.innerHTML = "";
-    rolesData.data.forEach((rol) => {
-      const checked = rolesAsignados.includes(parseInt(rol.id)) ? "checked" : "";
-      const div = document.createElement("div");
-      div.classList.add("rol-item");
-      div.innerHTML = `
-        <label>
-          <input type="checkbox" value="${rol.id}" ${checked}>
-          <strong>${rol.nombre}</strong> - <small>${rol.descripcion}</small>
-        </label>
-      `;
-      rolesContainer.appendChild(div);
-    });
+rolesData.data.forEach((rol) => {
+  const checked = rolesAsignados.includes(parseInt(rol.id)) ? "checked" : "";
+  const div = document.createElement("div");
+
+  div.classList.add("role-card");
+  if (checked) div.classList.add("active");
+  if (rol.nombre.toUpperCase() === "ADMIN_LOCAL") div.classList.add("admin-local");
+
+  div.innerHTML = `
+    <input type="checkbox" id="role_${rol.id}" value="${rol.id}" ${checked}>
+    <div class="role-name">${rol.nombre}</div>
+    <div class="role-desc">${rol.descripcion}</div>
+  `;
+  rolesContainer.appendChild(div);
+});
+// Efecto visual de selección de roles
+rolesContainer.addEventListener('click', (e) => {
+  const card = e.target.closest('.role-card');
+  if (!card) return;
+
+  const checkbox = card.querySelector('input[type="checkbox"]');
+  checkbox.checked = !checkbox.checked;
+  card.classList.toggle('active', checkbox.checked);
+});
+
+
 
     // 4️⃣ Mostrar modal
     modal.classList.add("show");
@@ -499,7 +513,10 @@ document.addEventListener('DOMContentLoaded', () => {
     checkboxes.forEach(chk => {
       if (chk !== except) {
         chk.disabled = disabled;
-        chk.parentElement.style.opacity = disabled ? '0.6' : '1';
+        const card = chk.closest('.role-card') || chk.parentElement;
+        card.style.opacity = disabled ? '0.6' : '1';
+        card.style.pointerEvents = disabled ? 'none' : 'auto';
+
       }
     });
   }
