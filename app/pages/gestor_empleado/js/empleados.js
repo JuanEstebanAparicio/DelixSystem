@@ -472,3 +472,71 @@ function closeModal(selectorOrEl) {
   console.log("[closeModal - global] closed", el.id || el);
 }
 
+/* ============================================================
+   🧩 BLOQUE: ADMIN_LOCAL Exclusivo en el Modal de Roles
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  const rolesContainer = document.getElementById('rolesContainer');
+  if (!rolesContainer) return;
+
+  const ADMIN_ROLE_NAME = 'ADMIN_LOCAL';
+
+  // Función para encontrar el checkbox del rol ADMIN_LOCAL
+  function getAdminCheckbox() {
+    const labels = rolesContainer.querySelectorAll('label');
+    for (const label of labels) {
+      const strong = label.querySelector('strong');
+      if (strong && strong.textContent.trim().toUpperCase() === ADMIN_ROLE_NAME) {
+        return label.querySelector('input[type="checkbox"]');
+      }
+    }
+    return null;
+  }
+
+  // Desactivar visualmente otros checkboxes
+  function toggleOtherRoles(disabled, except) {
+    const checkboxes = rolesContainer.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(chk => {
+      if (chk !== except) {
+        chk.disabled = disabled;
+        chk.parentElement.style.opacity = disabled ? '0.6' : '1';
+      }
+    });
+  }
+
+  // Lógica principal cuando se marca/desmarca ADMIN_LOCAL
+  function handleAdminToggle() {
+    const adminChk = getAdminCheckbox();
+    if (!adminChk) return;
+    if (adminChk.checked) {
+      toggleOtherRoles(true, adminChk);
+      // Desmarcar otros roles (por coherencia)
+      rolesContainer.querySelectorAll('input[type="checkbox"]').forEach(chk => {
+        if (chk !== adminChk) chk.checked = false;
+      });
+    } else {
+      toggleOtherRoles(false);
+    }
+  }
+
+  // Lógica para evitar marcar ADMIN_LOCAL junto a otros
+  rolesContainer.addEventListener('change', e => {
+    const adminChk = getAdminCheckbox();
+    if (!adminChk) return;
+    const target = e.target;
+
+    // Si marcó ADMIN_LOCAL
+    if (target === adminChk) {
+      handleAdminToggle();
+    } else if (adminChk.checked && target.checked) {
+      // Si marcó otro mientras ADMIN_LOCAL está activo → quitar ADMIN_LOCAL
+      adminChk.checked = false;
+      toggleOtherRoles(false);
+    }
+  });
+
+  // Reaplica estado cuando se abre el modal (por si cambia dinámicamente)
+  const modalRoles = document.getElementById('modalRoles');
+  const observer = new MutationObserver(() => handleAdminToggle());
+  observer.observe(rolesContainer, { childList: true, subtree: true });
+});
