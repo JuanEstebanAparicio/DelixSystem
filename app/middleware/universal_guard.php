@@ -5,14 +5,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-/**
- * 🧠 universalGuard()
- * Permite acceso tanto a propietarios como a empleados.
- * Detecta automáticamente de qué tipo es la sesión.
- * Retorna un arreglo con la información básica del usuario.
- */
+require_once __DIR__ . '/../../app/config/database.php';
+
 function universalGuard() {
-    // 👑 Caso 1: Propietario logueado
+    // 👑 Propietario
     if (isset($_SESSION['usuario']['id'])) {
         return [
             'tipo' => 'propietario',
@@ -21,18 +17,27 @@ function universalGuard() {
         ];
     }
 
-    // 👷‍♂️ Caso 2: Empleado logueado
+    // 👷‍♂️ Empleado
     if (isset($_SESSION['empleado_auth']['id'])) {
+        $empleadoId = $_SESSION['empleado_auth']['id'];
+        $result = supabase('employees', 'GET', null, '?id=eq.' . $empleadoId);
+
+        // Si no existe más → limpiar sesión
+        if (!$result || empty($result['data'])) {
+            unset($_SESSION['empleado_auth']);
+            header('Location: /DelixSystem/public/index.php?session=expired');
+            exit();
+        }
+
         return [
             'tipo' => 'empleado',
-            'id' => $_SESSION['empleado_auth']['id'],
-            'restaurant_id' => $_SESSION['empleado_auth']['user_id'] ?? null, // id del propietario
+            'id' => $empleadoId,
+            'restaurant_id' => $_SESSION['empleado_auth']['user_id'] ?? null,
             'nombre' => $_SESSION['empleado_auth']['full_name'] ?? 'Empleado'
         ];
     }
 
-    // 🚫 Nadie logueado → redirigir al inicio público
+    // 🚫 Nadie logueado
     header('Location: /DelixSystem/public/index.php');
     exit();
 }
-
