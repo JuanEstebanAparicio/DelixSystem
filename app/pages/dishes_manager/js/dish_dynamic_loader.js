@@ -7,7 +7,7 @@ async function loadDishes() {
   grid.innerHTML = "<p class='loading'>Cargando platos...</p>";
 
   try {
-    const response = await fetch("../php/get_dish.php");
+    const response = await fetch("../php/utilidades/get_dish.php");
     const data = await response.json();
 
     if (!data.success) throw new Error(data.error);

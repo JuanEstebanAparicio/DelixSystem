@@ -9,7 +9,7 @@ if (!isset($_SESSION['usuario'])) {
 
 $id_user = $_SESSION['usuario']['id'];
 
-require_once __DIR__ . '/../../../config/supabase.php';
+require_once __DIR__ . '/../../../../config/supabase.php';
 
 try {
     $stmt = $conexion->prepare("
