@@ -1,6 +1,6 @@
 <?php
 session_start();
-$baseDir = dirname(__DIR__, 3);
+$baseDir = dirname(__DIR__, 4);
 require_once($baseDir . '/config/supabase.php');
 
 header('Content-Type: application/json');
