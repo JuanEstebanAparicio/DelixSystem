@@ -500,7 +500,7 @@ function closeModal(selectorOrEl) {
 }
 
 /* ============================================================
-   🧩 BLOQUE: ADMIN_LOCAL Exclusivo en el Modal de Roles (adaptado y sincronizado)
+   🧩 BLOQUE: ADMIN_LOCAL Exclusivo en el Modal de Roles (versión final con efectos visuales)
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
   const modalRoles = document.getElementById('modalRoles');
@@ -526,10 +526,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const chk = card.querySelector('input[type="checkbox"]');
       if (chk !== except) {
         chk.disabled = disabled;
-        card.style.opacity = disabled ? '0.5' : '1';
-        card.style.pointerEvents = disabled ? 'none' : 'auto';
-        if (disabled) chk.checked = false;
-        card.classList.toggle('active', chk.checked);
+        if (disabled) {
+          card.classList.add('locked-role');
+          card.classList.remove('active');
+          chk.checked = false;
+        } else {
+          card.classList.remove('locked-role');
+        }
       }
     });
   }
@@ -537,10 +540,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // 🔄 Manejo principal
   function handleAdminToggle() {
     const adminChk = getAdminCheckbox();
-    if (!adminChk) return;
+    const adminCard = getAdminCard();
+    if (!adminChk || !adminCard) return;
+
     if (adminChk.checked) {
+      adminCard.classList.add('admin-active');
       toggleOtherRoles(true, adminChk);
     } else {
+      adminCard.classList.remove('admin-active');
       toggleOtherRoles(false);
     }
   }
@@ -556,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
         handleAdminToggle();
       } else if (adminChk.checked && target.checked) {
         adminChk.checked = false;
-        toggleOtherRoles(false);
+        handleAdminToggle();
       }
     });
 
@@ -566,19 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!card) return;
 
       const isAdmin = card.querySelector('.role-name')?.textContent.trim().toUpperCase() === ADMIN_ROLE_NAME;
-      if (isAdmin) {
-        // Forzamos lógica justo después del click
-        setTimeout(handleAdminToggle, 50);
-      } else {
-        const adminChk = getAdminCheckbox();
-        if (adminChk?.checked) {
-          // Si ADMIN_LOCAL está activo, impedir activar otros
-          setTimeout(() => {
-            adminChk.checked = true;
-            handleAdminToggle();
-          }, 50);
-        }
-      }
+      setTimeout(() => handleAdminToggle(), 50);
     });
 
     rolesContainer.dataset.adminListenerAttached = "true";

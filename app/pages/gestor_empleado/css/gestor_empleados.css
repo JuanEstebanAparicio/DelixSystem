@@ -408,3 +408,44 @@ td span:hover {
 .pulse-success {
   animation: pulseSuccess 0.8s ease;
 }
+
+/* ============================================================
+   💄 EFECTOS VISUALES PARA ROLES
+   ============================================================ */
+
+/* 🔒 Bloqueo visual de roles inactivos */
+.role-card.locked-role {
+  position: relative;
+  filter: grayscale(80%) brightness(0.85);
+  opacity: 0.5;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+.role-card.locked-role::after {
+  content: "🔒";
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+/* 👑 Rol ADMIN_LOCAL cuando está activo */
+.role-card.admin-active {
+  position: relative;
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+  background: linear-gradient(135deg, #fff8e1, #ffefba);
+  animation: adminPulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes adminPulse {
+  from { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+  to { box-shadow: 0 0 20px rgba(255, 215, 0, 0.9); }
+}
+
+/* 🌟 Pequeña transición para los roles bloqueados y desbloqueados */
+.role-card {
+  transition: all 0.3s ease;
+}
+
