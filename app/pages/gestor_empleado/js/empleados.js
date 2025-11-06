@@ -413,14 +413,21 @@ rolesData.data.forEach((rol) => {
   rolesContainer.appendChild(div);
 });
 // Efecto visual de selección de roles
-rolesContainer.addEventListener('click', (e) => {
-  const card = e.target.closest('.role-card');
-  if (!card) return;
+// 🧩 Efecto visual de selección de roles (versión estable)
+// Evita duplicar listeners si el modal se abre más de una vez
+if (!rolesContainer.dataset.listenerAttached) {
+  rolesContainer.addEventListener('click', (e) => {
+    const card = e.target.closest('.role-card');
+    if (!card) return;
 
-  const checkbox = card.querySelector('input[type="checkbox"]');
-  checkbox.checked = !checkbox.checked;
-  card.classList.toggle('active', checkbox.checked);
-});
+    const checkbox = card.querySelector('input[type="checkbox"]');
+    checkbox.checked = !checkbox.checked;
+    card.classList.toggle('active', checkbox.checked);
+  });
+
+  // Marcamos que ya tiene listener
+  rolesContainer.dataset.listenerAttached = "true";
+}
 
 
 
