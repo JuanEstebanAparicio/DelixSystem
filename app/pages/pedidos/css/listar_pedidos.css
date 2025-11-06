@@ -1,92 +1,151 @@
-/* /DelixSystem/app/pages/pedidos/css/pedidos.css */
 /* ===== RESET GENERAL ===== */
 *{
   margin:0;
   padding:0;
   box-sizing:border-box;
-  font-family: 'Poppins', sans-serif;
+  font-family:'Poppins', sans-serif;
 }
 
-body {
+body{
   background:#f6f7fb;
-  color:#333;
+  color:#2d3b47;
 }
 
 /* ===== CONTAINER PRINCIPAL LISTADO ===== */
 .page-container{
-  padding:30px;
-  animation: fadeIn .3s ease-in-out;
+  padding:25px;
+  animation:fadeIn .3s ease-in-out;
 }
 
-/* TITULO */
 .page-title{
-  font-size:1.8rem;
+  font-size:1.7rem;
   font-weight:600;
-  margin-bottom:25px;
-  color:#2d3b47;
+  margin-bottom:22px;
+  color:#1f3b59;
 }
 
-/* CARD TABLA */
-.card-table{
+/* NAV AREAS / filtros */
+.nav-areas{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+.nav-area{
+    padding:8px 18px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.05);
+    cursor:pointer;
+    transition:.25s;
+    font-weight:600;
+    font-size:14px;
+    backdrop-filter: blur(5px);
+}
+
+.nav-area:hover{
+    background:rgba(255,255,255,0.15);
+}
+
+.nav-area.active{
+    background:#4CAF50;  /* verde coherente restaurante */
+    color:white;
+    border-color:transparent;
+    box-shadow:0 0 12px rgba(76, 175, 80, .45);
+}
+
+
+/* ===== GRID ===== */
+.orders-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:20px;
+  padding-bottom:30px;
+}
+
+/* ===== CARDS ===== */
+.order-card{
   background:white;
-  border-radius:12px;
-  padding:20px;
-  box-shadow:0 3px 10px rgba(0,0,0,0.06);
+  border-radius:14px;
+  padding:18px 20px;
+  box-shadow:0 3px 12px rgba(0,0,0,0.06);
+  border:2px solid #e7e7e7;
+  transition:.20s cubic-bezier(.25,.46,.45,1);
 }
 
-/* TABLA */
-table{
-  width:100%;
-  border-collapse:collapse;
+.order-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 5px 14px rgba(0,0,0,0.09);
 }
 
-thead{
-  background:#eef1f5;
+/* cuando NO está pagado borde naranja suave */
+.order-card.pending{
+  border-color:#ff9800;
+}
+
+/* ===== TEXTO ===== */
+.order-id{
+  font-size:.9rem;
   font-weight:600;
+  opacity:.75;
+  margin-bottom:7px;
 }
 
-th,td{
-  padding:12px 10px;
-  border-bottom:1px solid #e3e3e3;
-  font-size:.95rem;
+.restaurant{
+  font-size:1.15rem;
+  font-weight:600;
+  margin-bottom:7px;
 }
 
-/* badge pagado / no pagado */
+.meta,.total,.method,.date{
+  font-size:.92rem;
+  margin-bottom:5px;
+}
+
+/* BADGES */
 .badge-paid{
-  background:#27ae60;
+  background:#005a8d;
   color:white;
   padding:6px 12px;
-  border-radius:8px;
-  font-size:.85rem;
+  border-radius:6px;
+  font-size:.82rem;
   font-weight:600;
+  display:inline-block;
+  margin:5px 0;
 }
+
 .badge-unpaid{
   background:#ff9800;
   color:white;
   padding:6px 12px;
-  border-radius:8px;
-  font-size:.85rem;
+  border-radius:6px;
+  font-size:.82rem;
   font-weight:600;
+  display:inline-block;
+  margin:5px 0;
 }
 
-/* ACCIONES */
+/* BTN */
 .btn-action{
-  padding:7px 12px;
-  background:#2a9d8f;
+  display:block;
+  margin-top:14px;
+  background:#005a8d;
   color:white;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  transition:.2s;
-  font-size:.85rem;
+  text-align:center;
+  padding:9px 0;
+  border-radius:9px;
   text-decoration:none;
+  font-size:.9rem;
+  font-weight:600;
+  transition:.2s;
 }
 .btn-action:hover{
-  background:#21867a;
+  background:#0074b3;
 }
 
 /* ANIM */
-@keyframes fadeIn {
+@keyframes fadeIn{
   from{opacity:0; transform:translateY(10px);}
   to{opacity:1; transform:translateY(0);}
 }
