@@ -116,7 +116,11 @@ $tipoUsuario = $usuario['tipo'];
 
 
   <!-- 📜 JS logic -->
-  <script defer src="../js/empleados.js"></script>
+  <!-- ==========================================================
+     JS PRINCIPAL - GESTOR DE EMPLEADOS
+============================================================== -->
+<script type="module" src="../js/empleados.bundle.js"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="/DelixSystem/public/js/alert.js"></script>
   <script src="/DelixSystem/public/js/modal.js"></script>
