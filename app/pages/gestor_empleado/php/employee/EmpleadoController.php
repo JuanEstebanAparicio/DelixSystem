@@ -19,7 +19,7 @@ try {
 
     $model = new EmpleadoModel($conexion);
 
-    // ----------------------------------------------------
+// ----------------------------------------------------
 // 🔹 ELIMINAR EMPLEADO (solo ADMIN_LOCAL)
 // ----------------------------------------------------
 if ($action === 'delete') {
@@ -28,15 +28,18 @@ if ($action === 'delete') {
     $id = $_POST['id'] ?? null;
     if (!$id) throw new Exception("ID de empleado no recibido.");
 
-    // 🟡 1. Marcar empleado como desconectado antes de eliminarlo
-    $stmt = $conexion->prepare("UPDATE employees SET is_online = FALSE WHERE id = :id");
-    $stmt->execute(['id' => $id]);
+    // 🟡 1️⃣ Marcar empleado como desconectado inmediatamente (para forzar cierre de sesión)
+    $update = supabase('employees', 'PATCH', ['is_online' => false], '?id=eq.' . $id);
 
-    // 🟥 2. Eliminar el registro definitivamente
+    if ($update['status'] !== 200 && $update['status'] !== 204) {
+        error_log("⚠️ No se pudo actualizar estado online del empleado ID {$id}");
+    }
+
+    // 🟥 2️⃣ Eliminar el registro definitivamente
     $deleted = $model->deleteEmployee($id);
     if (!$deleted) throw new Exception("No se pudo eliminar el empleado.");
 
-    // 🟢 3. Respuesta final
+    // 🟢 3️⃣ Respuesta al frontend
     echo json_encode([
         "status" => "success",
         "message" => "Empleado eliminado correctamente."
