@@ -583,3 +583,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const observer = new MutationObserver(() => handleAdminToggle());
   observer.observe(rolesContainer, { childList: true, subtree: true });
 });
+
+// ========================================
+// 🧩 Verificación activa de sesión empleado
+// ========================================
+setInterval(async () => {
+  try {
+    const res = await fetch("../../php/employee/EmpleadoSessionCheck.php", { cache: "no-store" });
+    const data = await res.json();
+
+    if (!data.active) {
+      // 🚨 Destruir sesión visual y redirigir
+      Alerts.error("Tu cuenta ha sido eliminada o ya no tienes acceso.", "Sesión finalizada");
+
+      setTimeout(() => {
+        window.location.href = "/DelixSystem/src/auth/logout_empleado.php";
+      }, 2000);
+    }
+  } catch (err) {
+    console.error("[EmpleadoSessionCheck] error:", err);
+  }
+}, 5000); // cada 5 segundos
