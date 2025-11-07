@@ -1,9 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['usuario'])) {
-    header("Location: /DelixSystem/");
-    exit;
-}
+require_once __DIR__ . '/../../../middleware/session_guard.php';
+protectPage();
 
 $id_usuario = $_SESSION['usuario']['id'];
 
