@@ -302,3 +302,21 @@ function renderIngredients(ids, ingredientes) {
     <ul>${names.map(n => `<li>${n}</li>`).join("")}</ul>
   `;
 }
+document.addEventListener("DOMContentLoaded", () => {
+  const categorySelect = document.getElementById("category");
+  const newCategoryInput = document.getElementById("newCategoryInput");
+
+  if (categorySelect && newCategoryInput) {
+    categorySelect.addEventListener("change", function () {
+      if (this.value === "__new__") {
+        newCategoryInput.classList.remove("hidden-input");
+        newCategoryInput.required = true;
+        newCategoryInput.focus();
+      } else {
+        newCategoryInput.classList.add("hidden-input");
+        newCategoryInput.required = false;
+        newCategoryInput.value = "";
+      }
+    });
+  }
+});

@@ -3,7 +3,7 @@ function validarFechas() {
   const vencimiento = document.getElementById("fecha_vencimiento").value;
 
   if (ingreso && vencimiento && new Date(vencimiento) < new Date(ingreso)) {
-    alert("⚠️ La fecha de vencimiento no puede ser anterior a la de ingreso.");
+    Alerts.warning("La fecha de vencimiento no puede ser anterior a la de ingreso.");
     return false;
   }
   return true;
@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
       renderStorage(data.insumos);
     } catch (error) {
       grid.innerHTML = `<p class='error'>Error al cargar ingredientes: ${error.message}</p>`;
+      Alerts.error("Error al cargar ingredientes: " + error.message);
     }
   }
 
@@ -145,29 +146,33 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append("action", isEdit ? "update" : "create");
 
     try {
+      Alerts.loading("Guardando ingrediente...");
       const res = await fetch("../php/inventario/ingredienteController.php", {
         method: "POST",
         body: formData,
       });
+      Alerts.close();
 
       const data = await res.json();
 
       if (data.success) {
-        alert(data.message || "✅ Ingrediente guardado correctamente");
+        Alerts.success(data.message || "Ingrediente guardado correctamente");
         hideModal();
         loadStorage();
       } else {
-        alert("⚠️ Error: " + (data.error || "No se pudo procesar la solicitud"));
+        Alerts.error(data.error || "No se pudo procesar la solicitud");
       }
     } catch (err) {
-      alert("❌ Error de red: " + err.message);
+      Alerts.error("Error de red: " + err.message);
     }
   });
 
   window.deleteIngredient = async function (id) {
-    if (!confirm("¿Seguro que deseas eliminar este ingrediente?")) return;
+    const confirmed = await Alerts.confirm("¿Seguro que deseas eliminar este ingrediente?");
+    if (!confirmed) return;
 
     try {
+      Alerts.loading("Eliminando ingrediente...");
       const formData = new FormData();
       formData.append("action", "delete");
       formData.append("id", id);
@@ -176,26 +181,43 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "POST",
         body: formData,
       });
+      Alerts.close();
 
       const data = await res.json();
 
       if (data.success) {
-        alert(data.message || "🗑️ Ingrediente eliminado correctamente.");
+        Alerts.success(data.message || "Ingrediente eliminado correctamente.");
         loadStorage();
       } else {
-        throw new Error(data.error || "Error al eliminar el ingrediente.");
+        Alerts.error(data.error || "Error al eliminar el ingrediente.");
       }
     } catch (err) {
-      alert("❌ " + err.message);
+      Alerts.error("Error: " + err.message);
     }
   };
 });
 
 window.hideModal = function (modalId = "formModal") {
   const modal = document.getElementById(modalId);
-  if (modal) {
-    modal.classList.add("hidden");
-  } else {
-    console.error(`Modal con id "${modalId}" no encontrado.`);
-  }
+  if (modal) modal.classList.add("hidden");
+  else console.error(`Modal con id "${modalId}" no encontrado.`);
 };
+
+document.addEventListener("DOMContentLoaded", () => {
+  const categorySelect = document.getElementById("category");
+  const newCategoryInput = document.getElementById("newCategoryInput");
+
+  if (categorySelect && newCategoryInput) {
+    categorySelect.addEventListener("change", function () {
+      if (this.value === "__new__") {
+        newCategoryInput.classList.remove("hidden-input");
+        newCategoryInput.required = true;
+        newCategoryInput.focus();
+      } else {
+        newCategoryInput.classList.add("hidden-input");
+        newCategoryInput.required = false;
+        newCategoryInput.value = "";
+      }
+    });
+  }
+});

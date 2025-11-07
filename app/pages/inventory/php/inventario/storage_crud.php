@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/products.php';
+require_once __DIR__ . '/products_constructor.php';
 
 class storage_crud {
 

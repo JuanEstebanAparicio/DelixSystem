@@ -213,6 +213,8 @@ try {
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="../../../../public/js/alert.js"></script>
 <script src="../js/form_handler.js"></script>
 <script src="../js/inventario.js"></script>
 <script>
