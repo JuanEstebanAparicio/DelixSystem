@@ -20,23 +20,30 @@ try {
     $model = new EmpleadoModel($conexion);
 
     // ----------------------------------------------------
-    // 🔹 ELIMINAR EMPLEADO (solo ADMIN_LOCAL)
-    // ----------------------------------------------------
-    if ($action === 'delete') {
-        verifyRoleAccess('empleados', 'eliminar');
+// 🔹 ELIMINAR EMPLEADO (solo ADMIN_LOCAL)
+// ----------------------------------------------------
+if ($action === 'delete') {
+    verifyRoleAccess('empleados', 'eliminar');
 
-        $id = $_POST['id'] ?? null;
-        if (!$id) throw new Exception("ID de empleado no recibido.");
+    $id = $_POST['id'] ?? null;
+    if (!$id) throw new Exception("ID de empleado no recibido.");
 
-        $deleted = $model->deleteEmployee($id);
-        if (!$deleted) throw new Exception("No se pudo eliminar el empleado.");
+    // 🟡 1. Marcar empleado como desconectado antes de eliminarlo
+    $stmt = $conexion->prepare("UPDATE employees SET is_online = FALSE WHERE id = :id");
+    $stmt->execute(['id' => $id]);
 
-        echo json_encode([
-            "status" => "success",
-            "message" => "Empleado eliminado correctamente."
-        ]);
-        exit;
-    }
+    // 🟥 2. Eliminar el registro definitivamente
+    $deleted = $model->deleteEmployee($id);
+    if (!$deleted) throw new Exception("No se pudo eliminar el empleado.");
+
+    // 🟢 3. Respuesta final
+    echo json_encode([
+        "status" => "success",
+        "message" => "Empleado eliminado correctamente."
+    ]);
+    exit;
+}
+
 
 // ----------------------------------------------------
 // 🔹 REGISTRO DE EMPLEADO (con código dinámico)
