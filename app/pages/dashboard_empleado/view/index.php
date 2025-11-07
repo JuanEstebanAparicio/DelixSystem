@@ -98,6 +98,6 @@ $empleado = DashboardEmpleadoController::obtenerDatosEmpleado($empleadoAuth['id'
   <!-- JS Global -->
   <script src="/DelixSystem/app/shared/js/control_center.js"></script>
   <script src="../js/roles_auto_update.js"></script>
-
+  <script src="/DelixSystem/app/pages/gestor_empleado/js/empleados.js"></script>
 </body>
 </html>
