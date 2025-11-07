@@ -583,34 +583,3 @@ document.addEventListener('DOMContentLoaded', () => {
   const observer = new MutationObserver(() => handleAdminToggle());
   observer.observe(rolesContainer, { childList: true, subtree: true });
 });
-
-// ========================================
-// 🧩 Verificación activa de sesión empleado (versión mejorada)
-// ========================================
-setInterval(async () => {
-  try {
-    // ✅ Ruta corregida (coherente con las demás llamadas del script)
-    const res = await fetch("../php/employee/EmpleadoSessionCheck.php", { cache: "no-store" });
-    const data = await res.json();
-
-    // 🚨 Si el usuario fue eliminado o ya no está activo
-    if (!data.active) {
-      console.warn("[EmpleadoSessionCheck] Sesión inválida detectada. Forzando cierre de sesión...");
-      
-      // 🔔 Mostrar alerta elegante
-      Alerts.error("Tu cuenta ha sido eliminada o ya no tienes acceso.", "Sesión finalizada");
-
-      // 🔐 Limpieza inmediata de almacenamiento local
-      localStorage.clear();
-      sessionStorage.clear();
-
-      // ⏳ Redirección inmediata y segura (impide volver con 'Atrás')
-      setTimeout(() => {
-        window.location.replace("/DelixSystem/src/auth/logout_empleado.php");
-      }, 1500);
-    }
-  } catch (err) {
-    console.error("[EmpleadoSessionCheck] error:", err);
-  }
-}, 5000); // cada 5 segundos
-

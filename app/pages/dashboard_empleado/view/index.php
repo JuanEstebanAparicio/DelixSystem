@@ -98,43 +98,6 @@ $empleado = DashboardEmpleadoController::obtenerDatosEmpleado($empleadoAuth['id'
   <!-- JS Global -->
   <script src="/DelixSystem/app/shared/js/control_center.js"></script>
   <script src="../js/roles_auto_update.js"></script>
-  <script src="/DelixSystem/app/pages/gestor_empleado/js/empleados.js"></script>
 
-   <script>
-// ========================================
-// 🧩 Verificación activa de sesión empleado
-// ========================================
-setInterval(async () => {
-  try {
-    const res = await fetch("DelixSystem/app/pages/dashboard_empleado/php/employee/EmpleadoSessionCheck.php", { cache: "no-store" });
-    const data = await res.json();
-
-    // 🔎 Mostrar en consola para depuración
-    console.log("[EmpleadoSessionCheck]", data);
-
-    // 🚨 Si el servidor responde que ya no está activo...
-    if (!data.active) {
-      let msg = "Tu cuenta ha sido eliminada o desactivada.";
-      if (data.reason === "offline") msg = "Has sido desconectado por un administrador.";
-      if (data.reason === "deleted") msg = "Tu cuenta ha sido eliminada del sistema.";
-      if (data.reason === "no_session") msg = "Tu sesión ya no es válida.";
-
-      // 🚨 Mostrar alerta visual si tienes librería Alerts (o usar alert())
-      if (typeof Alerts !== "undefined" && Alerts.error) {
-        Alerts.error(msg, "Sesión finalizada");
-      } else {
-        alert(msg);
-      }
-
-      // 🔁 Redirigir tras breve espera
-      setTimeout(() => {
-        window.location.href = "/DelixSystem/src/auth/logout_empleado.php";
-      }, 2000);
-    }
-  } catch (err) {
-    console.error("[EmpleadoSessionCheck] Error de verificación:", err);
-  }
-}, 5000); // cada 5 segundos
-</script>
 </body>
 </html>
