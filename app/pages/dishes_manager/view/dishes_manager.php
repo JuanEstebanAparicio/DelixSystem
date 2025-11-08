@@ -1,10 +1,6 @@
 <?php
-// DelixSystem/app/pages/dishes_manager/view/dishes_manager.php
-session_start();
-if (!isset($_SESSION['usuario'])) {
-    header("Location: /DelixSystem/");
-    exit;
-}
+require_once __DIR__ . '/../../../middleware/session_guard.php';
+protectPage();
 
 $id_usuario = $_SESSION['usuario']['id'];
 
@@ -45,14 +41,13 @@ try {
 <head>
   <meta charset="UTF-8">
   <title>Gestor de Platos</title>
-  <link rel="stylesheet" href="../css/dish_manager.css">
-  <link rel="stylesheet" href="../css/modales.css">
-  <link rel="stylesheet" href="../css/registroInsumo.css">
+  <link rel="stylesheet" href="../css/platillos.css">
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 
 <body>
 <header class="navbar">
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
   <h1 class="navbar-title">Gestor de Platillos</h1>
 
@@ -64,7 +59,7 @@ try {
 </header>
 
 
-  <nav class="sidebar hidden" id="sidebarMenu">
+  <nav class="sidebar" id="sidebarMenu">
     <h3 class="sidebar-title">Categorías</h3>
     <button id="reloadBtn" class="reload-btn" onclick="reloadCategories()">🔄 Recargar</button>
 
@@ -146,8 +141,8 @@ try {
     <div class="modal-content">
       <span class="close" onclick="hideModal('formModal')">&times;</span>
       <h2 id="modalTitle" class="modal-title">Registrar Plato</h2>
-
-      <form id="dishForm" action="../php/dish_add.php" method="POST" enctype="multipart/form-data">
+      <form id="dishForm" enctype="multipart/form-data">
+        <input type="hidden" name="action" id="action" value="add">
         <input type="hidden" name="id" id="dish_id">
         <input type="hidden" name="created_at" id="created_at">
 
@@ -170,7 +165,7 @@ try {
             <?php endforeach; ?>
             <option value="__new__">+ Nueva categoría...</option>
           </select>
-          <input type="text" id="newCategoryInput" name="new_category" placeholder="Nueva categoría" class="hidden">
+          <input type="text" id="newCategoryInput" name="new_category" placeholder="Nueva categoría" class="hidden-input">
         </div>
         
         <div id="previousIngredients" style="margin-bottom: 10px; font-size: 14px;"></div>
@@ -218,12 +213,13 @@ try {
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-  <script src="../js/form_handler.js"></script>
-  <script src="../js/category_handler.js"></script>
-  <script src="../js/sidebar_handler.js"></script>
-  <script src="../js/dish_dynamic_loader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="../../../../public/js/alert.js"></script>
+<script src="../../../middleware/session_guard.php"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="../js/form_handler.js"></script>
+<script src="../js/sidebar_handler.js"></script>
 <script>
   function goToInventory() {
     window.location.href = "/DelixSystem/app/pages/inventory/view/ingredient_manager.php";

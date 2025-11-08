@@ -1,12 +1,12 @@
 <?php
-require_once __DIR__ . '/products.php';
+require_once __DIR__ . '/products_constructor.php';
 
 class storage_crud {
 
     private $conn;
 
     public function __construct() {
-        require __DIR__ . '/../../../config/supabase.php';
+        require_once __DIR__ . '/../../../../config/supabase.php';
         $this->conn = $conexion;
     }
 

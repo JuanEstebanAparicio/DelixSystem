@@ -1,6 +1,6 @@
 <?php
 session_start();
-$baseDir = dirname(__DIR__, 3);
+$baseDir = dirname(__DIR__, 4);
 require_once($baseDir . '/config/supabase.php');
 
 header('Content-Type: application/json');
@@ -24,7 +24,6 @@ try {
     $categorias = $stmt->fetchAll(PDO::FETCH_COLUMN);
     if (!$categorias) $categorias = [];
 
-    // ✅ IMPORTANTE: devolver solo el array plano, no un objeto
     echo json_encode($categorias);
 
 } catch (Exception $e) {
