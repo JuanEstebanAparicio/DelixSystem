@@ -1,9 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['usuario'])) {
-    header("Location: /DelixSystem/");
-    exit;
-}
+require_once __DIR__ . '/../../../middleware/session_guard.php';
+protectPage();
 
 $id_usuario = $_SESSION['usuario']['id'];
 
@@ -50,6 +47,7 @@ try {
 
 <body>
 <header class="navbar">
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
   <h1 class="navbar-title">Gestor de Platillos</h1>
 
@@ -215,12 +213,13 @@ try {
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="../../../../public/js/alert.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-  <script src="../js/form_handler.js"></script>
-  <script src="../js/sidebar_handler.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="../../../../public/js/alert.js"></script>
+<script src="/DelixSystem/public/js/session_guard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="../js/form_handler.js"></script>
+<script src="../js/sidebar_handler.js"></script>
 <script>
   function goToInventory() {
     window.location.href = "/DelixSystem/app/pages/inventory/view/ingredient_manager.php";

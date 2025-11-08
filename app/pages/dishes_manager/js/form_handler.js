@@ -54,6 +54,8 @@ document.addEventListener("DOMContentLoaded", () => {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
+      Alerts.loading("Guardando plato...");
+
       const formData = new FormData(form);
 
       try {
@@ -63,16 +65,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         const data = await res.json();
+        Alerts.close();
 
         if (data.success) {
           hideModal("formModal");
-          alert(data.message || "✅ Operación realizada correctamente");
+          Alerts.success(data.message || "Plato guardado correctamente");
           loadDishes();
         } else {
-          alert("❌ Error: " + (data.error || "No se pudo procesar la solicitud."));
+          Alerts.error(data.error || "No se pudo procesar la solicitud.");
         }
       } catch (err) {
-        alert("⚠️ Error al enviar los datos: " + err.message);
+        Alerts.error("Error al enviar los datos: " + err.message);
       }
     });
   }
@@ -93,16 +96,13 @@ function newDish() {
   document.getElementById("submitBtn").textContent = "Registrar Plato";
 
   const hoy = new Date().toISOString().split("T")[0];
-  const fecha = document.getElementById("created_at");
-  if (fecha) fecha.value = hoy;
+  document.getElementById("created_at").value = hoy;
 
   $("#ingredients").val(null).trigger("change");
   $("#ingredientQuantities").empty();
 
-  const currentPhotoContainer = document.getElementById("currentPhotoContainer");
-  const currentPhotoInput = document.getElementById("current_photo_input");
-  if (currentPhotoContainer) currentPhotoContainer.classList.add("hidden");
-  if (currentPhotoInput) currentPhotoInput.value = "";
+  document.getElementById("currentPhotoContainer").classList.add("hidden");
+  document.getElementById("current_photo_input").value = "";
 
   showModal("formModal");
 }
@@ -114,20 +114,17 @@ function editDish(data) {
   const form = document.getElementById("dishForm");
   form.reset();
 
-  // ID y acción
   const idInput = document.getElementById("dish_id");
   idInput.name = "id";
   idInput.value = data.id;
   document.getElementById("action").value = "edit";
 
-  // Campos base
   document.getElementById("name_dish").value = data.name_dish || "";
   document.getElementById("price").value = data.price || "";
   document.getElementById("category").value = data.category || "";
   document.getElementById("description").value = data.description || "";
   document.getElementById("state").value = data.state || "Activo";
 
-  // Foto actual
   const currentPhotoContainer = document.getElementById("currentPhotoContainer");
   const currentPhoto = document.getElementById("currentPhoto");
   const currentPhotoInput = document.getElementById("current_photo_input");
@@ -173,11 +170,11 @@ function editDish(data) {
   showModal("formModal");
 }
 
-// ===============================
-// 🔹 ELIMINAR PLATO
-// ===============================
 async function deleteDish(id) {
-  if (!confirm("¿Seguro que deseas eliminar este plato?")) return;
+  const confirmed = await Alerts.confirm("¿Seguro que deseas eliminar este plato?", "Eliminar Plato");
+  if (!confirmed) return;
+
+  Alerts.loading("Eliminando plato...");
 
   const formData = new FormData();
   formData.append("action", "delete");
@@ -190,31 +187,16 @@ async function deleteDish(id) {
     });
 
     const data = await res.json();
+    Alerts.close();
+
     if (data.success) {
-      alert(data.message || "🗑️ Plato eliminado correctamente");
+      Alerts.success("Plato eliminado exitosamente");
       loadDishes();
     } else {
-      alert("❌ Error: " + (data.error || "No se pudo eliminar."));
+      Alerts.error(data.error || "No se pudo eliminar.");
     }
   } catch (err) {
-    alert("⚠️ Error al eliminar: " + err.message);
-  }
-}
-
-// ===============================
-// 🔹 CARGAR PLATOS
-// ===============================
-async function loadDishes() {
-  const grid = document.getElementById("dishGrid");
-  grid.innerHTML = "<p class='loading'>Cargando platos...</p>";
-
-  try {
-    const response = await fetch("../php/utilidades/get_dish.php");
-    const data = await response.json();
-    if (!data.success) throw new Error(data.error);
-    renderDishes(data.platos, data.ingredientes);
-  } catch (error) {
-    grid.innerHTML = `<p class='error'>Error: ${error.message}</p>`;
+    Alerts.error("Error al eliminar: " + err.message);
   }
 }
 
@@ -269,13 +251,14 @@ function renderDishes(platos, ingredientes) {
         </div>
         <div class="card-footer">
           <button class="btn btn-edit" onclick='editDish(${JSON.stringify(dish)})'>✏️</button>
-          <button class="btn btn-delet" onclick="deleteDish(${dish.id})">🗑️</button>
+          <button class="btn btn-delete" onclick="deleteDish(${dish.id})">🗑️</button>
         </div>
       `;
       grid.appendChild(card);
     });
   }
 
+  // Botón para crear nuevo plato
   const createCard = document.createElement("div");
   createCard.className = "ingredient-card card create-card";
   createCard.id = "globalCreateCard";
@@ -302,6 +285,10 @@ function renderIngredients(ids, ingredientes) {
     <ul>${names.map(n => `<li>${n}</li>`).join("")}</ul>
   `;
 }
+
+// ===============================
+// 🔹 CATEGORÍA NUEVA PERSONALIZADA
+// ===============================
 document.addEventListener("DOMContentLoaded", () => {
   const categorySelect = document.getElementById("category");
   const newCategoryInput = document.getElementById("newCategoryInput");

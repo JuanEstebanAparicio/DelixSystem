@@ -23,7 +23,7 @@ try {
     $stmt->execute();
     $platos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Obtener lista de ingredientes disponibles
+    // Obtener ingredientes disponibles
     $stmtIng = $conexion->prepare("
         SELECT id, name 
         FROM storage 
@@ -34,7 +34,7 @@ try {
     $stmtIng->execute();
     $ingredientes = $stmtIng->fetchAll(PDO::FETCH_ASSOC);
 
-    // Obtener ingredientes asignados a cada plato (con nombre y unidad)
+    // Agregar ingredientes por plato
     foreach ($platos as $i => $dish) {
         $stmt2 = $conexion->prepare("
             SELECT di.ingredient_id AS id, di.quantity_used, di.unit, s.name
@@ -51,10 +51,9 @@ try {
         "platos" => $platos,
         "ingredientes" => $ingredientes
     ]);
-
 } catch (PDOException $e) {
     echo json_encode([
         "success" => false,
-        "error" => $e->getMessage()
+        "error" => "Error al obtener los datos: " . $e->getMessage()
     ]);
 }
