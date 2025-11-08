@@ -119,3 +119,33 @@
   }
 
 })();
+
+// Marcar pedido como pagado
+
+document.addEventListener("DOMContentLoaded", ()=>{
+    const btn = document.getElementById("btnMarcarPagado");
+
+    if(btn){
+        btn.addEventListener("click", ()=>{
+
+            const idPedido = btn.dataset.id;
+
+            fetch("../php/marcar_pagado.php",{
+                method:"POST",
+                headers:{"Content-Type":"application/x-www-form-urlencoded"},
+                body:"id="+idPedido
+            })
+            .then(r=>r.json())
+            .then(data=>{
+                if(data.ok){
+                    // sonido
+                    const sonido = new Audio("/DelixSystem/public/audio/pagado.mp3");
+                    sonido.play();
+                    
+                    alert("Pedido marcado como pagado");
+                    location.reload();
+                }
+            });
+        });
+    }
+});

@@ -84,6 +84,22 @@ body{
   border-color:#ff9800;
 }
 
+.order-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.order-card.pending::before {
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  width:6px;
+  height:100%;
+  background:#ff9800;
+  border-radius:3px 0 0 3px;
+}
+
 /* ===== TEXTO ===== */
 .order-id{
   font-size:.9rem;
@@ -143,6 +159,26 @@ body{
 .btn-action:hover{
   background:#0074b3;
 }
+
+/* Badges de estado */
+.badge-estado {
+  padding:4px 10px;
+  border-radius:8px;
+  font-size:.8rem;
+  font-weight:600;
+  color:#fff;
+  display:inline-block;
+  margin:5px 0;
+  text-transform:capitalize;
+}
+
+/* Colores según estado */
+.badge-Pending { background:#ff9800; }
+.badge-Accepted { background:#2196F3; }
+.badge-In_progress { background:#00BCD4; }
+.badge-Ready { background:#4CAF50; }
+.badge-Delivered { background:#9C27B0; }
+
 
 /* ANIM */
 @keyframes fadeIn{

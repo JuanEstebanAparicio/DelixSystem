@@ -29,13 +29,15 @@ foreach($required as $r){
 // otros metodos = FALSE
 $pagado = ($data['metodo_pago'] === 'tarjeta') ? 1 : 0;
 
+// estado inicial de un pedido NUEVO
+$estado_inicial = "Pending";
 
 try {
     $conexion->beginTransaction();
 
     $stmt = $conexion->prepare("INSERT INTO orders
-        (id_user, restaurant_name, id_area, area, id_mesa, mesa, nombre_cliente, total_pedido, metodo_pago, pagado)
-        VALUES (:id_user,:restaurant_name,:id_area,:area,:id_mesa,:mesa,:nombre_cliente,:total_pedido,:metodo_pago,:pagado)
+        (id_user, restaurant_name, id_area, area, id_mesa, mesa, nombre_cliente, total_pedido, metodo_pago, pagado, estado)
+        VALUES (:id_user,:restaurant_name,:id_area,:area,:id_mesa,:mesa,:nombre_cliente,:total_pedido,:metodo_pago,:pagado,:estado)
         RETURNING id");
 
     $stmt->execute([
@@ -48,7 +50,8 @@ try {
         ":nombre_cliente"=>$data['nombre_cliente'] ?? null,
         ":total_pedido"=>$data['total'],
         ":metodo_pago"=>$data['metodo_pago'],
-        ":pagado"=>$pagado
+        ":pagado"=>$pagado,
+        ":estado"=>$estado_inicial
     ]);
 
     $order = $stmt->fetch(PDO::FETCH_ASSOC);

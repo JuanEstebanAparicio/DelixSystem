@@ -19,7 +19,6 @@ if ($userId && file_exists($modelPath)) {
             elseif (isset($a['nombre_area'])) $areas[] = $a['nombre_area'];
         }
     } catch (Throwable $e) {
-        // fallback abajo
         $areas = [];
     }
 }
@@ -35,16 +34,16 @@ if (empty($areas)) {
     }
 }
 
-// traer los pedidos más recientes
-$stmt = $conexion->prepare("SELECT id, restaurant_name, area, id_area, mesa, total_pedido, metodo_pago, pagado, created_at
+// traer los pedidos más recientes (incluimos estado)
+$stmt = $conexion->prepare("SELECT id, restaurant_name, area, id_area, mesa, total_pedido, metodo_pago, pagado, estado, created_at
     FROM orders
+    WHERE estado != 'Delivered'
     ORDER BY id DESC");
 $stmt->execute();
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Si la petición es fetch=1 devolvemos sólo el grid (para polling AJAX)
 if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
-    // render only the orders-grid markup
     if (empty($orders)) {
         echo '<p class="no-orders">No hay pedidos todavía.</p>';
         exit;
@@ -54,13 +53,17 @@ if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
         $areaAttr = htmlspecialchars(strtolower($o['area'] ?? ''));
         $paid = ((int)$o['pagado'] === 1);
         $cardClass = $paid ? 'order-card' : 'order-card pending';
+
         $created = htmlspecialchars($o['created_at'] ?? '');
         $restaurant = htmlspecialchars($o['restaurant_name'] ?? '');
         $mesa = htmlspecialchars($o['mesa'] ?? '');
         $total = number_format($o['total_pedido'] ?? 0,0,',','.');
         $metodo = htmlspecialchars($o['metodo_pago'] ?? '');
         $id = htmlspecialchars($o['id']);
-        $badge = $paid ? '<span class="badge-paid">Pagado</span>' : '<span class="badge-unpaid">Pendiente</span>';
+
+        $estado = htmlspecialchars($o['estado'] ?? 'pending');
+        $badgeEstado = '<span class="badge-estado badge-' . $estado . '">' . ucfirst($estado) . '</span>';
+        $badgePago = $paid ? '<span class="badge-paid">Pagado</span>' : '<span class="badge-unpaid">No Pagado</span>';
 
         echo '<article class="' . $cardClass . '" data-area="' . $areaAttr . '">';
         echo '<div class="order-id">#' . $id . '</div>';
@@ -68,7 +71,7 @@ if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
         echo '<div class="meta">Área: ' . htmlspecialchars($o['area'] ?? '') . ' | Mesa: ' . $mesa . '</div>';
         echo '<div class="total">Total: $' . $total . '</div>';
         echo '<div class="method">Pago: ' . $metodo . '</div>';
-        echo '<div class="state-row">' . $badge . '</div>';
+        echo '<div class="state-row">' . $badgeEstado . ' &nbsp;|&nbsp; ' . $badgePago . '</div>';
         echo '<div class="date">' . $created . '</div>';
         echo '<a class="btn-action" href="ver_pedido.php?id=' . urlencode($o['id']) . '">Ver Pedido</a>';
         echo '</article>';
@@ -111,6 +114,11 @@ if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
                 $areaAttr = htmlspecialchars(strtolower($o['area'] ?? ''));
                 $paid = ((int)$o['pagado'] === 1);
                 $cardClass = $paid ? 'order-card' : 'order-card pending';
+
+                // calculos para mostrar badges
+                $estado = htmlspecialchars($o['estado'] ?? 'pending');
+                $badgeEstado = '<span class="badge-estado badge-' . $estado . '">' . ucfirst($estado) . '</span>';
+                $badgePago = $paid ? '<span class="badge-paid">Pagado</span>' : '<span class="badge-unpaid">No Pagado</span>';
             ?>
             <article class="<?= $cardClass ?>" data-area="<?= $areaAttr ?>" role="listitem" aria-labelledby="order-<?= $o['id'] ?>">
                 <div class="order-id">#<?= htmlspecialchars($o['id']) ?></div>
@@ -122,7 +130,7 @@ if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
                 <div class="method">Pago: <?= htmlspecialchars($o['metodo_pago']) ?></div>
 
                 <div class="state-row">
-                    <?= $paid ? '<span class="badge-paid">Pagado</span>' : '<span class="badge-unpaid">Pendiente</span>' ?>
+                    <?= $badgeEstado ?> &nbsp;|&nbsp; <?= $badgePago ?>
                 </div>
 
                 <div class="date"><?= htmlspecialchars($o['created_at']) ?></div>
