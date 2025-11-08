@@ -61,8 +61,9 @@ if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
         $metodo = htmlspecialchars($o['metodo_pago'] ?? '');
         $id = htmlspecialchars($o['id']);
 
-        $estado = htmlspecialchars($o['estado'] ?? 'pending');
-        $badgeEstado = '<span class="badge-estado badge-' . $estado . '">' . ucfirst($estado) . '</span>';
+        $estadoRaw = strtolower(trim($o['estado'] ?? 'pending'));
+        $estadoCSS = str_replace([' ', '-'], '_', $estadoRaw);
+        $badgeEstado = '<span class="badge-estado badge-' . $estadoCSS . '">' . ucfirst($estadoRaw) . '</span>';
         $badgePago = $paid ? '<span class="badge-paid">Pagado</span>' : '<span class="badge-unpaid">No Pagado</span>';
 
         echo '<article class="' . $cardClass . '" data-area="' . $areaAttr . '">';

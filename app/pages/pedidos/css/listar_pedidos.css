@@ -161,23 +161,22 @@ body{
 }
 
 /* Badges de estado */
-.badge-estado {
-  padding:4px 10px;
-  border-radius:8px;
-  font-size:.8rem;
-  font-weight:600;
-  color:#fff;
-  display:inline-block;
-  margin:5px 0;
-  text-transform:capitalize;
+.badge-estado{
+    padding:6px 12px;
+    border-radius:8px;
+    font-size:.82rem;
+    font-weight:600;
+    color:white;
+    display:inline-block;
+    margin:5px 0;
 }
 
-/* Colores según estado */
-.badge-Pending { background:#ff9800; }
-.badge-Accepted { background:#2196F3; }
-.badge-In_progress { background:#00BCD4; }
-.badge-Ready { background:#4CAF50; }
-.badge-Delivered { background:#9C27B0; }
+/* colores reales de cocina */
+.badge-Pending{ background:#ff9800; }        /* naranja aviso */
+.badge-Accepted{ background:#2196F3; }       /* azul ok recibido */
+.badge-In_progress{ background:#9C27B0; }    /* morado en cocina */
+.badge-Ready{ background:#4CAF50; }          /* verde OK listo */
+.badge-Delivered{ background:#1E88E5; }      /* azul más fuerte (ya salió) */
 
 
 /* ANIM */
