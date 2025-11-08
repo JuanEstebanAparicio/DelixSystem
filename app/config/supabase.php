@@ -1,33 +1,88 @@
 <?php
 // DelixSystem/app/config/supabase.php
-// Datos de tu proyecto Supabase
-$host = "aws-1-us-east-1.pooler.supabase.com"; // host del pooler (usa el que te da Supabase)
-$port = "6543"; // puerto del pooler
-$dbname = "postgres";
-$user = "postgres.gqcaeecfhqdkpoatmkfs"; // usuario completo del pooler
-$password = "Delix2025"; // tu contraseña
 
+// ============================
+// 🔹 CONFIGURACIÓN SUPABASE
+// ============================
+$host = "aws-1-us-east-1.pooler.supabase.com";
+$port = "6543";
+$dbname = "postgres";
+$user = "postgres.gqcaeecfhqdkpoatmkfs";
+$password = "Delix2025";
+
+// ============================
+// 🔹 CONEXIÓN CON PDO
+// ============================
 try {
-    // ============================
-    // 🔹 Conexión optimizada y segura
-    // ============================
     $conexion = new PDO(
         "pgsql:host=$host;port=$port;dbname=$dbname",
         $user,
         $password,
         [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // mostrar errores reales
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ, // resultados en objetos
-            PDO::ATTR_EMULATE_PREPARES => true, // 🔸 necesario para el pooler de Supabase (pgbouncer)
-            PDO::ATTR_PERSISTENT => true // 🔸 mantiene la conexión viva = + velocidad
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => true,
+            PDO::ATTR_PERSISTENT => true
         ]
     );
-
-    // Opcional: test rápido solo si necesitas depurar
-    // echo "✅ Conexión exitosa a Supabase";
 } catch (PDOException $e) {
-    // 🔸 No muestres info sensible en producción
     error_log("❌ Error de conexión a Supabase: " . $e->getMessage());
-    die("Error interno al conectar con la base de datos.");
+    die(json_encode([
+        'status' => 'error',
+        'message' => 'Error interno al conectar con la base de datos.'
+    ]));
+}
+
+// ============================
+// 🔹 FUNCIÓN GENERAL supabase()
+// ============================
+// Esta función reemplaza la API REST y usa directamente PDO
+function supabase($table, $method, $data = null, $condition = null)
+{
+    global $conexion;
+
+    try {
+        if (strtoupper($method) === 'POST') {
+            // INSERTAR REGISTRO
+            $keys = array_keys($data);
+            $columns = implode(', ', $keys);
+            $placeholders = ':' . implode(', :', $keys);
+
+            $sql = "INSERT INTO $table ($columns) VALUES ($placeholders) RETURNING *";
+            $stmt = $conexion->prepare($sql);
+            $stmt->execute($data);
+
+            $result = $stmt->fetchAll();
+
+            return [
+                'status' => 201,
+                'data' => $result
+            ];
+        } elseif (strtoupper($method) === 'GET') {
+            // CONSULTAR REGISTROS
+            $sql = "SELECT * FROM $table";
+            if ($condition) {
+                $sql .= " WHERE $condition";
+            }
+
+            $stmt = $conexion->query($sql);
+            $result = $stmt->fetchAll();
+
+            return [
+                'status' => 200,
+                'data' => $result
+            ];
+        } else {
+            return [
+                'status' => 400,
+                'error' => 'Método no soportado'
+            ];
+        }
+    } catch (PDOException $e) {
+        return [
+            'status' => 500,
+            'error' => $e->getMessage()
+        ];
+    }
 }
 ?>

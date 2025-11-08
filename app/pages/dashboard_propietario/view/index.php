@@ -71,8 +71,10 @@ if ($id_usuario) {
 
 <body class="bg-gray-50 min-h-screen font-sans text-gray-800">
 
-  <!-- 🧭 Control Center -->
-   <?php include __DIR__ . '/../../../components/control_center_propietario.php'; ?>
+<?php include __DIR__ . '/../../../components/header_propietario.php'; ?>
+<?php include __DIR__ . '/../../../components/control_center_propietario.php'; ?>
+
+
 
 
   <!-- 🌟 Contenido Principal -->
@@ -129,7 +131,7 @@ if ($id_usuario) {
 
       <!-- 🔗 Accesos directos -->
       <div class="flex flex-wrap gap-4 justify-center">
-        <a href="/DelixSystem/app/pages/gestion_pedidos/view/index.php"
+        <a href="/DelixSystem/app/pages/pedidos/view/listar_pedidos.php"
            class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-lg font-medium transition-all">
           Pedidos
         </a>
@@ -141,7 +143,7 @@ if ($id_usuario) {
            class="bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2 rounded-lg font-medium transition-all">
           Empleados
         </a>
-        <a href="/DelixSystem/app/pages/dishes_manager/view/index.php"
+        <a href="/DelixSystem/app/pages/dishes_manager/view/dishes_manager.php"
            class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-lg font-medium transition-all">
           Gestor Menú
         </a>

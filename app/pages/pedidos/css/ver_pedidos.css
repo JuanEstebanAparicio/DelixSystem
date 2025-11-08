@@ -1,0 +1,91 @@
+body{
+    font-family: "Poppins", sans-serif;
+    background:#f5f5f5;
+    margin:0;
+    padding:25px;
+}
+
+.pedido-container{
+    max-width:700px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 2px 12px rgba(0,0,0,.12);
+}
+
+h2{ margin-top:0; font-size:26px; }
+
+.table-items{
+    width:100%;
+    border-collapse:collapse;
+    margin:18px 0;
+}
+.table-items th, .table-items td{
+    border:1px solid #ddd;
+    padding:8px;
+}
+.table-items th{
+    background:#0074b3;
+    color:#fff;
+}
+
+.table-items tbody tr:nth-child(odd){
+    background:#fafafa;
+}
+
+.table-items tbody tr:hover{
+    background:#e8f4ff;
+    transition:0.2s;
+}
+
+.btn-volver, .btn-pagar {
+    box-shadow:0 2px 6px rgba(0,0,0,.12);
+    transition:.2s;
+}
+
+.btn-volver:hover, .btn-pagar:hover {
+    transform: translateY(-2px);
+    opacity:.9;
+}
+
+
+.badge-paid{
+    background:#21b356;
+    color:white;
+    padding:5px 9px;
+    border-radius:8px;
+}
+.badge-unpaid{
+    background:#e33d35;
+    color:white;
+    padding:5px 9px;
+    border-radius:8px;
+}
+
+.btn-container{
+    margin-top:25px;
+    display:flex;
+    gap:12px;
+}
+
+.btn-pagar{
+    background:#21b356;
+    border:none;
+    color:white;
+    padding:10px 16px;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+}
+.btn-pagar:hover{ opacity:.85; }
+
+.btn-volver{
+    background:#444;
+    text-decoration:none;
+    color:white;
+    padding:10px 16px;
+    border-radius:8px;
+    font-size:16px;
+}
+.btn-volver:hover{ opacity:.85; }

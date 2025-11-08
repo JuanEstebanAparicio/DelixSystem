@@ -1,0 +1,186 @@
+/* ===== RESET GENERAL ===== */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins', sans-serif;
+}
+
+body{
+  background:#f6f7fb;
+  color:#2d3b47;
+}
+
+/* ===== CONTAINER PRINCIPAL LISTADO ===== */
+.page-container{
+  padding:25px;
+  animation:fadeIn .3s ease-in-out;
+}
+
+.page-title{
+  font-size:1.7rem;
+  font-weight:600;
+  margin-bottom:22px;
+  color:#1f3b59;
+}
+
+/* NAV AREAS / filtros */
+.nav-areas{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+.nav-area{
+    padding:8px 18px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.05);
+    cursor:pointer;
+    transition:.25s;
+    font-weight:600;
+    font-size:14px;
+    backdrop-filter: blur(5px);
+}
+
+.nav-area:hover{
+    background:rgba(255,255,255,0.15);
+}
+
+.nav-area.active{
+    background:#4CAF50;  /* verde coherente restaurante */
+    color:white;
+    border-color:transparent;
+    box-shadow:0 0 12px rgba(76, 175, 80, .45);
+}
+
+
+/* ===== GRID ===== */
+.orders-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:20px;
+  padding-bottom:30px;
+}
+
+/* ===== CARDS ===== */
+.order-card{
+  background:white;
+  border-radius:14px;
+  padding:18px 20px;
+  box-shadow:0 3px 12px rgba(0,0,0,0.06);
+  border:2px solid #e7e7e7;
+  transition:.20s cubic-bezier(.25,.46,.45,1);
+}
+
+.order-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 5px 14px rgba(0,0,0,0.09);
+}
+
+/* cuando NO está pagado borde naranja suave */
+.order-card.pending{
+  border-color:#ff9800;
+}
+
+.order-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.order-card.pending::before {
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  width:6px;
+  height:100%;
+  background:#ff9800;
+  border-radius:3px 0 0 3px;
+}
+
+/* ===== TEXTO ===== */
+.order-id{
+  font-size:.9rem;
+  font-weight:600;
+  opacity:.75;
+  margin-bottom:7px;
+}
+
+.restaurant{
+  font-size:1.15rem;
+  font-weight:600;
+  margin-bottom:7px;
+}
+
+.meta,.total,.method,.date{
+  font-size:.92rem;
+  margin-bottom:5px;
+}
+
+/* BADGES */
+.badge-paid{
+  background:#005a8d;
+  color:white;
+  padding:6px 12px;
+  border-radius:6px;
+  font-size:.82rem;
+  font-weight:600;
+  display:inline-block;
+  margin:5px 0;
+}
+
+.badge-unpaid{
+  background:#ff9800;
+  color:white;
+  padding:6px 12px;
+  border-radius:6px;
+  font-size:.82rem;
+  font-weight:600;
+  display:inline-block;
+  margin:5px 0;
+}
+
+/* BTN */
+.btn-action{
+  display:block;
+  margin-top:14px;
+  background:#005a8d;
+  color:white;
+  text-align:center;
+  padding:9px 0;
+  border-radius:9px;
+  text-decoration:none;
+  font-size:.9rem;
+  font-weight:600;
+  transition:.2s;
+}
+.btn-action:hover{
+  background:#0074b3;
+}
+
+/* Badges de estado */
+.badge-estado{
+    padding:6px 12px;
+    border-radius:8px;
+    font-size:.82rem;
+    font-weight:600;
+    color:white;
+    display:inline-block;
+    margin:5px 0;
+}
+
+/* colores reales de cocina */
+.badge-Pending{ background:#ff9800; }        /* naranja aviso */
+.badge-Accepted{ background:#2196F3; }       /* azul ok recibido */
+.badge-In_progress{ background:#9C27B0; }    /* morado en cocina */
+.badge-Ready{ background:#4CAF50; }          /* verde OK listo */
+.badge-Delivered{ background:#1E88E5; }      /* azul más fuerte (ya salió) */
+
+
+/* ANIM */
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}

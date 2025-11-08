@@ -1,4 +1,5 @@
 <?php
+// DelixSystem/app/pages/dishes_manager/view/dishes_manager.php
 session_start();
 if (!isset($_SESSION['usuario'])) {
     header("Location: /DelixSystem/");
@@ -51,11 +52,17 @@ try {
 </head>
 
 <body>
-  <header class="navbar">
-    <button class="hamburger" onclick="toggleSidebar()">☰</button>
-    <h1 class="navbar-title">Gestor de Platos</h1>
-    <button class="create-btn" onclick="newDish()">+ Crear Plato</button>
-  </header>
+<header class="navbar">
+  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+  <h1 class="navbar-title">Gestor de Platillos</h1>
+
+  <div class="button-group">
+    <button class="create-btn" onclick="newDish()">+ Crear Platillo</button>
+    <button class="inventory-btn" onclick="goToInventory()">🍎 Inventario</button>
+    <button class="dashboard-btn" onclick="goToDashboard()">🏠 Dashboard</button>
+  </div>
+</header>
+
 
   <nav class="sidebar hidden" id="sidebarMenu">
     <h3 class="sidebar-title">Categorías</h3>
@@ -217,5 +224,15 @@ try {
   <script src="../js/category_handler.js"></script>
   <script src="../js/sidebar_handler.js"></script>
   <script src="../js/dish_dynamic_loader.js"></script>
+<script>
+  function goToInventory() {
+    window.location.href = "/DelixSystem/app/pages/inventory/view/ingredient_manager.php";
+  }
+
+  function goToDashboard() {
+    window.location.href = "/DelixSystem/app/pages/dashboard_propietario/view/index.php";
+  }
+</script>
+
 </body>
 </html>
