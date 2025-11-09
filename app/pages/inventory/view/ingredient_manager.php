@@ -148,9 +148,19 @@ try {
         <label for="category">Categoría:</label>
         <select name="category" id="category" required>
           <option value="" disabled selected>Seleccione o cree una categoría</option>
+          <option value="Proteína">Proteína</option>
+          <option value="Carbohidrato">Carbohidrato</option>
+          <option value="Vegetal">Vegetal</option>
+          <option value="Lácteo">Lácteo</option>
+          <option value="Bebida">Bebida</option>
+          <option value="Salsa">Salsa</option>
+          <option value="Fruta">Fruta</option>
+          <option value="Cereal / Harina">Cereal / Harina</option>
+          <option value="Snack">Snack</option>
           <?php foreach ($listaCategorias as $cat): ?>
             <option value="<?= htmlspecialchars($cat) ?>"><?= htmlspecialchars($cat) ?></option>
           <?php endforeach; ?>
+
           <option value="__new__">+ Nueva categoría...</option>
         </select>
         <input type="text" id="newCategoryInput" name="new_category" placeholder="Nueva categoría" class="hidden-input">
@@ -197,7 +207,7 @@ try {
       <div class="form-group">
         <label for="photo">Foto:</label>
         <input type="file" name="photo" id="photo" accept="image/*">
-        <div id="currentPhotoContainer" class="photo-preview hidden">
+        <div id="currentPhotoContainer" class="photo-preview hidden-img">
           <p>Foto actual:</p>
           <img id="currentPhoto" src="" alt="Foto actual del ingrediente" class="preview-img">
         </div>
@@ -213,7 +223,6 @@ try {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../../../../public/js/alert.js"></script>
 <script src="../js/form_handler.js"></script>
-<script src="../js/inventario.js"></script>
 <script>
   function goToDishes() {
     window.location.href = "/DelixSystem/app/pages/dishes_manager/view/dishes_manager.php";
