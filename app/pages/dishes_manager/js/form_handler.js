@@ -288,13 +288,12 @@ function renderIngredients(ids, ingredientes) {
     <ul>${names.map(n => `<li>${n}</li>`).join("")}</ul>
   `;
 }
-
 // ===============================
 // 🔹 FILTRAR PLATILLOS POR CATEGORÍA (RENDERIZANDO)
 // ===============================
-async function mostrarCategoria(categoria, element) {
+window.mostrarCategoria = async function (categoria) {
   const grid = document.getElementById("dishGrid");
-  grid.innerHTML = "<p class='loading'>Cargando platillos...</p>";
+  grid.innerHTML = "<p class='loading'>Filtrando platillos...</p>";
 
   try {
     const response = await fetch("../php/utilidades/get_dish.php");
@@ -303,24 +302,29 @@ async function mostrarCategoria(categoria, element) {
     if (!data.success) throw new Error(data.error);
 
     let platos = data.platos;
+
+    // 🔹 Si no es "Todos", filtrar
     if (categoria !== "Todos") {
       platos = platos.filter(p => (p.category || "Sin categoría") === categoria);
     }
 
+    // 🔹 Renderizar los platillos filtrados
     renderDishes(platos, data.ingredientes);
 
-    // Marcar categoría activa
-    document.querySelectorAll(".sidebar-item").forEach(item => item.classList.remove("active"));
-    if (element) element.classList.add("active");
+    // 🔹 Marcar la categoría activa en el sidebar
+    document.querySelectorAll(".sidebar-item").forEach(item => {
+      item.classList.toggle("active", item.textContent.trim() === categoria);
+    });
 
-    // Cerrar sidebar si está abierto
+    // 🔹 Cerrar sidebar (por si está abierto)
     document.getElementById("sidebarMenu").classList.remove("active");
     document.getElementById("sidebarOverlay")?.classList.remove("active");
+
   } catch (error) {
-    grid.innerHTML = `<p class='error'>Error: ${error.message}</p>`;
-    Alerts.error("Error al cargar los platillos: " + error.message);
+    grid.innerHTML = `<p class='error'>Error al filtrar: ${error.message}</p>`;
+    Alerts.error("Error al filtrar los platillos: " + error.message);
   }
-}
+};
 
 // ===============================
 // 🔹 RECARGAR CATEGORÍAS
