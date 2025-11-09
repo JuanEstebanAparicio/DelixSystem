@@ -2,6 +2,8 @@
 session_start();
 header('Content-Type: application/json');
 
+require_once __DIR__ . '/../../../../config/supabase.php';
+
 if (!isset($_SESSION['usuario'])) {
     echo json_encode(["success" => false, "error" => "No autorizado"]);
     exit;
@@ -9,10 +11,8 @@ if (!isset($_SESSION['usuario'])) {
 
 $id_user = $_SESSION['usuario']['id'];
 
-require_once __DIR__ . '/../../../../config/supabase.php';
-
 try {
-    // Obtener platos
+    // 🔹 Obtener platos
     $stmt = $conexion->prepare("
         SELECT * 
         FROM dish
@@ -23,7 +23,7 @@ try {
     $stmt->execute();
     $platos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Obtener ingredientes disponibles
+    // 🔹 Obtener ingredientes disponibles
     $stmtIng = $conexion->prepare("
         SELECT id, name 
         FROM storage 
@@ -34,7 +34,7 @@ try {
     $stmtIng->execute();
     $ingredientes = $stmtIng->fetchAll(PDO::FETCH_ASSOC);
 
-    // Agregar ingredientes por plato
+    // 🔹 Agregar ingredientes a cada plato
     foreach ($platos as $i => $dish) {
         $stmt2 = $conexion->prepare("
             SELECT di.ingredient_id AS id, di.quantity_used, di.unit, s.name
@@ -46,14 +46,20 @@ try {
         $platos[$i]['ingredients'] = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // 🔹 Extraer categorías únicas
+    $categorias = array_unique(array_filter(array_column($platos, 'category')));
+
     echo json_encode([
         "success" => true,
         "platos" => $platos,
-        "ingredientes" => $ingredientes
+        "ingredientes" => $ingredientes,
+        "categorias" => array_values($categorias)
     ]);
+
 } catch (PDOException $e) {
     echo json_encode([
         "success" => false,
         "error" => "Error al obtener los datos: " . $e->getMessage()
     ]);
 }
+?>

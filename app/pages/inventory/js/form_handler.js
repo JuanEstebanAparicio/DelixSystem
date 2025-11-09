@@ -181,3 +181,165 @@ document.addEventListener("DOMContentLoaded", () => {
   loadStorage();
   reloadCategories();
 });
+// ===============================
+// 🔹 MODAL CONTROL Y CRUD
+// ===============================
+
+// Mostrar modal
+function showModal(id) {
+  document.getElementById(id).classList.remove("hidden");
+  document.body.style.overflow = "hidden"; // Evita scroll al abrir
+}
+
+// Ocultar modal
+function hideModal(id) {
+  document.getElementById(id).classList.add("hidden");
+  document.body.style.overflow = "";
+  document.getElementById("ingredientForm").reset();
+  document.getElementById("currentPhotoContainer").classList.add("hidden-img");
+}
+
+// Crear nuevo ingrediente
+function newIngredient() {
+  const form = document.getElementById("ingredientForm");
+  document.getElementById("modalTitle").textContent = "Registrar Ingrediente";
+  document.getElementById("action").value = "create";
+  form.reset();
+  document.getElementById("currentPhotoContainer").classList.add("hidden-img");
+  showModal("formModal");
+}
+
+// Editar ingrediente existente
+function editIngredient(ing) {
+  const form = document.getElementById("ingredientForm");
+  document.getElementById("modalTitle").textContent = "Editar Ingrediente";
+  document.getElementById("action").value = "update";
+
+  // Llenar campos
+  form.ingredient_id.value = ing.id;
+  form.name.value = ing.name || "";
+  form.amount.value = ing.amount || "";
+  form.minimum_quantity.value = ing.minimum_quantity || "";
+  form.unit.value = ing.unit || "Unidad";
+  form.unit_cost.value = ing.unit_cost || "";
+  form.category.value = ing.category || "";
+  form.batch.value = ing.batch || "";
+  form.description.value = ing.description || "";
+  form.location.value = ing.location || "";
+  form.state.value = ing.state || "Activo";
+  form.supplier.value = ing.supplier || "";
+  form.fecha_ingreso.value = ing.fecha_ingreso || "";
+  form.fecha_vencimiento.value = ing.fecha_vencimiento || "";
+
+  // Mostrar foto actual si existe
+  const currentPhotoContainer = document.getElementById("currentPhotoContainer");
+  const currentPhoto = document.getElementById("currentPhoto");
+  if (ing.photo && ing.photo.trim() !== "") {
+    currentPhoto.src = ing.photo.startsWith("media/")
+      ? "../" + ing.photo
+      : "../media/" + ing.photo;
+    currentPhotoContainer.classList.remove("hidden-img");
+  } else {
+    currentPhotoContainer.classList.add("hidden-img");
+  }
+
+  showModal("formModal");
+}
+
+// Guardar (crear/editar)
+document.getElementById("ingredientForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (!validarFechas()) return;
+
+  const form = e.target;
+  const formData = new FormData(form);
+
+  try {
+    const response = await fetch("../php/inventario/ingredienteController.php", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await response.json();
+
+    if (data.success) {
+      Alerts.success(data.message || "Ingrediente guardado correctamente.");
+      hideModal("formModal");
+      loadStorage();
+      reloadCategories();
+    } else {
+      Alerts.warning(data.error || "No se pudo guardar el ingrediente.");
+    }
+  } catch (err) {
+    Alerts.error("Error al guardar ingrediente: " + err.message);
+  }
+});
+
+// Eliminar ingrediente
+async function deleteIngredient(id) {
+  const confirm = await Swal.fire({
+    title: "¿Eliminar ingrediente?",
+    text: "Esta acción no se puede deshacer.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  try {
+    const response = await fetch("../php/inventario/ingredienteController.php", {
+      method: "POST",
+      body: new URLSearchParams({
+        id,
+        action: "delete",
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      Alerts.success("Ingrediente eliminado correctamente.");
+      loadStorage();
+      reloadCategories();
+    } else {
+      Alerts.warning(data.error || "No se pudo eliminar el ingrediente.");
+    }
+  } catch (err) {
+    Alerts.error("Error al eliminar ingrediente: " + err.message);
+  }
+}
+
+// ===============================
+// 🔹 NUEVA CATEGORÍA
+// ===============================
+const categorySelect = document.getElementById("category");
+const newCategoryInput = document.getElementById("newCategoryInput");
+
+categorySelect.addEventListener("change", () => {
+  if (categorySelect.value === "__new__") {
+    newCategoryInput.classList.remove("hidden-input");
+    newCategoryInput.required = true;
+  } else {
+    newCategoryInput.classList.add("hidden-input");
+    newCategoryInput.required = false;
+    newCategoryInput.value = "";
+  }
+});
+
+// ===============================
+// 🔹 PREVISUALIZAR FOTO
+// ===============================
+document.getElementById("photo").addEventListener("change", function (e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (ev) {
+      const preview = document.getElementById("currentPhoto");
+      const container = document.getElementById("currentPhotoContainer");
+      preview.src = ev.target.result;
+      container.classList.remove("hidden-img");
+    };
+    reader.readAsDataURL(file);
+  }
+});

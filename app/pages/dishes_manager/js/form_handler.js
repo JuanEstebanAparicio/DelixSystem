@@ -4,7 +4,6 @@
 function showModal(id) {
   document.getElementById(id).classList.remove("hidden");
 }
-
 function hideModal(id) {
   document.getElementById(id).classList.add("hidden");
 }
@@ -80,6 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  reloadCategories();
   loadDishes();
 });
 
@@ -170,6 +170,9 @@ function editDish(data) {
   showModal("formModal");
 }
 
+// ===============================
+// 🔹 ELIMINAR PLATO
+// ===============================
 async function deleteDish(id) {
   const confirmed = await Alerts.confirm("¿Seguro que deseas eliminar este plato?", "Eliminar Plato");
   if (!confirmed) return;
@@ -287,23 +290,84 @@ function renderIngredients(ids, ingredientes) {
 }
 
 // ===============================
-// 🔹 CATEGORÍA NUEVA PERSONALIZADA
+// 🔹 FILTRAR PLATILLOS POR CATEGORÍA (RENDERIZANDO)
 // ===============================
-document.addEventListener("DOMContentLoaded", () => {
-  const categorySelect = document.getElementById("category");
-  const newCategoryInput = document.getElementById("newCategoryInput");
+async function mostrarCategoria(categoria, element) {
+  const grid = document.getElementById("dishGrid");
+  grid.innerHTML = "<p class='loading'>Cargando platillos...</p>";
 
-  if (categorySelect && newCategoryInput) {
-    categorySelect.addEventListener("change", function () {
-      if (this.value === "__new__") {
-        newCategoryInput.classList.remove("hidden-input");
-        newCategoryInput.required = true;
-        newCategoryInput.focus();
-      } else {
-        newCategoryInput.classList.add("hidden-input");
-        newCategoryInput.required = false;
-        newCategoryInput.value = "";
-      }
+  try {
+    const response = await fetch("../php/utilidades/get_dish.php");
+    const data = await response.json();
+
+    if (!data.success) throw new Error(data.error);
+
+    let platos = data.platos;
+    if (categoria !== "Todos") {
+      platos = platos.filter(p => (p.category || "Sin categoría") === categoria);
+    }
+
+    renderDishes(platos, data.ingredientes);
+
+    // Marcar categoría activa
+    document.querySelectorAll(".sidebar-item").forEach(item => item.classList.remove("active"));
+    if (element) element.classList.add("active");
+
+    // Cerrar sidebar si está abierto
+    document.getElementById("sidebarMenu").classList.remove("active");
+    document.getElementById("sidebarOverlay")?.classList.remove("active");
+  } catch (error) {
+    grid.innerHTML = `<p class='error'>Error: ${error.message}</p>`;
+    Alerts.error("Error al cargar los platillos: " + error.message);
+  }
+}
+
+// ===============================
+// 🔹 RECARGAR CATEGORÍAS
+// ===============================
+async function reloadCategories() {
+  try {
+    const response = await fetch("../php/utilidades/get_dish.php");
+    let categorias = await response.json();
+
+    categorias = [...new Set(categorias.map(c => c.category || c))];
+
+    const list = document.getElementById("categoryList");
+    list.innerHTML = "";
+
+    const todosLi = document.createElement("li");
+    todosLi.className = "sidebar-item active";
+    todosLi.textContent = "Todos";
+    todosLi.onclick = (e) => mostrarCategoria("Todos", e.target);
+    list.appendChild(todosLi);
+
+    categorias.forEach(cat => {
+      const li = document.createElement("li");
+      li.className = "sidebar-item";
+      li.textContent = cat;
+      li.onclick = (e) => mostrarCategoria(cat, e.target);
+      list.appendChild(li);
     });
+  } catch (err) {
+    console.error("❌ Error al recargar categorías:", err);
+  }
+}
+
+// ===============================
+// 🔹 TOGGLE SIDEBAR
+// ===============================
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebarMenu');
+  const overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.toggle('active');
+  overlay.classList.toggle('active');
+}
+document.addEventListener('click', (e) => {
+  const sidebar = document.getElementById('sidebarMenu');
+  const overlay = document.getElementById('sidebarOverlay');
+  const hamburger = document.querySelector('.hamburger');
+  if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
   }
 });

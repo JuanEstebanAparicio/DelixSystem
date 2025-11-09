@@ -200,7 +200,7 @@ try {
           <input type="file" name="photo" id="photo" accept="image/*">
           <input type="hidden" name="current_photo" id="current_photo_input">
 
-          <div id="currentPhotoContainer" class="photo-preview hidden">
+          <div id="currentPhotoContainer" class="photo-preview hidden-img">
             <p>Foto actual:</p>
             <img id="currentPhoto" src="" alt="Foto actual del plato" class="preview-img">
           </div>
@@ -219,7 +219,6 @@ try {
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="../js/form_handler.js"></script>
-<script src="../js/sidebar_handler.js"></script>
 <script>
   function goToInventory() {
     window.location.href = "/DelixSystem/app/pages/inventory/view/ingredient_manager.php";
