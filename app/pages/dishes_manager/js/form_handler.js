@@ -250,7 +250,7 @@ function renderDishes(platos, ingredientes) {
           <p class="ingredient-cost">$${Number(dish.price).toLocaleString()}</p>
           <p class="ingredient-state ${dish.state.toLowerCase()}">${dish.state}</p>
           <p class="ingredient-desc">${dish.description || "Sin descripción"}</p>
-          ${renderIngredients(dish.ingredients, ingredientes)}
+          ${renderIngredients(dish.ingredients)}
         </div>
         <div class="card-footer">
           <button class="btn btn-edit" onclick='editDish(${JSON.stringify(dish)})'>✏️</button>
@@ -275,21 +275,22 @@ function renderDishes(platos, ingredientes) {
   grid.appendChild(createCard);
 }
 
-function renderIngredients(ids, ingredientes) {
-  if (!ids || ids.length === 0) return "";
-  const names = ids
-    .map(id => {
-      const ing = ingredientes.find(i => i.id == id);
-      return ing ? ing.name : "";
-    })
-    .filter(Boolean);
+// ===============================
+// 🔹 RENDER INGREDIENTES (CORREGIDO)
+// ===============================
+function renderIngredients(ingredients) {
+  if (!ingredients || ingredients.length === 0) return "";
+  const listItems = ingredients.map(ing => `
+    <li>${ing.name} (${ing.quantity_used} ${ing.unit})</li>
+  `).join("");
   return `
     <p><strong>Ingredientes:</strong></p>
-    <ul>${names.map(n => `<li>${n}</li>`).join("")}</ul>
+    <ul>${listItems}</ul>
   `;
 }
+
 // ===============================
-// 🔹 FILTRAR PLATILLOS POR CATEGORÍA (RENDERIZANDO)
+// 🔹 FILTRAR PLATILLOS POR CATEGORÍA
 // ===============================
 window.mostrarCategoria = async function (categoria) {
   const grid = document.getElementById("dishGrid");
@@ -316,10 +317,8 @@ window.mostrarCategoria = async function (categoria) {
       item.classList.toggle("active", item.textContent.trim() === categoria);
     });
 
-    // 🔹 Cerrar sidebar (por si está abierto)
     document.getElementById("sidebarMenu").classList.remove("active");
     document.getElementById("sidebarOverlay")?.classList.remove("active");
-
   } catch (error) {
     grid.innerHTML = `<p class='error'>Error al filtrar: ${error.message}</p>`;
     Alerts.error("Error al filtrar los platillos: " + error.message);
@@ -332,9 +331,8 @@ window.mostrarCategoria = async function (categoria) {
 async function reloadCategories() {
   try {
     const response = await fetch("../php/utilidades/get_dish.php");
-    let categorias = await response.json();
-
-    categorias = [...new Set(categorias.map(c => c.category || c))];
+    const data = await response.json();
+    const categorias = [...new Set(data.platos.map(c => c.category || "Sin categoría"))];
 
     const list = document.getElementById("categoryList");
     list.innerHTML = "";
