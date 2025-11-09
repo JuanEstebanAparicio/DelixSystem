@@ -373,3 +373,20 @@ document.addEventListener('click', (e) => {
     overlay.classList.remove('active');
   }
 });
+  // ===============================
+  // 🔹 CAMPO DE NUEVA CATEGORÍA
+  // ===============================
+  const categorySelect = document.getElementById("category");
+  const newCategoryInput = document.getElementById("newCategoryInput");
+
+  if (categorySelect && newCategoryInput) {
+    categorySelect.addEventListener("change", () => {
+      if (categorySelect.value === "__new__") {
+        newCategoryInput.classList.remove("hidden-input");
+        newCategoryInput.focus();
+      } else {
+        newCategoryInput.classList.add("hidden-input");
+        newCategoryInput.value = "";
+      }
+    });
+  }
