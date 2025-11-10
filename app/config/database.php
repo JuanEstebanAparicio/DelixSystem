@@ -1,28 +1,17 @@
 <?php
 /**--
- *  Este módulo gestiona la comunicación entre la aplicación y la base de datos
- *  de Supabase mediante peticiones HTTP (REST API). 
- * 
- *  Proporciona funciones reutilizables para:
- *   - Consultar, insertar, actualizar o eliminar registros en tablas de Supabase.
- *   - Manejar autenticación de usuarios a través del endpoint de Supabase Auth.
- * 
- * Funciones principales:
- *  • supabase($table, $method, $data, $query, $useService)
- *      Permite interactuar con cualquier tabla del proyecto Supabase usando 
- *      métodos HTTP (GET, POST, PATCH, DELETE).
- * 
- *  • supabaseAuth($endpoint, $method, $data)
- *      Gestiona la autenticación (registro, login, recuperación de contraseña)
- *      con el servicio de autenticación de Supabase.
- * 
- * Dependencias:
- *  - constants.php (debe contener SUPABASE_URL, SUPABASE_ANON_KEY y SUPABASE_SERVICE_KEY)
- *  - Extensión cURL habilitada en PHP.
+ *  Comunicación con Supabase vía REST API (cURL)
+ *  Funciones principales:
+ *   • supabaseRest($table, $method, $data, $query, $useService)
+ *   • supabaseAuth($endpoint, $method, $data)
  */
+
 require_once __DIR__ . '/constants.php';
 
-function supabase(string $table, string $method = 'GET', array $data = null, string $query = '', bool $useService = true): array {
+/**
+ * 🔹 Interacción con tablas de Supabase mediante HTTP
+ */
+function supabaseRest(string $table, string $method = 'GET', array $data = null, string $query = '', bool $useService = true): array {
     $url = rtrim(SUPABASE_URL, '/') . '/rest/v1/' . ltrim($table, '/') . $query;
     $key = $useService ? SUPABASE_SERVICE_KEY : SUPABASE_ANON_KEY;
 
@@ -56,6 +45,9 @@ function supabase(string $table, string $method = 'GET', array $data = null, str
     ];
 }
 
+/**
+ * 🔹 Autenticación vía Supabase Auth API
+ */
 function supabaseAuth(string $endpoint, string $method = 'POST', array $data = null): array {
     $url = rtrim(SUPABASE_URL, '/') . '/auth/v1/' . ltrim($endpoint, '/');
 

@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once __DIR__ . '/../../app/config/supabase.php';
+require_once __DIR__ . '/../../app/config/database.php';
 
 function universalGuard() {
     // 👑 Propietario
@@ -20,9 +20,8 @@ function universalGuard() {
     // 👷‍♂️ Empleado
     if (isset($_SESSION['empleado_auth']['id'])) {
         $empleadoId = $_SESSION['empleado_auth']['id'];
-        $result = supabase('employees', 'GET', null, '?id=eq.' . $empleadoId);
+        $result = supabaseRest('employees', 'GET', null, '?id=eq.' . $empleadoId);
 
-        // Si no existe más → limpiar sesión
         if (!$result || empty($result['data'])) {
             unset($_SESSION['empleado_auth']);
             header('Location: /DelixSystem/public/index.php?session=expired');
