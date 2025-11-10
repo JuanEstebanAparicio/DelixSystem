@@ -32,97 +32,63 @@ $paid = ($order['estado'] === 'paid');
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Pedido #<?= htmlspecialchars($order['id']) ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/ver_pedidos.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pedido #<?= htmlspecialchars($order['id']) ?></title>
+<link rel="stylesheet" href="../css/ver_pedidos.css">
 </head>
 <body>
 
 <?php if(isset($_SESSION['flash_msg'])): ?>
-    <div class='alert alert-success'><?= $_SESSION['flash_msg']; ?></div>
+    <div class='alert alert-success' style='margin-bottom:15px;'><?= $_SESSION['flash_msg']; ?></div>
 <?php unset($_SESSION['flash_msg']); endif; ?>
 
 <?php if(isset($_SESSION['flash_error'])): ?>
-    <div class='alert alert-danger'><?= $_SESSION['flash_error']; ?></div>
+    <div class='alert alert-danger' style='margin-bottom:15px;'><?= $_SESSION['flash_error']; ?></div>
 <?php unset($_SESSION['flash_error']); endif; ?>
 
-<div class="top-bar">
-    <a href="listar_pedidos.php" class="back-button">
-        <i class="ri-arrow-left-line"></i>
-    </a>
-    <h1>Detalles del Pedido #<?= htmlspecialchars($order['id']) ?></h1>
-</div>
 
 <div class="pedido-container">
-    <!-- Info Cards Grid -->
-    <div class="info-cards">
-        <div class="info-card">
-            <i class="ri-store-2-line"></i>
-            <div>
-                <label>Restaurante</label>
-                <span><?= htmlspecialchars($order['restaurant_name']) ?></span>
-            </div>
-        </div>
-        <div class="info-card">
-            <i class="ri-map-pin-2-line"></i>
-            <div>
-                <label>Área</label>
-                <span><?= htmlspecialchars($order['area']) ?></span>
-            </div>
-        </div>
-        <div class="info-card">
-            <i class="ri-restaurant-line"></i>
-            <div>
-                <label>Mesa</label>
-                <span><?= htmlspecialchars($order['mesa']) ?></span>
-            </div>
-        </div>
-        <div class="info-card">
-            <i class="ri-time-line"></i>
-            <div>
-                <label>Fecha</label>
-                <span><?= htmlspecialchars($order['created_at']) ?></span>
-            </div>
-        </div>
+
+    <h2>Pedido #<?= htmlspecialchars($order['id']) ?></h2>
+
+    <p><strong>Restaurante:</strong> <?= htmlspecialchars($order['restaurant_name']) ?></p>
+    <p><strong>Área:</strong> <?= htmlspecialchars($order['area']) ?></p>
+    <p><strong>Mesa:</strong> <?= htmlspecialchars($order['mesa']) ?></p>
+    <p><strong>Fecha:</strong> <?= htmlspecialchars($order['created_at']) ?></p>
+
+    <div class="estado-row">
+        <?= $paid ? "<span class='badge-paid'>Pagado</span>" : "<span class='badge-unpaid'>Pendiente</span>" ?>
     </div>
 
-    <!-- Estado y Pago -->
-    <div class="status-section">
-        <div class="payment-status">
-            <i class="ri-bank-card-line"></i>
-            <?= $paid ? 
-                "<span class='badge-paid'><i class='ri-checkbox-circle-line'></i> Pagado</span>" : 
-                "<span class='badge-unpaid'><i class='ri-time-line'></i> Pendiente</span>" 
-            ?>
-        </div>
+    <h3>Items del Pedido</h3>
 
-    <div class="productos-section">
-        <h3>Items del Pedido</h3>
-        
-        <?php if(empty($items)): ?>
-            <p class="no-items">No hay items registrados para este pedido.</p>
-        <?php else: ?>
-            <div class="productos-lista">
-                <?php foreach($items as $i): ?>
-                    <div class="producto-item">
-                        <div class="producto-info">
-                            <span class="producto-cantidad"><?= htmlspecialchars($i['cantidad']) ?></span>
-                            <span class="producto-nombre"><?= htmlspecialchars($i['nombre_platillo']) ?></span>
-                        </div>
-                        <div class="producto-precio">
-                            $<?= number_format((float)$i['cantidad'] * (float)$i['precio'],0,',','.') ?>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-            
-            <div class="total-section">
-                <span class="total-label">Total Final</span>
-                <span class="total-amount">$<?= number_format($order['total_pedido'],0,',','.') ?></span>
-            </div>
-        <?php endif; ?>
+    <?php if(empty($items)): ?>
+      <p>No hay items registrados para este pedido.</p>
+    <?php else: ?>
+    <table class="table-items">
+        <thead>
+            <tr>
+                <th>Platillo</th>
+                <th>Precio</th>
+                <th>Cant</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach($items as $i): ?>
+            <tr>
+                <td><?= htmlspecialchars($i['nombre_platillo']) ?></td>
+                <td>$<?= number_format($i['precio'],0,',','.') ?></td>
+                <td><?= htmlspecialchars($i['cantidad']) ?></td>
+                <td>$<?= number_format((float)$i['cantidad'] * (float)$i['precio'],0,',','.') ?></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+    <?php endif; ?>
+
+    <h3>Total Final: $<?= number_format($order['total_pedido'],0,',','.') ?></h3>
 
    <?php
 // ---- CONTROL DE ESTADO DEL PEDIDO ----
@@ -142,47 +108,33 @@ $siguienteEstado = $flow[$estadoActual] ?? null;
 
 ?>
 
-    <!-- Barra de Progreso del Estado -->
-    <div class="order-progress">
-        <h3>Estado del Pedido</h3>
-        <div class="progress-bar">
-            <?php
-            $estados = ['Pending', 'Accepted', 'In_progress', 'Ready', 'Delivered'];
-            $currentIdx = array_search($estadoActual, $estados);
-            foreach ($estados as $idx => $estado):
-                $isActive = $idx <= $currentIdx;
-                $icon = match($estado) {
-                    'Pending' => 'ri-timer-line',
-                    'Accepted' => 'ri-check-line',
-                    'In_progress' => 'ri-loader-4-line',
-                    'Ready' => 'ri-restaurant-2-line',
-                    'Delivered' => 'ri-flag-line',
-                    default => 'ri-circle-line'
-                };
-            ?>
-            <div class="progress-step <?= $isActive ? 'active' : '' ?>">
-                <div class="step-icon">
-                    <i class="<?= $icon ?>"></i>
-                </div>
-                <span class="step-label"><?= str_replace('_', ' ', $estado) ?></span>
-            </div>
-            <?php if ($idx < count($estados) - 1): ?>
-                <div class="progress-line <?= $idx < $currentIdx ? 'active' : '' ?>"></div>
-            <?php endif; ?>
-            <?php endforeach; ?>
-        </div>
+<div class="estado-box" style="margin-top:25px;padding:18px;border-radius:10px;border:1px solid #cfcfcf;">
+    <h3>Estado Actual: 
+        <span class="estado-tag" style="padding:4px 10px;border-radius:6px;background:#f3f3f3;font-weight:bold;">
+            <?= ucfirst(str_replace("_"," ",$estadoActual)) ?>
+        </span>
+    </h3>
 
-        <?php if($siguienteEstado): ?>
-        <form action="../php/cambiar_estado.php" method="POST" class="estado-form">
+    <?php if($siguienteEstado): ?>
+        
+        <form action="../php/cambiar_estado.php" method="POST" style="margin-top:12px;">
             <input type="hidden" name="pedido_id" value="<?= $order['id'] ?>">
             <input type="hidden" name="nuevo_estado" value="<?= $siguienteEstado ?>">
-            <button type="submit" class="btn-next-state">
-                <i class="ri-arrow-right-line"></i>
-                Avanzar a <?= ucfirst(str_replace("_"," ",$siguienteEstado)) ?>
+
+            <button type="submit" class="btn btn-primary" style="padding:10px 20px;border-radius:8px;font-size:16px;font-weight:bold;">
+                Cambiar a <?= ucfirst(str_replace("_"," ",$siguienteEstado)) ?>
             </button>
         </form>
-        <?php endif; ?>
-    </div>
+
+    <?php else: ?>
+
+        <div style="margin-top:12px;font-weight:bold;font-size:18px;color:green;">
+            ✅ Pedido finalizado (Delivered)
+        </div>
+
+    <?php endif; ?>
+
+</div>
 
 
 

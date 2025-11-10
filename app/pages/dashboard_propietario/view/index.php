@@ -42,6 +42,24 @@ if ($id_usuario) {
     }
 }
 
+$totalOrdenes = 0;
+
+if ($id_usuario) {
+    try {
+        // total ordenes reales del propietario
+        $stmtPedidos = $conexion->prepare("
+            SELECT COUNT(*) AS total 
+            FROM orders 
+            WHERE id_user = ?
+        ");
+        $stmtPedidos->execute([$id_usuario]);
+        $totalOrdenes = $stmtPedidos->fetch(PDO::FETCH_ASSOC)['total'];
+    } catch (Exception $e) {
+        $error = $e->getMessage();
+    }
+}
+
+
 ?>
 
 
@@ -113,7 +131,7 @@ if ($id_usuario) {
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
         <div class="bg-emerald-100 p-6 rounded-xl text-center">
           <h3 class="text-emerald-800 text-lg font-semibold">Pedidos del Día</h3>
-          <p class="text-3xl font-bold text-emerald-700 mt-2">45</p>
+          <p class="text-3xl font-bold text-emerald-700 mt-2"><?= $totalOrdenes ?></p>
         </div>
         <div class="bg-sky-100 p-6 rounded-xl text-center">
           <h3 class="text-sky-800 text-lg font-semibold">Ventas Totales</h3>
