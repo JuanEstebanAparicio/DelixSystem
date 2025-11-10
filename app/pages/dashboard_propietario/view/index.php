@@ -71,10 +71,8 @@ if ($id_usuario) {
 
 <body class="bg-gray-50 min-h-screen font-sans text-gray-800">
 
-<?php include __DIR__ . '/../../../components/header_propietario.php'; ?>
-<?php include __DIR__ . '/../../../components/control_center_propietario.php'; ?>
-
-
+  <!-- 🧭 Control Center -->
+   <?php include __DIR__ . '/../../../components/control_center_propietario.php'; ?>
 
 
   <!-- 🌟 Contenido Principal -->

@@ -171,12 +171,57 @@ body{
     margin:5px 0;
 }
 
+.badge-estado{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:6px;
+    font-size:12px;
+    font-weight:600;
+}
+
+.badge-pending{
+    background:#ffc10720;
+    border:1px solid #ffc107;
+    color:#856404;
+}
+
+.badge-preparing{
+    background:#17a2b820;
+    border:1px solid #17a2b8;
+    color:#0c5460;
+}
+
+.badge-ready{
+    background:#28a74520;
+    border:1px solid #28a745;
+    color:#155724;
+}
+
+.badge-delivered{
+    background:#343a4020;
+    border:1px solid #343a40;
+    color:#1b1e21;
+}
+
+.badge-paid{
+    background:#28a74520;
+    border:1px solid #28a745;
+    color:#155724;
+}
+
+.badge-unpaid{
+    background:#dc354520;
+    border:1px solid #dc3545;
+    color:#721c24;
+}
+
+
 /* colores reales de cocina */
-.badge-Pending{ background:#ff9800; }        /* naranja aviso */
-.badge-Accepted{ background:#2196F3; }       /* azul ok recibido */
-.badge-In_progress{ background:#9C27B0; }    /* morado en cocina */
-.badge-Ready{ background:#4CAF50; }          /* verde OK listo */
-.badge-Delivered{ background:#1E88E5; }      /* azul más fuerte (ya salió) */
+.badge-pending{ background:#ff9800; }
+.badge-accepted{ background:#2196F3; }
+.badge-in_progress{ background:#9C27B0; }
+.badge-ready{ background:#4CAF50; }
+.badge-delivered{ background:#1E88E5; }
 
 
 /* ANIM */

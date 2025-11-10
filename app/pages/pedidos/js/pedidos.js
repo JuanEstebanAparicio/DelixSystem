@@ -90,6 +90,14 @@
       // After replacing, reapply filter & nav events
       setActiveButton();
       filtrarPedidosEnDOM();
+      console.log("DEBUG REFRESH GRID: reaplicando eventos y reinit control center", new Date().toLocaleTimeString());
+if (typeof initControlCenterPropietario === "function") {
+    console.log("DEBUG REFRESH GRID: initControlCenterPropietario SI existe, ejecutando...");
+    initControlCenterPropietario();
+} else {
+    console.log("DEBUG REFRESH GRID: initControlCenterPropietario NO existe");
+}
+
     } catch (err) {
       // silent fail (network temporarily down)
       console.error('Error refrescando pedidos:', err);

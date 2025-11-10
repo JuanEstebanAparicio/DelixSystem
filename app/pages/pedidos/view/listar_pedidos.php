@@ -1,6 +1,12 @@
 <?php
 // DelixSystem/app/pages/pedidos/view/listar_pedidos.php
 session_start();
+require_once __DIR__ . '/../../../middleware/session_guard.php';
+protectPage('propietario');
+
+// ✅ Incluimos el Control Center
+ include __DIR__ . '/../../../components/header_propietario.php'; 
+  include __DIR__ . '/../../../components/control_center_propietario.php'; 
 require_once __DIR__ . '/../../../config/supabase.php';
 
 // (opcional) intentar usar modelo de Areas si existe
@@ -44,27 +50,29 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Si la petición es fetch=1 devolvemos sólo el grid (para polling AJAX)
 if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
+
     if (empty($orders)) {
         echo '<p class="no-orders">No hay pedidos todavía.</p>';
         exit;
     }
 
-    foreach ($orders as $o) {
-        $areaAttr = htmlspecialchars(strtolower($o['area'] ?? ''));
-        $paid = ((int)$o['pagado'] === 1);
-        $cardClass = $paid ? 'order-card' : 'order-card pending';
+foreach ($orders as $o) {
 
-        $created = htmlspecialchars($o['created_at'] ?? '');
-        $restaurant = htmlspecialchars($o['restaurant_name'] ?? '');
-        $mesa = htmlspecialchars($o['mesa'] ?? '');
-        $total = number_format($o['total_pedido'] ?? 0,0,',','.');
-        $metodo = htmlspecialchars($o['metodo_pago'] ?? '');
-        $id = htmlspecialchars($o['id']);
+    $areaAttr = htmlspecialchars(strtolower($o['area'] ?? ''));
+    $paid = ((int)$o['pagado'] === 1);
+    $cardClass = $paid ? 'order-card' : 'order-card pending';
 
-        $estadoRaw = strtolower(trim($o['estado'] ?? 'pending'));
-        $estadoCSS = str_replace([' ', '-'], '_', $estadoRaw);
-        $badgeEstado = '<span class="badge-estado badge-' . $estadoCSS . '">' . ucfirst($estadoRaw) . '</span>';
-        $badgePago = $paid ? '<span class="badge-paid">Pagado</span>' : '<span class="badge-unpaid">No Pagado</span>';
+    $created = htmlspecialchars($o['created_at'] ?? '');
+    $restaurant = htmlspecialchars($o['restaurant_name'] ?? '');
+    $mesa = htmlspecialchars($o['mesa'] ?? '');
+    $total = number_format($o['total_pedido'] ?? 0,0,',','.');
+    $metodo = htmlspecialchars($o['metodo_pago'] ?? '');
+    $id = htmlspecialchars($o['id']);
+
+    $estado = htmlspecialchars($o['estado'] ?? 'pending');
+    $badgeEstado = '<span class="badge-estado badge-' . $estado . '">' . ucfirst($estado) . '</span>';
+    $badgePago = $paid ? '<span class="badge-paid">Pagado</span>' : '<span class="badge-unpaid">No Pagado</span>';
+
 
         echo '<article class="' . $cardClass . '" data-area="' . $areaAttr . '">';
         echo '<div class="order-id">#' . $id . '</div>';
@@ -79,6 +87,7 @@ if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
     }
     exit;
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -87,8 +96,12 @@ if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Gestor de Pedidos</title>
 <link rel="stylesheet" href="../css/listar_pedidos.css">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/DelixSystem/app/shared/css/globals.css">
+  <link rel="stylesheet" href="/DelixSystem/app/shared/css/control_center.css">
 </head>
-<body>
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800 pt-28 px-6">
 
 <div class="page-container">
 
@@ -145,7 +158,10 @@ if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
 
 </div>
 
+  <!-- JS Global -->
+ <script src="/DelixSystem/app/shared/js/control_center_propietario.js"></script>
 <!-- JS -->
 <script src="../js/pedidos.js" defer></script>
+
 </body>
 </html>
