@@ -67,7 +67,7 @@ body{
 /* ===== CARDS ===== */
 .order-card{
   background:white;
-  border-radius:14px;
+  border-radius:22px;   /* antes era 14px */
   padding:18px 20px;
   box-shadow:0 3px 12px rgba(0,0,0,0.06);
   border:2px solid #e7e7e7;
@@ -76,8 +76,9 @@ body{
 
 .order-card:hover{
   transform:translateY(-4px);
-  box-shadow:0 5px 14px rgba(0,0,0,0.09);
+  box-shadow:0 8px 18px rgba(0,0,0,0.12); /* un poquito mas */
 }
+
 
 /* cuando NO está pagado borde naranja suave */
 .order-card.pending{
@@ -94,11 +95,12 @@ body{
   position:absolute;
   left:0;
   top:0;
-  width:6px;
+  width:8px;  /* 6 → 8 se siente más premium */
   height:100%;
   background:#ff9800;
-  border-radius:3px 0 0 3px;
+  border-radius:22px 0 0 22px; /* antes 3px */
 }
+
 
 /* ===== TEXTO ===== */
 .order-id{
@@ -169,50 +171,6 @@ body{
     color:white;
     display:inline-block;
     margin:5px 0;
-}
-
-.badge-estado{
-    display:inline-block;
-    padding:4px 8px;
-    border-radius:6px;
-    font-size:12px;
-    font-weight:600;
-}
-
-.badge-pending{
-    background:#ffc10720;
-    border:1px solid #ffc107;
-    color:#856404;
-}
-
-.badge-preparing{
-    background:#17a2b820;
-    border:1px solid #17a2b8;
-    color:#0c5460;
-}
-
-.badge-ready{
-    background:#28a74520;
-    border:1px solid #28a745;
-    color:#155724;
-}
-
-.badge-delivered{
-    background:#343a4020;
-    border:1px solid #343a40;
-    color:#1b1e21;
-}
-
-.badge-paid{
-    background:#28a74520;
-    border:1px solid #28a745;
-    color:#155724;
-}
-
-.badge-unpaid{
-    background:#dc354520;
-    border:1px solid #dc3545;
-    color:#721c24;
 }
 
 

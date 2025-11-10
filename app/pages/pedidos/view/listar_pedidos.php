@@ -73,8 +73,8 @@ foreach ($orders as $o) {
     $badgeEstado = '<span class="badge-estado badge-' . $estado . '">' . ucfirst($estado) . '</span>';
     $badgePago = $paid ? '<span class="badge-paid">Pagado</span>' : '<span class="badge-unpaid">No Pagado</span>';
 
-
-        echo '<article class="' . $cardClass . '" data-area="' . $areaAttr . '">';
+        // Use data-order-id and aria-label instead of adding element IDs (prevents duplicates)
+        echo '<article class="' . $cardClass . '" data-area="' . $areaAttr . '" data-order-id="' . $id . '" aria-label="Pedido #' . $id . '">';
         echo '<div class="order-id">#' . $id . '</div>';
         echo '<div class="restaurant">' . $restaurant . '</div>';
         echo '<div class="meta">Área: ' . htmlspecialchars($o['area'] ?? '') . ' | Mesa: ' . $mesa . '</div>';
@@ -133,11 +133,13 @@ foreach ($orders as $o) {
                 $estado = htmlspecialchars($o['estado'] ?? 'pending');
                 $badgeEstado = '<span class="badge-estado badge-' . $estado . '">' . ucfirst($estado) . '</span>';
                 $badgePago = $paid ? '<span class="badge-paid">Pagado</span>' : '<span class="badge-unpaid">No Pagado</span>';
+                $orderIdEsc = htmlspecialchars($o['id']);
             ?>
-            <article class="<?= $cardClass ?>" data-area="<?= $areaAttr ?>" role="listitem" aria-labelledby="order-<?= $o['id'] ?>">
-                <div class="order-id">#<?= htmlspecialchars($o['id']) ?></div>
+            <!-- Use data-order-id and aria-label instead of element IDs to avoid duplicates -->
+            <article class="<?= $cardClass ?>" data-area="<?= $areaAttr ?>" role="listitem" data-order-id="<?= $orderIdEsc ?>" aria-label="Pedido #<?= $orderIdEsc ?>">
+                <div class="order-id">#<?= $orderIdEsc ?></div>
 
-                <div id="order-<?= $o['id'] ?>" class="restaurant"><?= htmlspecialchars($o['restaurant_name']) ?></div>
+                <div class="restaurant"><?= htmlspecialchars($o['restaurant_name']) ?></div>
                 <div class="meta">Área: <?= htmlspecialchars($o['area']) ?> | Mesa: <?= htmlspecialchars($o['mesa']) ?></div>
 
                 <div class="total">Total: $<?= number_format($o['total_pedido'],0,',','.') ?></div>
@@ -157,7 +159,6 @@ foreach ($orders as $o) {
     </div>
 
 </div>
-
   <!-- JS Global -->
  <script src="/DelixSystem/app/shared/js/control_center_propietario.js"></script>
 <!-- JS -->
