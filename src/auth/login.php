@@ -7,7 +7,7 @@ $email = $_POST['email'] ?? '';
 $password = $_POST['password'] ?? '';
 
 // ✅ Filtro correcto por correo
-$user = supabase('usuarios', 'GET', null, '?email=eq.' . urlencode($email));
+$user = supabaseRest('usuarios', 'GET', null, '?email=eq.' . urlencode($email));
 
 if (!$user || empty($user['data'])) {
   echo json_encode(['status' => 'error', 'message' => 'Usuario no encontrado']);

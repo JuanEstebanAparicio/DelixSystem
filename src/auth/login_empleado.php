@@ -22,7 +22,7 @@ if (empty($restaurant_name) || empty($email) || empty($document)) {
 
 try {
   // 🔸 Buscar restaurante (propietario)
-  $rest = supabase('usuarios', 'GET', null, '?restaurant_name=eq.' . urlencode($restaurant_name));
+  $rest = supabaseRest('usuarios', 'GET', null, '?restaurant_name=eq.' . urlencode($restaurant_name));
 
   if (!$rest || empty($rest['data'])) {
     echo json_encode([
@@ -35,7 +35,7 @@ try {
   $user_id = $rest['data'][0]['id'];
 
   // 🔸 Buscar empleado en esa empresa
-  $emp = supabase(
+  $emp = supabaseRest(
     'employees',
     'GET',
     null,
@@ -63,7 +63,7 @@ try {
   ];
 
   // 🟢 Marcar como conectado
-  supabase('employees', 'PATCH', ['is_online' => true], '?id=eq.' . $empleado['id']);
+  supabaseRest('employees', 'PATCH', ['is_online' => true], '?id=eq.' . $empleado['id']);
 
   echo json_encode([
     'status' => 'success',
