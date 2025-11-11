@@ -120,11 +120,15 @@ window.mostrarCategoria = async function (categoria) {
 
     document.getElementById("sidebarMenu")?.classList.remove("active");
     document.getElementById("sidebarOverlay")?.classList.remove("active");
+    filtrarIngredientes();
+
   } catch (error) {
     grid.innerHTML = `<p class='error'>Error al filtrar: ${error.message}</p>`;
-    if (typeof Alerts !== "undefined" && Alerts.error) Alerts.error("Error al filtrar: " + error.message);
+    if (typeof Alerts !== "undefined" && Alerts.error) 
+      Alerts.error("Error al filtrar: " + error.message);
   }
 };
+
 
 window.reloadCategories = async function () {
   const categoryList = document.getElementById("categoryList");
@@ -381,13 +385,15 @@ async function deleteIngredient(id) {
 }
 const filterState = document.getElementById("filterState");
 const searchInput = document.getElementById("searchInput");
+const toggleFilters = document.getElementById("toggleFilters");
+const filtersContainer = document.querySelector(".filters");
 
 filterState.addEventListener("change", filtrarIngredientes);
 searchInput.addEventListener("input", filtrarIngredientes);
 
 function filtrarIngredientes() {
-  const stateValue = document.getElementById("filterState").value;
-  const searchValue = document.getElementById("searchInput").value.toLowerCase();
+  const stateValue = filterState.value;
+  const searchValue = searchInput.value.toLowerCase();
   
   const cards = document.querySelectorAll(".ingredient-card.card:not(.create-card)");
 
@@ -401,3 +407,10 @@ function filtrarIngredientes() {
     card.style.display = matchesState && matchesSearch ? "block" : "none";
   });
 }
+
+toggleFilters.addEventListener("click", () => {
+  filtersContainer.classList.toggle("hidden-filters");
+  toggleFilters.textContent = filtersContainer.classList.contains("hidden-filters")
+    ? "Mostrar filtros"
+    : "Ocultar filtros";
+});

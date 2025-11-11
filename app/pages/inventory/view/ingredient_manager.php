@@ -62,21 +62,21 @@ try {
 </nav>
 
 <main class="main-content container">
-  <h2 class="page-title">Inventario de Ingredientes</h2>
-    <div class="filters" style="display: flex; gap: 15px; margin: 15px 0;">
-      
-      <!-- Filtro por estado -->
-      <select id="filterState" style="padding: 6px; border-radius: 6px;">
-        <option value="Todos">Todos</option>
-        <option value="Activo">Activos</option>
-        <option value="no_disponible">No disponibles</option>
-      </select>
+  <div class="header-section" style="display: flex; justify-content: space-between; align-items: center;">
+    <h2 class="page-title">Inventario de Ingredientes</h2>
+    <button id="toggleFilters">Mostrar filtros</button>
+  </div>
 
-      <!-- Buscador -->
-      <input type="text" id="searchInput" placeholder="Buscar por nombre..." 
-        style="padding: 6px; border-radius: 6px; flex: 1;">
+  <div class="filters hidden-filters">
+    <select id="filterState">
+      <option value="Todos">Todos</option>
+      <option value="Activo">Activos</option>
+      <option value="no_disponible">No disponibles</option>
+    </select>
 
-    </div>
+    <input type="text" id="searchInput" placeholder="Buscar por nombre...">
+  </div>
+
   <div class="card-container" id="ingredientGrid" data-user="<?= $id_usuario ?>">
     <?php foreach ($categorias as $categoria => $items): ?>
       <?php foreach ($items as $ing): ?>
