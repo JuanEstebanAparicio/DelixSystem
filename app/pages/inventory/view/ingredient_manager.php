@@ -32,12 +32,13 @@ try {
   <meta charset="UTF-8">
   <title>Gestor de Ingredientes</title>
   <link rel="stylesheet" href="../css/ingredient_manager.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 
 <body>
 <header class="navbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
-  <h1 class="navbar-title">Gestor de Ingredientes</h1>
+  <h1 class="navbar-title">🍽️ Gestor de Ingredientes</h1>
 
   <div class="button-group">
     <button class="create-btn" onclick="newIngredient()">+ Crear Ingrediente</button>
@@ -51,7 +52,7 @@ try {
   <button id="reloadBtn" class="reload-btn" onclick="reloadCategories()">🔄 Recargar</button>
 
   <ul class="sidebar-list" id="categoryList">
-    <li class="sidebar-item" onclick="mostrarCategoria('Todos')">Todos</li>
+    <li class="sidebar-item active" onclick="mostrarCategoria('Todos')">Todos</li>
     <?php foreach ($categorias as $categoria => $items): ?>
       <li class="sidebar-item" onclick="mostrarCategoria('<?= htmlspecialchars($categoria) ?>')">
         <?= htmlspecialchars($categoria) ?>
@@ -61,22 +62,15 @@ try {
 </nav>
 
 <main class="main-content container">
-  <h2 class="page-title">Gestor de Ingredientes</h2>
+  <h2 class="page-title">Inventario de Ingredientes</h2>
 
   <div class="card-container" id="ingredientGrid" data-user="<?= $id_usuario ?>">
-
     <?php foreach ($categorias as $categoria => $items): ?>
       <?php foreach ($items as $ing): ?>
         <div class="ingredient-card card" data-category="<?= htmlspecialchars($categoria) ?>">
-          <?php if (!empty($ing['photo'])): ?>
-            <div class="card-image">
-              <img src="<?= htmlspecialchars($ing['photo']) ?>" alt="<?= htmlspecialchars($ing['name']) ?>">
-            </div>
-          <?php else: ?>
-            <div class="card-image">
-              <img src="../img/default.png" alt="Sin imagen">
-            </div>
-          <?php endif; ?>
+          <div class="card-image">
+            <img src="<?= htmlspecialchars($ing['photo'] ?: '../img/default.png') ?>" alt="<?= htmlspecialchars($ing['name']) ?>">
+          </div>
 
           <div class="card-body">
             <h4 class="ingredient-name"><?= htmlspecialchars($ing['name']) ?></h4>
@@ -160,7 +154,6 @@ try {
           <?php foreach ($listaCategorias as $cat): ?>
             <option value="<?= htmlspecialchars($cat) ?>"><?= htmlspecialchars($cat) ?></option>
           <?php endforeach; ?>
-
           <option value="__new__">+ Nueva categoría...</option>
         </select>
         <input type="text" id="newCategoryInput" name="new_category" placeholder="Nueva categoría" class="hidden-input">
@@ -200,7 +193,7 @@ try {
         <input type="date" name="fecha_ingreso" id="fecha_ingreso">
       </div>
 
-      <div class="form-group inline"
+      <div class="form-group inline">
         <label for="fecha_vencimiento">Fecha vencimiento:</label>
         <input type="date" name="fecha_vencimiento" id="fecha_vencimiento">
       </div>
