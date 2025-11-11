@@ -145,7 +145,7 @@ if ($id_usuario) {
            class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-lg font-medium transition-all">
           Gestor Menú
         </a>
-        <a href="/DelixSystem/app/pages/reports/view/index.php"
+        <a href="/DelixSystem/app/pages/gestor_reportes/view/index.php"
            class="bg-rose-500 hover:bg-rose-600 text-white px-5 py-2 rounded-lg font-medium transition-all">
           Reportes
         </a>
