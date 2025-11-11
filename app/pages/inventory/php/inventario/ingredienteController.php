@@ -7,6 +7,7 @@ header('Content-Type: application/json');
 
 require_once(__DIR__ . '/products_constructor.php');
 require_once(__DIR__ . '/storage_crud.php');
+require_once(__DIR__ . '/../../../../config/supabase_img.php'); // helper de Supabase
 
 try {
     if (empty($_SESSION['usuario']['id'])) {
@@ -15,9 +16,6 @@ try {
 
     $id_user = intval($_SESSION['usuario']['id']);
     $crud = new storage_crud();
-
-    $baseDir = dirname(__DIR__, 2);
-    $mediaRoot = $baseDir . '/media';
 
     $roundAction = $_POST['action'] ?? '';
     $actionMap = [
@@ -28,53 +26,13 @@ try {
         'delete' => 'delete'
     ];
     $method = $actionMap[$roundAction] ?? null;
+    if (!$method) throw new Exception("Acción no válida.");
 
-    if (!$method) {
-        throw new Exception("Acción no válida.");
-    }
+    $toDate = fn($d) => empty($d) ? null : (new DateTime($d))->format("Y-m-d H:i:s");
 
-    $toDate = function ($d) {
-        if (empty($d)) return null;
-        return (new DateTime($d))->format("Y-m-d H:i:s");
-    };
-
-    $clearDirectory = function ($dir) {
-        if (!is_dir($dir)) return;
-        $files = scandir($dir);
-        foreach ($files as $file) {
-            if ($file === '.' || $file === '..') continue;
-            $path = "$dir/$file";
-            if (is_dir($path)) {
-                $this->clearDirectory($path);
-                @rmdir($path);
-            } else {
-                @unlink($path);
-            }
-        }
-    };
-
-    $uploadPhoto = function ($file, $safeCategory, $safeProduct, $mediaRoot, $clearDirectory) {
-        if (empty($file['name']) || $file['error'] !== UPLOAD_ERR_OK) return null;
-
-        $categoryDir = "$mediaRoot/$safeCategory";
-        $productDir = "$categoryDir/$safeProduct";
-
-        if (!is_dir($productDir) && !mkdir($productDir, 0777, true)) {
-            throw new Exception("No se pudo crear el directorio del producto.");
-        }
-        $clearDirectory($productDir);
-
-        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $name = uniqid("photo_") . "." . strtolower($ext);
-        $target = "$productDir/$name";
-
-        if (!move_uploaded_file($file['tmp_name'], $target)) {
-            throw new Exception("Error al guardar la imagen.");
-        }
-
-        return "media/$safeCategory/$safeProduct/$name";
-    };
-
+    // ======================================================
+    // 🟩 CREAR PRODUCTO
+    // ======================================================
     if ($method === 'add') {
         $category = trim($_POST['category'] ?? '');
         $newCategory = trim($_POST['new_category'] ?? '');
@@ -83,14 +41,16 @@ try {
         }
 
         $name = trim($_POST['name'] ?? '');
-        if (!$name) {
-            throw new Exception("El nombre del ingrediente es obligatorio.");
+        if (!$name) throw new Exception("El nombre del ingrediente es obligatorio.");
+
+        // Subir imagen a Supabase si existe
+        $photo = null;
+        if (!empty($_FILES['photo']['name'])) {
+            $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', $category ?: 'sin_categoria');
+            $safeProduct = preg_replace('/[^a-zA-Z0-9_-]/', '_', $name);
+            $path = "inventario/$id_user/$safeCategory/$safeProduct"; // ruta dentro del bucket
+            $photo = supabaseUploadImage($_FILES['photo'], 'storage_img', $path);
         }
-
-        $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', $category ?: 'sin_categoria');
-        $safeProduct = preg_replace('/[^a-zA-Z0-9_-]/', '_', $name);
-
-        $photo = $uploadPhoto($_FILES['photo'] ?? [], $safeCategory, $safeProduct, $mediaRoot, $clearDirectory);
 
         $producto = new Product(
             $id_user,
@@ -115,6 +75,9 @@ try {
         exit;
     }
 
+    // ======================================================
+    // 🟨 EDITAR PRODUCTO
+    // ======================================================
     if ($method === 'edit') {
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) throw new Exception("ID inválido.");
@@ -133,11 +96,17 @@ try {
         $safeProduct = preg_replace('/[^a-zA-Z0-9_-]/', '_', $name);
 
         $photo = $current['photo'];
+
+        // Si sube nueva imagen, reemplazarla en Supabase
         if (!empty($_FILES['photo']['name'])) {
-            $newPhoto = $uploadPhoto($_FILES['photo'], $safeCategory, $safeProduct, $mediaRoot, $clearDirectory);
-            if ($newPhoto) {
-                $photo = $newPhoto;
+            $path = "inventario/$id_user/$safeCategory/$safeProduct";
+
+            // Eliminar imagen anterior si existía
+            if (!empty($photo)) {
+                supabaseDeleteImage('storage_img', str_replace(rtrim(SUPABASE_URL, '/') . "/storage/v1/object/public/storage_img/", '', $photo));
             }
+
+            $photo = supabaseUploadImage($_FILES['photo'], 'storage_img', $path);
         }
 
         $producto = new Product(
@@ -163,6 +132,9 @@ try {
         exit;
     }
 
+    // ======================================================
+    // 🟥 ELIMINAR PRODUCTO
+    // ======================================================
     if ($method === 'delete') {
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) throw new Exception("ID inválido.");
@@ -170,9 +142,9 @@ try {
         $producto = $crud->getProductById($id, $id_user);
         if (!$producto) throw new Exception("Ingrediente no encontrado.");
 
+        // Eliminar imagen del bucket si existía
         if (!empty($producto['photo'])) {
-            $file = $baseDir . '/' . $producto['photo'];
-            if (file_exists($file)) @unlink($file);
+            supabaseDeleteImage('storage_img', str_replace(rtrim(SUPABASE_URL, '/') . "/storage/v1/object/public/storage_img/", '', $producto['photo']));
         }
 
         $crud->deleteProduct($id, $id_user);

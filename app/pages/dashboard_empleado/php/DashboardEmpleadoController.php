@@ -10,7 +10,7 @@ class DashboardEmpleadoController
         }
 
         // 🔹 Consultar los datos básicos del empleado
-        $response = supabase(
+        $response = supabaseRest(
             'employees',
             'GET',
             null,
@@ -28,7 +28,7 @@ class DashboardEmpleadoController
         $empleado['restaurant_name'] = $_SESSION['empleado_auth']['restaurant_name'] ?? 'Restaurante no identificado';
 
         // 🔹 Obtener roles del empleado
-        $rolesResponse = supabase(
+        $rolesResponse = supabaseRest(
             'employee_roles',
             'GET',
             null,

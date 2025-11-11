@@ -12,7 +12,7 @@ try {
         $empleadoId = $_SESSION['empleado_auth']['id'];
 
         // 🔴 Actualizar estado en la base de datos
-        supabase('employees', 'PATCH', ['is_online' => false], '?id=eq.' . $empleadoId);
+        supabaseRest('employees', 'PATCH', ['is_online' => false], '?id=eq.' . $empleadoId);
     }
 
     // 🔹 Eliminar sesión del empleado

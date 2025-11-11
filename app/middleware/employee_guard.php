@@ -25,7 +25,7 @@ function protectEmpleado() {
 
     try {
         // 🧩 Verificamos que aún exista en BD
-        $result = supabase('employees', 'GET', null, '?id=eq.' . $empleadoId);
+        $result = supabaseRest('employees', 'GET', null, '?id=eq.' . $empleadoId);
 
         if (!$result || empty($result['data'])) {
             // 🔴 Empleado ya no existe → cerrar sesión inmediata

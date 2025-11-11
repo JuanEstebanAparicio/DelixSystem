@@ -1,41 +1,45 @@
-// ===============================
-// 🔹 VALIDAR FECHAS
-// ===============================
 function validarFechas() {
-  const ingreso = document.getElementById("fecha_ingreso").value;
-  const vencimiento = document.getElementById("fecha_vencimiento").value;
+  const ingresoEl = document.getElementById("fecha_ingreso");
+  const vencimientoEl = document.getElementById("fecha_vencimiento");
+  if (!ingresoEl || !vencimientoEl) return true;
+
+  const ingreso = ingresoEl.value;
+  const vencimiento = vencimientoEl.value;
 
   if (ingreso && vencimiento && new Date(vencimiento) < new Date(ingreso)) {
-    Alerts.warning("La fecha de vencimiento no puede ser anterior a la de ingreso.");
+    if (typeof Alerts !== "undefined" && Alerts.warning) {
+      Alerts.warning("La fecha de vencimiento no puede ser anterior a la de ingreso.");
+    } else {
+      alert("La fecha de vencimiento no puede ser anterior a la de ingreso.");
+    }
     return false;
   }
   return true;
 }
 
-// ===============================
-// 🔹 CARGAR INVENTARIO GLOBAL
-// ===============================
 async function loadStorage() {
   const grid = document.getElementById("ingredientGrid");
+  if (!grid) return;
   grid.innerHTML = "<p class='loading'>Cargando ingredientes...</p>";
 
   try {
     const response = await fetch("../php/utilidades/get_storage.php");
     const data = await response.json();
-
-    if (!data.success) throw new Error(data.error);
-    renderStorage(data.insumos);
+    if (!data.success) throw new Error(data.error || "Respuesta inválida del servidor.");
+    renderStorage(data.insumos || []);
   } catch (error) {
     grid.innerHTML = `<p class='error'>Error al cargar ingredientes: ${error.message}</p>`;
-    Alerts.error("Error al cargar ingredientes: " + error.message);
+    if (typeof Alerts !== "undefined" && Alerts.error) {
+      Alerts.error("Error al cargar ingredientes: " + error.message);
+    } else {
+      console.error(error);
+    }
   }
 }
 
-// ===============================
-// 🔹 RENDERIZAR TARJETAS
-// ===============================
 function renderStorage(ingredientes) {
   const grid = document.getElementById("ingredientGrid");
+  if (!grid) return;
   grid.innerHTML = "";
 
   const categorias = {};
@@ -48,37 +52,38 @@ function renderStorage(ingredientes) {
   for (const cat in categorias) {
     categorias[cat].forEach(ing => {
       const imgPath = ing.photo && ing.photo.trim() !== ""
-        ? (ing.photo.startsWith("media/") ? "../" + ing.photo : "../media/" + ing.photo)
+        ? ing.photo
         : "../img/default.png";
 
       const card = document.createElement("div");
       card.className = "ingredient-card card";
       card.dataset.category = cat;
 
+      const ingEscaped = JSON.stringify(ing).replace(/'/g, "\\'");
+
       card.innerHTML = `
         <div class="card-image">
-          <img src="${imgPath}" alt="${ing.name}">
+          <img src="${imgPath}" alt="${escapeHtml(ing.name || 'Ingrediente')}">
         </div>
         <div class="card-body">
-          <h4 class="ingredient-name">${ing.name}</h4>
+          <h4 class="ingredient-name">${escapeHtml(ing.name || '')}</h4>
           <p class="ingredient-cost">$${Number(ing.unit_cost || 0).toLocaleString()}</p>
-          <p class="ingredient-state ${ing.state?.toLowerCase() || "inactivo"}">${ing.state || "Inactivo"}</p>
-          <p><strong>Cantidad:</strong> ${ing.amount} ${ing.unit}</p>
-          <p><strong>Mínimo:</strong> ${ing.minimum_quantity}</p>
-          <p class="ingredient-desc">${ing.description || "Sin descripción"}</p>
-          <p><strong>Proveedor:</strong> ${ing.supplier || "No especificado"}</p>
-          <p><strong>Ubicación:</strong> ${ing.location || "Sin ubicación"}</p>
+          <p class="ingredient-state ${((ing.state||"inactivo").toLowerCase())}">${escapeHtml(ing.state || "Inactivo")}</p>
+          <p><strong>Cantidad:</strong> ${escapeHtml(String(ing.amount || 0))} ${escapeHtml(ing.unit || '')}</p>
+          <p><strong>Mínimo:</strong> ${escapeHtml(String(ing.minimum_quantity || '0'))}</p>
+          <p class="ingredient-desc">${escapeHtml(ing.description || "Sin descripción")}</p>
+          <p><strong>Proveedor:</strong> ${escapeHtml(ing.supplier || "No especificado")}</p>
+          <p><strong>Ubicación:</strong> ${escapeHtml(ing.location || "Sin ubicación")}</p>
         </div>
         <div class="card-footer">
-          <button class="btn btn-edit" onclick='editIngredient(${JSON.stringify(ing)})'>✏️</button>
-          <button class="btn btn-delete" onclick="deleteIngredient(${ing.id})">🗑️</button>
+          <button class="btn btn-edit" onclick='editIngredient(${ingEscaped})'>✏️</button>
+          <button class="btn btn-delete" onclick="deleteIngredient(${Number(ing.id)})">🗑️</button>
         </div>
       `;
       grid.appendChild(card);
     });
   }
 
-  // 🌟 Tarjeta de creación
   const createCard = document.createElement("div");
   createCard.className = "ingredient-card card create-card";
   createCard.id = "globalCreateCard";
@@ -92,58 +97,46 @@ function renderStorage(ingredientes) {
   grid.appendChild(createCard);
 }
 
-// ===============================
-// 🔹 FILTRAR POR CATEGORÍA
-// ===============================
 window.mostrarCategoria = async function (categoria) {
   const grid = document.getElementById("ingredientGrid");
+  if (!grid) return;
   grid.innerHTML = "<p class='loading'>Filtrando ingredientes...</p>";
 
   try {
     const response = await fetch("../php/utilidades/get_storage.php");
     const data = await response.json();
+    if (!data.success) throw new Error(data.error || "Respuesta inválida del servidor.");
+    let ingredientes = data.insumos || [];
 
-    if (!data.success) throw new Error(data.error);
-    let ingredientes = data.insumos;
-
-    // 🔹 Si no es "Todos", filtrar
     if (categoria !== "Todos") {
       ingredientes = ingredientes.filter(ing => (ing.category || "Sin categoría") === categoria);
     }
 
-    // 🔹 Renderizar filtrados
     renderStorage(ingredientes);
 
-    // 🔹 Marcar activo
     document.querySelectorAll(".sidebar-item").forEach(item => {
       item.classList.toggle("active", item.textContent.trim() === categoria);
     });
 
-    // 🔹 Cerrar sidebar
-    document.getElementById("sidebarMenu").classList.remove("active");
+    document.getElementById("sidebarMenu")?.classList.remove("active");
     document.getElementById("sidebarOverlay")?.classList.remove("active");
-
   } catch (error) {
     grid.innerHTML = `<p class='error'>Error al filtrar: ${error.message}</p>`;
-    Alerts.error("Error al filtrar: " + error.message);
+    if (typeof Alerts !== "undefined" && Alerts.error) Alerts.error("Error al filtrar: " + error.message);
   }
 };
 
-// ===============================
-// 🔹 RECARGAR CATEGORÍAS
-// ===============================
 window.reloadCategories = async function () {
   const categoryList = document.getElementById("categoryList");
+  if (!categoryList) return;
 
   try {
     const res = await fetch("../php/utilidades/get_storage.php");
     const data = await res.json();
-
-    if (!data.success) throw new Error(data.error);
-
+    if (!data.success) throw new Error(data.error || "Respuesta inválida");
+    const categorias = data.categorias || [];
     categoryList.innerHTML = `<li class="sidebar-item active" onclick="mostrarCategoria('Todos')">Todos</li>`;
-
-    data.categorias.forEach(cat => {
+    categorias.forEach(cat => {
       const li = document.createElement("li");
       li.classList.add("sidebar-item");
       li.textContent = cat;
@@ -151,13 +144,11 @@ window.reloadCategories = async function () {
       categoryList.appendChild(li);
     });
   } catch (error) {
-    Alerts.error("Error al recargar categorías: " + error.message);
+    if (typeof Alerts !== "undefined" && Alerts.error) Alerts.error("Error al recargar categorías: " + error.message);
+    console.error(error);
   }
 };
 
-// ===============================
-// 🔹 SIDEBAR TOGGLE
-// ===============================
 function toggleSidebar() {
   const sidebar = document.getElementById("sidebarMenu");
   let overlay = document.getElementById("sidebarOverlay");
@@ -174,172 +165,217 @@ function toggleSidebar() {
   overlay.classList.toggle("active");
 }
 
-// ===============================
-// 🔹 INICIALIZAR TODO
-// ===============================
 document.addEventListener("DOMContentLoaded", () => {
+  const fechaIngreso = document.getElementById("fecha_ingreso");
+  const hoy = new Date().toISOString().split("T")[0];
+  if (fechaIngreso) {
+    if (!fechaIngreso.value) fechaIngreso.value = hoy;
+    fechaIngreso.readOnly = true;
+  }
+
   loadStorage();
   reloadCategories();
+
+  const form = document.getElementById("ingredientForm");
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!validarFechas()) return;
+
+      const formData = new FormData(form);
+      try {
+        const resp = await fetch("../php/inventario/ingredienteController.php", {
+          method: "POST",
+          body: formData
+        });
+        const data = await resp.json();
+        if (data.success) {
+          if (typeof Alerts !== "undefined" && Alerts.success) Alerts.success(data.message || "Ingrediente guardado correctamente.");
+          hideModal("formModal");
+          loadStorage();
+          reloadCategories();
+        } else {
+          if (typeof Alerts !== "undefined" && Alerts.warning) Alerts.warning(data.error || "No se pudo guardar el ingrediente.");
+        }
+      } catch (err) {
+        if (typeof Alerts !== "undefined" && Alerts.error) Alerts.error("Error al guardar ingrediente: " + err.message);
+        console.error(err);
+      }
+    });
+  }
+
+  const photoInput = document.getElementById("photo");
+  if (photoInput) {
+    photoInput.addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (ev) {
+          const preview = document.getElementById("currentPhoto");
+          const container = document.getElementById("currentPhotoContainer");
+          if (preview) preview.src = ev.target.result;
+          if (container) container.classList.remove("hidden-img");
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  const categorySelect = document.getElementById("category");
+  const newCategoryInput = document.getElementById("newCategoryInput");
+  if (categorySelect && newCategoryInput) {
+    categorySelect.addEventListener("change", () => {
+      if (categorySelect.value === "__new__") {
+        newCategoryInput.classList.remove("hidden-input");
+        newCategoryInput.required = true;
+      } else {
+        newCategoryInput.classList.add("hidden-input");
+        newCategoryInput.required = false;
+        newCategoryInput.value = "";
+      }
+    });
+  }
 });
-// ===============================
-// 🔹 MODAL CONTROL Y CRUD
-// ===============================
 
-// Mostrar modal
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function showModal(id) {
-  document.getElementById(id).classList.remove("hidden");
-  document.body.style.overflow = "hidden"; // Evita scroll al abrir
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
 }
 
-// Ocultar modal
 function hideModal(id) {
-  document.getElementById(id).classList.add("hidden");
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add("hidden");
   document.body.style.overflow = "";
-  document.getElementById("ingredientForm").reset();
-  document.getElementById("currentPhotoContainer").classList.add("hidden-img");
+  const form = document.getElementById("ingredientForm");
+  if (form) form.reset();
+  const currentPhotoContainer = document.getElementById("currentPhotoContainer");
+  if (currentPhotoContainer) currentPhotoContainer.classList.add("hidden-img");
+  const fechaIngreso = document.getElementById("fecha_ingreso");
+  if (fechaIngreso) {
+    fechaIngreso.value = new Date().toISOString().split("T")[0];
+    fechaIngreso.readOnly = true;
+  }
 }
 
-// Crear nuevo ingrediente
 function newIngredient() {
   const form = document.getElementById("ingredientForm");
+  if (!form) return;
   document.getElementById("modalTitle").textContent = "Registrar Ingrediente";
-  document.getElementById("action").value = "create";
+  const actionEl = document.getElementById("action");
+  if (actionEl) actionEl.value = "create";
   form.reset();
-  document.getElementById("currentPhotoContainer").classList.add("hidden-img");
+  const fechaIngreso = document.getElementById("fecha_ingreso");
+  if (fechaIngreso) {
+    fechaIngreso.value = new Date().toISOString().split("T")[0];
+    fechaIngreso.readOnly = true;
+  }
+  const currentPhotoContainer = document.getElementById("currentPhotoContainer");
+  if (currentPhotoContainer) currentPhotoContainer.classList.add("hidden-img");
   showModal("formModal");
 }
 
-// Editar ingrediente existente
 function editIngredient(ing) {
   const form = document.getElementById("ingredientForm");
+  if (!form) return;
+
   document.getElementById("modalTitle").textContent = "Editar Ingrediente";
-  document.getElementById("action").value = "update";
+  const actionEl = document.getElementById("action");
+  if (actionEl) actionEl.value = "update";
 
-  // Llenar campos
-  form.ingredient_id.value = ing.id;
-  form.name.value = ing.name || "";
-  form.amount.value = ing.amount || "";
-  form.minimum_quantity.value = ing.minimum_quantity || "";
-  form.unit.value = ing.unit || "Unidad";
-  form.unit_cost.value = ing.unit_cost || "";
-  form.category.value = ing.category || "";
-  form.batch.value = ing.batch || "";
-  form.description.value = ing.description || "";
-  form.location.value = ing.location || "";
-  form.state.value = ing.state || "Activo";
-  form.supplier.value = ing.supplier || "";
-  form.fecha_ingreso.value = ing.fecha_ingreso || "";
-  form.fecha_vencimiento.value = ing.fecha_vencimiento || "";
+  form.ingredient_id.value = ing.id ?? "";
+  form.name.value = ing.name ?? "";
+  form.amount.value = ing.amount ?? "";
+  form.minimum_quantity.value = ing.minimum_quantity ?? "";
+  form.unit.value = ing.unit ?? "Unidad";
+  form.unit_cost.value = ing.unit_cost ?? "";
+  form.category.value = ing.category ?? "";
+  form.batch.value = ing.batch ?? "";
+  form.description.value = ing.description ?? "";
+  form.location.value = ing.location ?? "";
+  form.state.value = ing.state ?? "Activo";
+  form.supplier.value = ing.supplier ?? "";
 
-  // Mostrar foto actual si existe
+  const fechaIngreso = document.getElementById("fecha_ingreso");
+  if (fechaIngreso) {
+    if (ing.entrance_date) {
+      fechaIngreso.value = String(ing.entrance_date).split("T")[0];
+    } else if (ing.fecha_ingreso) {
+      fechaIngreso.value = String(ing.fecha_ingreso).split("T")[0];
+    } else {
+      fechaIngreso.value = new Date().toISOString().split("T")[0];
+    }
+    fechaIngreso.readOnly = true;
+  }
+
+  const fechaVenc = document.getElementById("fecha_vencimiento");
+  if (fechaVenc) {
+    if (ing.expiration_date) {
+      fechaVenc.value = String(ing.expiration_date).split("T")[0];
+    } else if (ing.fecha_vencimiento) {
+      fechaVenc.value = String(ing.fecha_vencimiento).split("T")[0];
+    } else {
+      fechaVenc.value = "";
+    }
+  }
+
   const currentPhotoContainer = document.getElementById("currentPhotoContainer");
   const currentPhoto = document.getElementById("currentPhoto");
   if (ing.photo && ing.photo.trim() !== "") {
-    currentPhoto.src = ing.photo.startsWith("media/")
-      ? "../" + ing.photo
-      : "../media/" + ing.photo;
-    currentPhotoContainer.classList.remove("hidden-img");
+    if (currentPhoto) currentPhoto.src = ing.photo;
+    if (currentPhotoContainer) currentPhotoContainer.classList.remove("hidden-img");
   } else {
-    currentPhotoContainer.classList.add("hidden-img");
+    if (currentPhoto) currentPhoto.src = "../img/default.png";
+    if (currentPhotoContainer) currentPhotoContainer.classList.add("hidden-img");
   }
 
   showModal("formModal");
 }
 
-// Guardar (crear/editar)
-document.getElementById("ingredientForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  if (!validarFechas()) return;
-
-  const form = e.target;
-  const formData = new FormData(form);
-
-  try {
-    const response = await fetch("../php/inventario/ingredienteController.php", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await response.json();
-
-    if (data.success) {
-      Alerts.success(data.message || "Ingrediente guardado correctamente.");
-      hideModal("formModal");
-      loadStorage();
-      reloadCategories();
-    } else {
-      Alerts.warning(data.error || "No se pudo guardar el ingrediente.");
-    }
-  } catch (err) {
-    Alerts.error("Error al guardar ingrediente: " + err.message);
-  }
-});
-
-// Eliminar ingrediente
 async function deleteIngredient(id) {
-  const confirm = await Swal.fire({
-    title: "¿Eliminar ingrediente?",
-    text: "Esta acción no se puede deshacer.",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar",
-  });
-
-  if (!confirm.isConfirmed) return;
+  let confirmed = false;
+  if (typeof Swal !== "undefined") {
+    const result = await Swal.fire({
+      title: "¿Eliminar ingrediente?",
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    });
+    confirmed = result.isConfirmed;
+  } else {
+    confirmed = confirm("¿Eliminar ingrediente? Esta acción no se puede deshacer.");
+  }
+  if (!confirmed) return;
 
   try {
-    const response = await fetch("../php/inventario/ingredienteController.php", {
+    const resp = await fetch("../php/inventario/ingredienteController.php", {
       method: "POST",
-      body: new URLSearchParams({
-        id,
-        action: "delete",
-      }),
+      body: new URLSearchParams({ id: id, action: "delete" })
     });
-
-    const data = await response.json();
-
+    const data = await resp.json();
     if (data.success) {
-      Alerts.success("Ingrediente eliminado correctamente.");
+      if (typeof Alerts !== "undefined" && Alerts.success) Alerts.success(data.message || "Ingrediente eliminado correctamente.");
       loadStorage();
       reloadCategories();
     } else {
-      Alerts.warning(data.error || "No se pudo eliminar el ingrediente.");
+      if (typeof Alerts !== "undefined" && Alerts.warning) Alerts.warning(data.error || "No se pudo eliminar el ingrediente.");
     }
   } catch (err) {
-    Alerts.error("Error al eliminar ingrediente: " + err.message);
+    if (typeof Alerts !== "undefined" && Alerts.error) Alerts.error("Error al eliminar ingrediente: " + err.message);
+    console.error(err);
   }
 }
-
-// ===============================
-// 🔹 NUEVA CATEGORÍA
-// ===============================
-const categorySelect = document.getElementById("category");
-const newCategoryInput = document.getElementById("newCategoryInput");
-
-categorySelect.addEventListener("change", () => {
-  if (categorySelect.value === "__new__") {
-    newCategoryInput.classList.remove("hidden-input");
-    newCategoryInput.required = true;
-  } else {
-    newCategoryInput.classList.add("hidden-input");
-    newCategoryInput.required = false;
-    newCategoryInput.value = "";
-  }
-});
-
-// ===============================
-// 🔹 PREVISUALIZAR FOTO
-// ===============================
-document.getElementById("photo").addEventListener("change", function (e) {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function (ev) {
-      const preview = document.getElementById("currentPhoto");
-      const container = document.getElementById("currentPhotoContainer");
-      preview.src = ev.target.result;
-      container.classList.remove("hidden-img");
-    };
-    reader.readAsDataURL(file);
-  }
-});

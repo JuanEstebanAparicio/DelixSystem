@@ -1,0 +1,228 @@
+<?php
+require_once __DIR__ . '/../../../middleware/session_guard.php';
+protectPage('propietario');
+
+include __DIR__ . '/../../../components/header_propietario.php';
+include __DIR__ . '/../../../components/control_center_propietario.php';
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once __DIR__ . '/../../../config/supabase.php';
+require_once __DIR__ . '/../php/ReportController.php';
+
+$usuario = $_SESSION['usuario'] ?? [];
+$id_usuario = $usuario['id'] ?? null;
+
+$reportController = new ReportController($conexion);
+
+// Reportes generales (diario, semanal, mensual)
+$reportes = $reportController->obtenerReportes($id_usuario);
+
+// Filtros GET
+$inicio = $_GET['inicio'] ?? null;
+$fin = $_GET['fin'] ?? null;
+$area = $_GET['area'] ?? null;
+
+// Reporte por rango (si se aplicó filtro)
+$reporteRango = null;
+if ($inicio && $fin) {
+    $reporteRango = $reportController->obtenerReportePorRango($id_usuario, $inicio, $fin, $area);
+}
+
+?>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Delix | Reportes</title>
+    <link rel="stylesheet" href="../css/reportes.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/DelixSystem/app/shared/css/globals.css">
+    <link rel="stylesheet" href="/DelixSystem/app/shared/css/control_center_propietario.css">
+</head>
+
+<body class="bg-gray-100 min-h-screen flex">
+
+    <!-- Sidebar -->
+    <aside id="sidebar"
+        class="bg-white w-64 shadow-xl flex flex-col justify-between fixed left-0 top-[80px] bottom-0
+               rounded-tr-3xl rounded-br-3xl border-r border-gray-200 transform transition-transform duration-300
+               -translate-x-full lg:translate-x-0 z-50">
+        <div class="p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <i class="ri-bar-chart-2-line text-emerald-600"></i> Reportes
+            </h2>
+
+            <nav class="flex flex-col gap-3">
+                <button class="nav-item active" data-section="resumen">
+                    <i class="ri-dashboard-3-line"></i> Resumen general
+                </button>
+                <button class="nav-item" data-section="rango">
+                    <i class="ri-calendar-line"></i> Por rango de fechas
+                </button>
+                <button class="nav-item" data-section="detalle">
+                    <i class="ri-list-unordered"></i> Detalle diario
+                </button>
+                <button class="nav-item" data-section="exportar">
+                    <i class="ri-download-line"></i> Exportar datos
+                </button>
+            </nav>
+        </div>
+
+        <div class="p-6 border-t text-sm text-gray-500">
+            <p>Gestor Delix v1.0</p>
+        </div>
+    </aside>
+
+    <!-- Contenido -->
+    <main id="mainContent" class="flex-1 pt-28 px-8 lg:ml-64 transition-all duration-300">
+        <section class="reportes-container">
+            
+            <div class="reportes-filtros">
+                <h1 class="titulo-seccion">📊 Gestor de Reportes</h1>
+            </div>
+
+            <!-- SECCIONES -->
+            <section id="resumen" class="report-section active">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-6">
+                    <div class="report-card bg-daily">
+                        <h3>Hoy</h3>
+                        <p class="amount"><?= $reportes['daily']['total_orders'] ?> pedidos</p>
+                        <p>$<?= number_format($reportes['daily']['total_sales'], 0, ',', '.') ?></p>
+                    </div>
+
+                    <div class="report-card bg-weekly">
+                        <h3>Últimos 7 días</h3>
+                        <p class="amount"><?= $reportes['weekly']['total_orders'] ?> pedidos</p>
+                        <p>$<?= number_format($reportes['weekly']['total_sales'], 0, ',', '.') ?></p>
+                    </div>
+
+                    <div class="report-card bg-monthly">
+                        <h3>Este mes</h3>
+                        <p class="amount"><?= $reportes['monthly']['total_orders'] ?> pedidos</p>
+                        <p>$<?= number_format($reportes['monthly']['total_sales'], 0, ',', '.') ?></p>
+                    </div>
+                </div>
+            </section>
+
+          <section id="rango" class="report-section hidden">
+    <div class="bg-white p-6 rounded-2xl shadow-md mb-8">
+        <h2 class="text-2xl font-semibold mb-4 text-gray-700 flex items-center gap-2">
+            <i class="ri-filter-3-line text-emerald-600"></i> Filtrar por rango de fechas
+        </h2>
+
+        <form id="filtro-form" class="filtros-form grid grid-cols-1 sm:grid-cols-4 gap-6" method="GET">
+            <div class="filtro-item flex flex-col">
+                <label for="fecha_inicio" class="text-gray-600 font-medium">Desde:</label>
+                <input type="date" name="inicio" id="fecha_inicio" class="input-filtro" value="<?= htmlspecialchars($inicio ?? '') ?>">
+            </div>
+
+            <div class="filtro-item flex flex-col">
+                <label for="fecha_fin" class="text-gray-600 font-medium">Hasta:</label>
+                <input type="date" name="fin" id="fecha_fin" class="input-filtro" value="<?= htmlspecialchars($fin ?? '') ?>">
+            </div>
+
+            <div class="filtro-item flex flex-col">
+                <label for="area" class="text-gray-600 font-medium">Área:</label>
+                <select id="area" name="area" class="input-filtro">
+                    <option value="">Todas</option>
+                    <?php
+                    $stmt = $conexion->query("SELECT DISTINCT area FROM orders ORDER BY area ASC");
+                    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                        $selected = (isset($_GET['area']) && $_GET['area'] === $row['area']) ? 'selected' : '';
+                        echo "<option value='{$row['area']}' $selected>{$row['area']}</option>";
+                    }
+                    ?>
+                </select>
+            </div>
+
+            <div class="flex items-end">
+                <button type="submit" class="btn-filtrar">Aplicar</button>
+            </div>
+        </form>
+    </div>
+
+    <?php if ($inicio && $fin): ?>
+        <div class="bg-white p-8 rounded-2xl shadow-lg fade-in">
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">
+                Resultados del <?= htmlspecialchars($inicio) ?> al <?= htmlspecialchars($fin) ?>
+            </h3>
+            <?php if (!empty($_GET['area'])): ?>
+                <p class="text-gray-500 mb-4">Área: <strong><?= htmlspecialchars($_GET['area']) ?></strong></p>
+            <?php endif; ?>
+
+            <?php if (!empty($reporteRango)): ?>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="report-card bg-range">
+                        <h3>Total pedidos</h3>
+                        <p class="amount"><?= $reporteRango['total_orders'] ?? 0 ?></p>
+                    </div>
+                    <div class="report-card bg-daily">
+                        <h3>Ventas totales</h3>
+                        <p>$<?= number_format($reporteRango['total_sales'] ?? 0, 0, ',', '.') ?></p>
+                    </div>
+                </div>
+            <?php else: ?>
+                <p class="text-gray-500 mt-4">No se encontraron resultados en este rango.</p>
+            <?php endif; ?>
+        </div>
+    <?php else: ?>
+        <p class="text-gray-500 mt-8">Selecciona un rango de fechas para generar el reporte.</p>
+    <?php endif; ?>
+</section>
+
+
+
+            <section id="detalle" class="report-section hidden">
+                <?php
+                $detalle = $reportController->obtenerDetalleDiario($id_usuario, $inicio, $fin);
+                if (!empty($detalle)):
+                ?>
+                    <div class="overflow-x-auto">
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Pedidos</th>
+                                    <th>Total Ventas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($detalle as $fila): ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($fila['fecha']) ?></td>
+                                    <td><?= $fila['total_orders'] ?></td>
+                                    <td>$<?= number_format($fila['total_sales'], 0, ',', '.') ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <p class="no-resultados">Aún no hay detalle disponible.</p>
+                <?php endif; ?>
+            </section>
+        </section>
+    </main>
+
+    <!-- Modal exportar -->
+    <div id="exportModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-xl shadow-lg w-96 text-center">
+            <h3 class="text-xl font-semibold mb-4">Exportar Reportes</h3>
+            <p class="text-gray-600 mb-6">Selecciona el formato para descargar tus reportes.</p>
+            <div class="flex justify-center gap-4">
+                <button class="btn-secondary">PDF</button>
+                <button class="btn-secondary">Excel</button>
+            </div>
+            <button onclick="closeModal('exportModal')" class="mt-6 text-sm text-gray-500 hover:text-gray-700">Cerrar</button>
+        </div>
+    </div>
+
+    <script src="../js/reportes.js"></script>
+    <script src="/DelixSystem/app/shared/js/control_center_propietario.js"></script>
+</body>
+</html>
