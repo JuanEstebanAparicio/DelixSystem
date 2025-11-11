@@ -70,7 +70,7 @@ try {
         <div class="ingredient-card card" data-category="<?= htmlspecialchars($categoria) ?>">
           <?php if (!empty($ing['photo'])): ?>
             <div class="card-image">
-              <img src="../<?= htmlspecialchars($ing['photo']) ?>" alt="<?= htmlspecialchars($ing['name']) ?>">
+              <img src="<?= htmlspecialchars($ing['photo']) ?>" alt="<?= htmlspecialchars($ing['name']) ?>">
             </div>
           <?php else: ?>
             <div class="card-image">
@@ -186,6 +186,7 @@ try {
         <select name="state" id="state">
           <option value="Activo">Activo</option>
           <option value="Agotado">Agotado</option>
+          <option value="no disponible">no disponible</option>
         </select>
       </div>
 
@@ -199,7 +200,7 @@ try {
         <input type="date" name="fecha_ingreso" id="fecha_ingreso">
       </div>
 
-      <div class="form-group inline">
+      <div class="form-group inline"
         <label for="fecha_vencimiento">Fecha vencimiento:</label>
         <input type="date" name="fecha_vencimiento" id="fecha_vencimiento">
       </div>
