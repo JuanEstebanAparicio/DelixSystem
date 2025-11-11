@@ -379,3 +379,25 @@ async function deleteIngredient(id) {
     console.error(err);
   }
 }
+const filterState = document.getElementById("filterState");
+const searchInput = document.getElementById("searchInput");
+
+filterState.addEventListener("change", filtrarIngredientes);
+searchInput.addEventListener("input", filtrarIngredientes);
+
+function filtrarIngredientes() {
+  const stateValue = document.getElementById("filterState").value;
+  const searchValue = document.getElementById("searchInput").value.toLowerCase();
+  
+  const cards = document.querySelectorAll(".ingredient-card.card:not(.create-card)");
+
+  cards.forEach(card => {
+    const state = card.querySelector(".ingredient-state")?.textContent.trim() || "";
+    const name = card.querySelector(".ingredient-name")?.textContent.toLowerCase() || "";
+
+    const matchesState = stateValue === "Todos" || state.toLowerCase() === stateValue.toLowerCase();
+    const matchesSearch = name.includes(searchValue);
+
+    card.style.display = matchesState && matchesSearch ? "block" : "none";
+  });
+}

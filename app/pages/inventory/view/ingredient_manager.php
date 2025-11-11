@@ -63,7 +63,20 @@ try {
 
 <main class="main-content container">
   <h2 class="page-title">Inventario de Ingredientes</h2>
+    <div class="filters" style="display: flex; gap: 15px; margin: 15px 0;">
+      
+      <!-- Filtro por estado -->
+      <select id="filterState" style="padding: 6px; border-radius: 6px;">
+        <option value="Todos">Todos</option>
+        <option value="Activo">Activos</option>
+        <option value="no_disponible">No disponibles</option>
+      </select>
 
+      <!-- Buscador -->
+      <input type="text" id="searchInput" placeholder="Buscar por nombre..." 
+        style="padding: 6px; border-radius: 6px; flex: 1;">
+
+    </div>
   <div class="card-container" id="ingredientGrid" data-user="<?= $id_usuario ?>">
     <?php foreach ($categorias as $categoria => $items): ?>
       <?php foreach ($items as $ing): ?>
@@ -178,8 +191,7 @@ try {
         <label for="state">Estado:</label>
         <select name="state" id="state">
           <option value="Activo">Activo</option>
-          <option value="Agotado">Agotado</option>
-          <option value="no disponible">no disponible</option>
+          <option value="no_disponible">no disponible</option>
         </select>
       </div>
 
