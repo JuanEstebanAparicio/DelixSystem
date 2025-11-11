@@ -10,7 +10,7 @@
 
 body {
   font-family: 'Poppins', 'Inter', sans-serif;
-  background: linear-gradient(135deg, #fff7ed, #fde68a);
+  background: linear-gradient(135deg, #fff7ed, #e4d7a4);
   color: #2f2f2f;
   min-height: 100vh;
   margin-top: 70px;
@@ -423,4 +423,10 @@ body {
   .ingredient-card {
     width: 100%;
   }
+}
+.preview-img {
+max-width: 120px;
+max-height: 120px;
+border-radius: 8px;
+border: 1px solid #ccc;
 }
