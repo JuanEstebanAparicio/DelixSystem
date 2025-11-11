@@ -1,6 +1,3 @@
-// ===============================
-// 🔹 MOSTRAR / OCULTAR MODALES
-// ===============================
 function showModal(id) {
   document.getElementById(id).classList.remove("hidden");
 }
@@ -8,15 +5,11 @@ function hideModal(id) {
   document.getElementById(id).classList.add("hidden");
 }
 
-// ===============================
-// 🔹 CONFIGURACIÓN DE FORMULARIO
-// ===============================
 document.addEventListener("DOMContentLoaded", () => {
   const hoy = new Date().toISOString().split("T")[0];
   const fecha = document.getElementById("created_at");
   if (fecha) fecha.value = hoy;
 
-  // Inicializar Select2
   if (window.jQuery && $("#ingredients").length) {
     $("#ingredients").select2({
       placeholder: "Selecciona los ingredientes...",
@@ -47,25 +40,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Envío del formulario
   const form = document.getElementById("dishForm");
   if (form) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-
       Alerts.loading("Guardando plato...");
-
       const formData = new FormData(form);
-
       try {
         const res = await fetch("../php/platillos/dish_controller.php", {
           method: "POST",
           body: formData
         });
-
         const data = await res.json();
         Alerts.close();
-
         if (data.success) {
           hideModal("formModal");
           Alerts.success(data.message || "Plato guardado correctamente");
@@ -83,42 +70,29 @@ document.addEventListener("DOMContentLoaded", () => {
   loadDishes();
 });
 
-// ===============================
-// 🔹 NUEVO PLATO
-// ===============================
 function newDish() {
   const form = document.getElementById("dishForm");
   form.reset();
-
   document.getElementById("dish_id").value = "";
   document.getElementById("action").value = "add";
   document.getElementById("modalTitle").textContent = "Registrar Plato";
   document.getElementById("submitBtn").textContent = "Registrar Plato";
-
   const hoy = new Date().toISOString().split("T")[0];
   document.getElementById("created_at").value = hoy;
-
   $("#ingredients").val(null).trigger("change");
   $("#ingredientQuantities").empty();
-
   document.getElementById("currentPhotoContainer").classList.add("hidden");
   document.getElementById("current_photo_input").value = "";
-
   showModal("formModal");
 }
 
-// ===============================
-// 🔹 EDITAR PLATO
-// ===============================
 function editDish(data) {
   const form = document.getElementById("dishForm");
   form.reset();
-
   const idInput = document.getElementById("dish_id");
   idInput.name = "id";
   idInput.value = data.id;
   document.getElementById("action").value = "edit";
-
   document.getElementById("name_dish").value = data.name_dish || "";
   document.getElementById("price").value = data.price || "";
   document.getElementById("category").value = data.category || "";
@@ -129,16 +103,15 @@ function editDish(data) {
   const currentPhoto = document.getElementById("currentPhoto");
   const currentPhotoInput = document.getElementById("current_photo_input");
 
-  if (data.photo && data.photo.trim() !== "") {
-    currentPhoto.src = "../" + data.photo;
-    currentPhotoContainer.classList.remove("hidden");
-    currentPhotoInput.value = data.photo;
-  } else {
+  if (!data.photo || data.photo.trim() === "") {
     currentPhotoContainer.classList.add("hidden");
     currentPhotoInput.value = "";
+  } else {
+    currentPhoto.src = data.photo.startsWith("http") ? data.photo : "../" + data.photo;
+    currentPhotoContainer.classList.remove("hidden");
+    currentPhotoInput.value = data.photo;
   }
 
-  // Ingredientes
   if (Array.isArray(data.ingredients)) {
     const ingredientIds = data.ingredients.map(i => i.id);
     $("#ingredients").val(ingredientIds).trigger("change");
@@ -146,7 +119,6 @@ function editDish(data) {
     setTimeout(() => {
       const container = $("#ingredientQuantities");
       container.empty();
-
       data.ingredients.forEach(ing => {
         const inputId = "quantity_" + ing.id;
         const block = `
@@ -170,28 +142,20 @@ function editDish(data) {
   showModal("formModal");
 }
 
-// ===============================
-// 🔹 ELIMINAR PLATO
-// ===============================
 async function deleteDish(id) {
   const confirmed = await Alerts.confirm("¿Seguro que deseas eliminar este plato?", "Eliminar Plato");
   if (!confirmed) return;
-
   Alerts.loading("Eliminando plato...");
-
   const formData = new FormData();
   formData.append("action", "delete");
   formData.append("id", id);
-
   try {
     const res = await fetch("../php/platillos/dish_controller.php", {
       method: "POST",
       body: formData
     });
-
     const data = await res.json();
     Alerts.close();
-
     if (data.success) {
       Alerts.success("Plato eliminado exitosamente");
       loadDishes();
@@ -203,17 +167,12 @@ async function deleteDish(id) {
   }
 }
 
-// ===============================
-// 🔹 CARGAR Y RENDERIZAR PLATOS
-// ===============================
 async function loadDishes() {
   const grid = document.getElementById("dishGrid");
   grid.innerHTML = "<p class='loading'>Cargando platos...</p>";
-
   try {
     const response = await fetch("../php/utilidades/get_dish.php");
     const data = await response.json();
-
     if (!data.success) throw new Error(data.error);
     renderDishes(data.platos, data.ingredientes);
   } catch (error) {
@@ -221,7 +180,7 @@ async function loadDishes() {
   }
 }
 
-function renderDishes(platos, ingredientes) {
+function renderDishes(platos) {
   const grid = document.getElementById("dishGrid");
   grid.innerHTML = "";
 
@@ -234,9 +193,14 @@ function renderDishes(platos, ingredientes) {
 
   for (const cat in categorias) {
     categorias[cat].forEach(dish => {
-      const imgPath = dish.photo && dish.photo.trim() !== ""
-        ? (dish.photo.startsWith("media/") ? "../" + dish.photo : "../media/" + dish.photo)
-        : "../img/default.png";
+      let imgPath;
+      if (!dish.photo || dish.photo.trim() === "") {
+        imgPath = "../img/default.png";
+      } else if (dish.photo.startsWith("http")) {
+        imgPath = dish.photo;
+      } else {
+        imgPath = "../" + dish.photo;
+      }
 
       const card = document.createElement("div");
       card.className = "ingredient-card card";
@@ -261,7 +225,6 @@ function renderDishes(platos, ingredientes) {
     });
   }
 
-  // Botón para crear nuevo plato
   const createCard = document.createElement("div");
   createCard.className = "ingredient-card card create-card";
   createCard.id = "globalCreateCard";
@@ -275,74 +238,46 @@ function renderDishes(platos, ingredientes) {
   grid.appendChild(createCard);
 }
 
-// ===============================
-// 🔹 RENDER INGREDIENTES (CORREGIDO)
-// ===============================
 function renderIngredients(ingredients) {
   if (!ingredients || ingredients.length === 0) return "";
-  const listItems = ingredients.map(ing => `
-    <li>${ing.name} (${ing.quantity_used} ${ing.unit})</li>
-  `).join("");
-  return `
-    <p><strong>Ingredientes:</strong></p>
-    <ul>${listItems}</ul>
-  `;
+  const listItems = ingredients.map(ing => `<li>${ing.name} (${ing.quantity_used} ${ing.unit})</li>`).join("");
+  return `<p><strong>Ingredientes:</strong></p><ul>${listItems}</ul>`;
 }
 
-// ===============================
-// 🔹 FILTRAR PLATILLOS POR CATEGORÍA
-// ===============================
 window.mostrarCategoria = async function (categoria) {
   const grid = document.getElementById("dishGrid");
   grid.innerHTML = "<p class='loading'>Filtrando platillos...</p>";
-
   try {
     const response = await fetch("../php/utilidades/get_dish.php");
     const data = await response.json();
-
     if (!data.success) throw new Error(data.error);
-
     let platos = data.platos;
-
-    // 🔹 Si no es "Todos", filtrar
     if (categoria !== "Todos") {
       platos = platos.filter(p => (p.category || "Sin categoría") === categoria);
     }
-
-    // 🔹 Renderizar los platillos filtrados
-    renderDishes(platos, data.ingredientes);
-
-    // 🔹 Marcar la categoría activa en el sidebar
+    renderDishes(platos);
     document.querySelectorAll(".sidebar-item").forEach(item => {
       item.classList.toggle("active", item.textContent.trim() === categoria);
     });
-
     document.getElementById("sidebarMenu").classList.remove("active");
     document.getElementById("sidebarOverlay")?.classList.remove("active");
   } catch (error) {
     grid.innerHTML = `<p class='error'>Error al filtrar: ${error.message}</p>`;
-    Alerts.error("Error al filtrar los platillos: " + error.message);
   }
 };
 
-// ===============================
-// 🔹 RECARGAR CATEGORÍAS
-// ===============================
 async function reloadCategories() {
   try {
     const response = await fetch("../php/utilidades/get_dish.php");
     const data = await response.json();
     const categorias = [...new Set(data.platos.map(c => c.category || "Sin categoría"))];
-
     const list = document.getElementById("categoryList");
     list.innerHTML = "";
-
     const todosLi = document.createElement("li");
     todosLi.className = "sidebar-item active";
     todosLi.textContent = "Todos";
     todosLi.onclick = (e) => mostrarCategoria("Todos", e.target);
     list.appendChild(todosLi);
-
     categorias.forEach(cat => {
       const li = document.createElement("li");
       li.className = "sidebar-item";
@@ -350,20 +285,16 @@ async function reloadCategories() {
       li.onclick = (e) => mostrarCategoria(cat, e.target);
       list.appendChild(li);
     });
-  } catch (err) {
-    console.error("❌ Error al recargar categorías:", err);
-  }
+  } catch (err) {}
 }
 
-// ===============================
-// 🔹 TOGGLE SIDEBAR
-// ===============================
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebarMenu');
   const overlay = document.getElementById('sidebarOverlay');
   sidebar.classList.toggle('active');
   overlay.classList.toggle('active');
 }
+
 document.addEventListener('click', (e) => {
   const sidebar = document.getElementById('sidebarMenu');
   const overlay = document.getElementById('sidebarOverlay');
@@ -373,20 +304,18 @@ document.addEventListener('click', (e) => {
     overlay.classList.remove('active');
   }
 });
-  // ===============================
-  // 🔹 CAMPO DE NUEVA CATEGORÍA
-  // ===============================
-  const categorySelect = document.getElementById("category");
-  const newCategoryInput = document.getElementById("newCategoryInput");
 
-  if (categorySelect && newCategoryInput) {
-    categorySelect.addEventListener("change", () => {
-      if (categorySelect.value === "__new__") {
-        newCategoryInput.classList.remove("hidden-input");
-        newCategoryInput.focus();
-      } else {
-        newCategoryInput.classList.add("hidden-input");
-        newCategoryInput.value = "";
-      }
-    });
-  }
+const categorySelect = document.getElementById("category");
+const newCategoryInput = document.getElementById("newCategoryInput");
+
+if (categorySelect && newCategoryInput) {
+  categorySelect.addEventListener("change", () => {
+    if (categorySelect.value === "__new__") {
+      newCategoryInput.classList.remove("hidden-input");
+      newCategoryInput.focus();
+    } else {
+      newCategoryInput.classList.add("hidden-input");
+      newCategoryInput.value = "";
+    }
+  });
+}

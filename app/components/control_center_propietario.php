@@ -65,7 +65,7 @@ $nombreRestaurante = htmlspecialchars($propietario['restaurant_name']);
       <span class="text-base font-medium">Gestión de Empleados</span>
     </a>
 
-    <a href="/DelixSystem/app/pages/reports/view/index.php"
+    <a href="/DelixSystem/app/pages/gestor_reportes/view/index.php"
        class="flex items-center gap-3 text-gray-700 hover:text-emerald-600 transition">
       <i class="ri-bar-chart-box-line text-2xl"></i>
       <span class="text-base font-medium">Reportes y Ventas</span>
