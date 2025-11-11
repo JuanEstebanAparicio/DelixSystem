@@ -7,6 +7,7 @@ header('Content-Type: application/json');
 
 require_once(__DIR__ . '/dishes.php');
 require_once(__DIR__ . '/dishes_crud.php');
+require_once(__DIR__ . '/../../../../config/supabase_img.php'); // ✅ Importamos el helper
 
 try {
 
@@ -16,9 +17,6 @@ try {
 
     $id_user = intval($_SESSION['usuario']['id']);
     $crud = new dishes_crud();
-
-    $baseDir = dirname(__DIR__, 2);
-    $mediaRoot = $baseDir . '/media';
 
     $roundAction = $_POST['action'] ?? '';
     $actionMap = [
@@ -34,36 +32,22 @@ try {
         throw new Exception("Acción no válida.");
     }
 
-    $clearDirectory = function ($dir) {
-        if (!is_dir($dir)) return;
-        foreach (scandir($dir) as $file) {
-            if ($file == "." || $file == "..") continue;
-            $path = "$dir/$file";
-            if (is_file($path)) @unlink($path);
-        }
-    };
+    // =========================================================
+    // 🟢 SUBIR IMAGEN A SUPABASE
+    // =========================================================
+    $uploadPhoto = function ($file, $category, $dish, $photoOld = null) {
 
-    $uploadPhoto = function ($file, $safeCategory, $safeDish, $mediaRoot, $clearDirectory) {
+        $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($category));
+        $safeDish     = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($dish));
+        $path         = "platillos/$safeCategory/$safeDish";
 
-        if (empty($file['name']) || $file['error'] !== UPLOAD_ERR_OK) return null;
-
-        $categoryDir = "$mediaRoot/$safeCategory";
-        $dishDir = "$categoryDir/$safeDish";
-
-        if (!is_dir($dishDir)) mkdir($dishDir, 0777, true);
-
-        // Eliminar imágenes previas
-        $clearDirectory($dishDir);
-
-        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        $name = uniqid("dish_") . "." . $ext;
-        $target = "$dishDir/$name";
-
-        if (!move_uploaded_file($file['tmp_name'], $target)) {
-            throw new Exception("Error al guardar la imagen del plato.");
+        // Si existía una imagen previa → eliminar
+        if ($photoOld) {
+            $relative = str_replace(rtrim(SUPABASE_URL, '/') . "/storage/v1/object/public/dish_img/", '', $photoOld);
+            supabaseDeleteImage('dish_img', $relative);
         }
 
-        return "media/$safeCategory/$safeDish/$name";
+        return supabaseUploadImage($file, 'dish_img', $path);
     };
 
     // =========================================================
@@ -79,10 +63,11 @@ try {
 
         if (!empty($_POST['new_category'])) $category = trim($_POST['new_category']);
 
-        $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($category));
-        $safeDish = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($name));
-
-        $photo = $uploadPhoto($_FILES['photo'] ?? [], $safeCategory, $safeDish, $mediaRoot, $clearDirectory);
+        // ✅ Subir imagen a Supabase
+        $photo = null;
+        if (!empty($_FILES['photo']['name'])) {
+            $photo = $uploadPhoto($_FILES['photo'], $category, $name);
+        }
 
         $ingredients = [];
         if (!empty($_POST['ingredients'])) {
@@ -96,8 +81,8 @@ try {
         }
 
         $dish = new dishes(null, $id_user, $name, $price, $category, $description, $state, date("Y-m-d H:i:s"), $photo);
-
         $crud->createDish($dish, $ingredients);
+
         echo json_encode(["success" => true, "message" => "✅ Plato creado correctamente."]);
         exit;
     }
@@ -110,7 +95,6 @@ try {
         $id = intval($_POST['id']);
         if ($id <= 0) throw new Exception("ID inválido.");
 
-        // Obtener plato actual
         $current = $crud->getDishById($id, $id_user);
         if (!$current) throw new Exception("Plato no encontrado.");
 
@@ -119,17 +103,13 @@ try {
         $category = trim($_POST['category']);
         $description = trim($_POST['description']);
         $state = $_POST['state'];
-        $photo = $_POST['current_photo'] ?? $current['photo'];
+        $photo = $current['photo'];
 
         if (!empty($_POST['new_category'])) $category = trim($_POST['new_category']);
 
-        $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($category));
-        $safeDish = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($name));
-
-        // Si sube nueva imagen → reemplazar
+        // ✅ Si sube nueva imagen → reemplazar
         if (!empty($_FILES['photo']['name'])) {
-            $newPhoto = $uploadPhoto($_FILES['photo'], $safeCategory, $safeDish, $mediaRoot, $clearDirectory);
-            if ($newPhoto) $photo = $newPhoto;
+            $photo = $uploadPhoto($_FILES['photo'], $category, $name, $photo);
         }
 
         $ingredients = [];
@@ -144,8 +124,8 @@ try {
         }
 
         $dish = new dishes($id, $id_user, $name, $price, $category, $description, $state, null, $photo);
-
         $crud->updateDish($dish, $id, $ingredients);
+
         echo json_encode(["success" => true, "message" => "✅ Plato actualizado correctamente."]);
         exit;
     }
@@ -158,7 +138,15 @@ try {
         $id = intval($_POST['id']);
         if ($id <= 0) throw new Exception("ID inválido.");
 
+        $current = $crud->getDishById($id, $id_user);
+
+        if ($current && !empty($current['photo'])) {
+            $relative = str_replace(rtrim(SUPABASE_URL, '/') . "/storage/v1/object/public/dish_img/", '', $current['photo']);
+            supabaseDeleteImage('dish_img', $relative);
+        }
+
         $crud->deleteDish($id, $id_user);
+
         echo json_encode(["success" => true, "message" => "🗑️ Plato eliminado correctamente."]);
         exit;
     }
