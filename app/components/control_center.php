@@ -64,7 +64,7 @@ $displayEmail = htmlspecialchars($empleado['email']);
           <span>Reportes</span>
         </a>
         
-        <a href="/DelixSystem/app/pages/reportes/view/index.php" class="group card-control bg-cyan-50 hover:bg-cyan-100">
+        <a href="/DelixSystem/app/pages/dashboard_empleado/view/index.php" class="group card-control bg-cyan-50 hover:bg-cyan-100">
           <i class="ri-dashboard-fill text-cyan-600 text-3xl group-hover:scale-110 transition-transform"></i>
           <span>Dashboard</span>
         </a>
