@@ -17,7 +17,23 @@ try {
     if ($usuario['tipo'] === 'propietario') {
         $id_user = $usuario['id'];
     } elseif ($usuario['tipo'] === 'empleado') {
-        $id_user = $usuario['restaurant_id']; // usa el ID del restaurante del propietario
+        // 🔹 Obtener el ID del propietario asociado
+        if (!empty($usuario['restaurant_id'])) {
+            $id_user = $usuario['restaurant_id'];
+        } elseif (!empty($usuario['user_id'])) {
+            $id_user = $usuario['user_id'];
+        } else {
+            // Último recurso: buscar propietario desde la tabla employees
+            $stmt = $conexion->prepare("SELECT user_id FROM employees WHERE id = :id_empleado LIMIT 1");
+            $stmt->execute([':id_empleado' => $usuario['id']]);
+            $owner = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$owner || empty($owner['user_id'])) {
+                throw new Exception("No se pudo determinar el propietario del empleado.");
+            }
+
+            $id_user = $owner['user_id'];
+        }
     } else {
         throw new Exception("Usuario no autenticado.");
     }
@@ -58,3 +74,4 @@ try {
         "error" => $e->getMessage()
     ]);
 }
+?>
