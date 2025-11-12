@@ -74,7 +74,7 @@ try {
       <option value="no_disponible">No disponibles</option>
     </select>
 
-    <input type="text" id="searchInput" placeholder="Buscar por nombre...">
+    <input type="text" id="searchInput" placeholder="Buscar por nombre..."> 
   </div>
 
   <div class="card-container" id="ingredientGrid" data-user="<?= $id_usuario ?>">

@@ -1,0 +1,355 @@
+/* === ESTILO BASE === */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #f1f5f9;
+  color: #1e293b;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* === CONTENIDO PRINCIPAL === */
+.main-content {
+  padding: 40px;
+  min-height: 100vh;
+  transition: filter 0.3s ease;
+  position: relative;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 35px;
+}
+
+.header h1 {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-add {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+}
+
+/* === GRID DE COMBOS === */
+.combo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 28px;
+}
+
+.combo-card {
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+}
+
+.combo-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+.combo-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.combo-card .content {
+  padding: 18px;
+}
+
+.combo-card h3 {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #0f172a;
+}
+
+.combo-card p {
+  color: #475569;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.combo-card .price {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.action-btns {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.btn-edit {
+  background: #facc15;
+  color: #1e293b;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  transition: all 0.3s;
+}
+
+.btn-edit:hover {
+  background: #eab308;
+  transform: translateY(-2px);
+}
+
+.btn-delete {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  transition: all 0.3s;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+/* === SIDEBAR === */
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: -90px;
+  width: 90px;
+  height: 100vh;
+  background: linear-gradient(180deg, #0f172a, #1e293b);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 30px;
+  transition: right 0.4s ease;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.25);
+  z-index: 1002;
+}
+
+.sidebar.open {
+  right: 0;
+}
+
+.sidebar button {
+  width: 55px;
+  height: 55px;
+  border-radius: 15px;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+  font-size: 1.5rem;
+  margin: 12px 0;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.sidebar button:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: scale(1.1);
+}
+
+/* === BOTÓN FLOTANTE === */
+.toggle-btn {
+  position: fixed;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #1e3a8a;
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  font-size: 1.3rem;
+  z-index: 1003;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-btn:hover {
+  background: #2563eb;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.toggle-btn.rotate {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* === OVERLAY === */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 1001;
+}
+
+.overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* === MODAL === */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  transition: opacity 0.3s ease;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+/* === Contenedor del modal === */
+.modal-content {
+  background: #fff;
+  width: 90%;
+  max-width: 550px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: fadeIn 0.25s ease;
+}
+
+/* === Cabecera === */
+.modal-header {
+  background: #1e3a8a;
+  color: #fff;
+  padding: 1rem 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* === Botón de cierre === */
+.close-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.close-btn:hover {
+  transform: scale(1.1);
+}
+
+/* === Cuerpo === */
+.modal-body {
+  padding: 1.2rem;
+  overflow-y: auto;
+}
+
+/* === Formulario === */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+}
+
+/* === Botones del formulario === */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.btn-cancel,
+.btn-save {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-cancel {
+  background: #e5e7eb;
+  color: #111;
+}
+
+.btn-save {
+  background: #1e3a8a;
+  color: #fff;
+}
+
+.btn-save:hover {
+  background: #273fa1;
+}
+
+/* === Animación de aparición === */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 20px;
+  }
+  .modal-content {
+    width: 95%;
+    max-height: 90vh;
+  }
+}
