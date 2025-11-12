@@ -120,11 +120,15 @@ window.mostrarCategoria = async function (categoria) {
 
     document.getElementById("sidebarMenu")?.classList.remove("active");
     document.getElementById("sidebarOverlay")?.classList.remove("active");
+    filtrarIngredientes();
+
   } catch (error) {
     grid.innerHTML = `<p class='error'>Error al filtrar: ${error.message}</p>`;
-    if (typeof Alerts !== "undefined" && Alerts.error) Alerts.error("Error al filtrar: " + error.message);
+    if (typeof Alerts !== "undefined" && Alerts.error) 
+      Alerts.error("Error al filtrar: " + error.message);
   }
 };
+
 
 window.reloadCategories = async function () {
   const categoryList = document.getElementById("categoryList");
@@ -379,3 +383,34 @@ async function deleteIngredient(id) {
     console.error(err);
   }
 }
+const filterState = document.getElementById("filterState");
+const searchInput = document.getElementById("searchInput");
+const toggleFilters = document.getElementById("toggleFilters");
+const filtersContainer = document.querySelector(".filters");
+
+filterState.addEventListener("change", filtrarIngredientes);
+searchInput.addEventListener("input", filtrarIngredientes);
+
+function filtrarIngredientes() {
+  const stateValue = filterState.value;
+  const searchValue = searchInput.value.toLowerCase();
+  
+  const cards = document.querySelectorAll(".ingredient-card.card:not(.create-card)");
+
+  cards.forEach(card => {
+    const state = card.querySelector(".ingredient-state")?.textContent.trim() || "";
+    const name = card.querySelector(".ingredient-name")?.textContent.toLowerCase() || "";
+
+    const matchesState = stateValue === "Todos" || state.toLowerCase() === stateValue.toLowerCase();
+    const matchesSearch = name.includes(searchValue);
+
+    card.style.display = matchesState && matchesSearch ? "block" : "none";
+  });
+}
+
+toggleFilters.addEventListener("click", () => {
+  filtersContainer.classList.toggle("hidden-filters");
+  toggleFilters.textContent = filtersContainer.classList.contains("hidden-filters")
+    ? "Mostrar filtros"
+    : "Ocultar filtros";
+});

@@ -62,7 +62,20 @@ try {
 </nav>
 
 <main class="main-content container">
-  <h2 class="page-title">Inventario de Ingredientes</h2>
+  <div class="header-section" style="display: flex; justify-content: space-between; align-items: center;">
+    <h2 class="page-title">Inventario de Ingredientes</h2>
+    <button id="toggleFilters">Mostrar filtros</button>
+  </div>
+
+  <div class="filters hidden-filters">
+    <select id="filterState">
+      <option value="Todos">Todos</option>
+      <option value="Activo">Activos</option>
+      <option value="no_disponible">No disponibles</option>
+    </select>
+
+    <input type="text" id="searchInput" placeholder="Buscar por nombre...">
+  </div>
 
   <div class="card-container" id="ingredientGrid" data-user="<?= $id_usuario ?>">
     <?php foreach ($categorias as $categoria => $items): ?>
@@ -178,8 +191,7 @@ try {
         <label for="state">Estado:</label>
         <select name="state" id="state">
           <option value="Activo">Activo</option>
-          <option value="Agotado">Agotado</option>
-          <option value="no disponible">no disponible</option>
+          <option value="no_disponible">no disponible</option>
         </select>
       </div>
 
