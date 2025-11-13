@@ -1,10 +1,30 @@
 <?php
-require_once __DIR__ . '/../../../middleware/session_guard.php';
-protectPage();
+// DelixSystem/app/pages/inventory/view/ingredient_manager.php
 
-$id_usuario = $_SESSION['usuario']['id'];
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
+// 🧩 Inicialización de UI y sesiones (soporte para empleado y propietario)
+require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php';
+require_once __DIR__ . '/../../../middleware/universal_guard.php';
 require_once __DIR__ . '/../../../config/supabase.php';
+
+// ✅ Detecta el tipo de usuario activo
+$usuario = universalGuard();
+
+// Determinar el ID base para filtrar el inventario
+if ($usuario['tipo'] === 'propietario') {
+    $id_usuario = $usuario['id'];
+} elseif ($usuario['tipo'] === 'empleado') {
+    // El empleado usa el ID del restaurante asociado al propietario
+    $id_usuario = $usuario['restaurant_id'];
+} else {
+    header("Location: /DelixSystem/public/index.php");
+    exit;
+}
+
+// Nombre del usuario actual (solo para mostrar en encabezados)
+$nombreUsuario = $usuario['nombre'] ?? 'Usuario';
 
 try {
     $stmt = $conexion->prepare("SELECT * FROM storage WHERE id_user = :id_user ORDER BY category, name ASC");
