@@ -128,6 +128,11 @@ try {
   <button id="verCarritoBtn">
     🛒 <span id="cartCount" style="background:red;color:white;padding:2px 6px;border-radius:12px;font-size:12px;position:absolute;margin-left:4px;top:6px;right:10px;">0</span>
   </button>
+<button id="verPedidosBtn" <?= empty($_SESSION['cliente']) ? "disabled" : "" ?>>
+    Ver mis pedidos
+</button>
+
+
 </header>
 
 <?php

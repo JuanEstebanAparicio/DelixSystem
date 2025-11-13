@@ -350,3 +350,82 @@ function closeDishModal(){
     document.getElementById("dishModal").style.display = "none";
 }
 
+// ====== SINCRONIZAR CLIENTE CON SERVIDOR ======
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("=== Sincronizando cliente ===");
+
+    // 1️⃣ Leer localStorage (el nombre está en nombre_cliente)
+    const rawName = localStorage.getItem("nombre_cliente");
+
+    console.log("Contenido actual del localStorage (nombre_cliente):", rawName);
+
+    let clienteObj = null;
+
+    // 2️⃣ Construir clienteObj aunque rawName NO sea JSON
+    if (rawName) {
+        // Obtenemos valores desde los data-atributos del <body>
+        const body = document.body;
+
+        clienteObj = {
+            nombre: rawName,
+            mesa: body.dataset.mesa,
+            id_mesa: body.dataset.id_mesa,
+            id_area: body.dataset.id_area
+        };
+    }
+
+    // 3️⃣ Si NO hay cliente, mostrar advertencia y salir
+    if (!clienteObj) {
+        console.warn("⚠️ No hay cliente guardado en localStorage");
+        return;
+    }
+
+    console.log("Cliente armado:", clienteObj);
+
+    // 4️⃣ Ocultar modal de identificación si ya existe
+    const modalCliente = document.getElementById("clienteLoginModal");
+    if (modalCliente) {
+        modalCliente.style.display = "none";
+    }
+
+    // 5️⃣ Mostrar el nombre del cliente en el header
+    const nombreClienteHeader = document.getElementById("nombreClienteHeader");
+    if (nombreClienteHeader) {
+        nombreClienteHeader.textContent = `Cliente: ${clienteObj.nombre}`;
+    }
+
+    // 6️⃣ Sincronizar con servidor: sincronizar_cliente.php
+    fetch("/DelixSystem/app/views/mesas/php/sincronizar_cliente.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cliente: clienteObj })
+    })
+    .then(r => r.json())
+    .then(data => {
+        console.log("Respuesta del servidor:", data);
+    })
+    .catch(err => console.error("Error enviando cliente al servidor:", err));
+});
+
+// ====== BOTÓN "VER MIS PEDIDOS" ======
+document.addEventListener("DOMContentLoaded", () => {
+
+    const btnVer = document.getElementById("verPedidosBtn");
+
+    if (btnVer) {
+        btnVer.addEventListener("click", () => {
+
+            // Si por algún motivo no está sincronizado, evitamos errores
+            const nombre = localStorage.getItem("nombre_cliente");
+
+            if (!nombre) {
+                Swal.fire("⚠️ Debes identificarte primero");
+                return;
+            }
+
+            // Redirigir a la vista correcta
+            window.location.href = "/DelixSystem/app/views/mesas/view/mis_pedidos.php";
+        });
+    }
+
+});
