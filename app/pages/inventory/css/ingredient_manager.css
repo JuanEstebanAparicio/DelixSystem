@@ -304,6 +304,11 @@ body {
 .hidden-input {
   display: none !important;
 }
+
+.hidden-img {
+  display: none !important;
+}
+
 /* === MODAL === */
 .modal {
   position: fixed;
