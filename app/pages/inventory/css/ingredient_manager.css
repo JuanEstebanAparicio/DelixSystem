@@ -301,7 +301,9 @@ body {
   font-weight: bold;
   margin-bottom: 0.3rem;
 }
-
+.hidden-input {
+  display: none !important;
+}
 /* === MODAL === */
 .modal {
   position: fixed;
