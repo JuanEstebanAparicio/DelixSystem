@@ -1,3 +1,27 @@
+async function safeFetchJson(url, options = {}) {
+  try {
+    const resp = await fetch(url, options);
+    const text = await resp.text();
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return {
+        status: "error",
+        message: "Respuesta no válida desde el servidor.",
+        raw: text
+      };
+    }
+  } catch (err) {
+    return {
+      status: "error",
+      message: "Error al conectar con el servidor.",
+      error: err.message
+    };
+  }
+}
+
+
 function validarFechas() {
   const ingresoEl = document.getElementById("fecha_ingreso");
   const vencimientoEl = document.getElementById("fecha_vencimiento");
@@ -238,53 +262,31 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("ingredientForm");
   if (form) {
     form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+  e.preventDefault();
 
-      const categorySelect = document.getElementById("category");
-      const newCategoryInput = document.getElementById("newCategoryInput");
+  if (!validarFechas()) return;
 
-      if (categorySelect && newCategoryInput && categorySelect.value === "__new__" && newCategoryInput.value.trim() !== "") {
-        const newCat = newCategoryInput.value.trim().toLowerCase();
+  const formData = new FormData(form);
 
-        Array.from(categorySelect.options).forEach(opt => {
-          if (opt.value.trim().toLowerCase() === newCat || opt.textContent.trim().toLowerCase() === newCat) {
-            opt.remove();
-          }
-        });
+  const data = await safeFetchJson(
+    "../php/inventario/ingredienteController.php",
+    {
+      method: "POST",
+      body: formData
+    }
+  );
 
-        const newOption = document.createElement("option");
-        newOption.value = newCat;
-        newOption.textContent = newCategoryInput.value.trim();
-        categorySelect.appendChild(newOption);
-        categorySelect.value = newCat;
-      }
+  if (data.status === "error") {
+    Alerts?.warning && Alerts.warning(data.message);
+    return;
+  }
 
-      if (!validarFechas()) return;
-
-      const formData = new FormData(form);
-      if (categorySelect && categorySelect.value) {
-        formData.set("category", categorySelect.value);
-      }
-
-      try {
-        const resp = await fetch("../php/inventario/ingredienteController.php", {
-          method: "POST",
-          body: formData
-        });
-        const data = await resp.json();
-        if (data.success) {
-          if (typeof Alerts !== "undefined" && Alerts.success) Alerts.success(data.message || "Ingrediente guardado correctamente.");
-          hideModal("formModal");
-          loadStorage();
-          reloadCategories();
-        } else {
-          if (typeof Alerts !== "undefined" && Alerts.warning) Alerts.warning(data.error || "No se pudo guardar el ingrediente.");
-        }
-      } catch (err) {
-        if (typeof Alerts !== "undefined" && Alerts.error) Alerts.error("Error al guardar ingrediente: " + err.message);
-        console.error(err);
-      }
-    });
+  Alerts?.success && Alerts.success(data.message || "Guardado correctamente.");
+  hideModal("formModal");
+  loadStorage();
+  reloadCategories();
+});
+  
   }
 
   const photoInput = document.getElementById("photo");
@@ -428,40 +430,36 @@ function editIngredient(ing) {
 }
 
 async function deleteIngredient(id) {
-  let confirmed = false;
-  if (typeof Swal !== "undefined") {
-    const result = await Swal.fire({
-      title: "¿Eliminar ingrediente?",
-      text: "Esta acción no se puede deshacer.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-    });
-    confirmed = result.isConfirmed;
-  } else {
-    confirmed = confirm("¿Eliminar ingrediente? Esta acción no se puede deshacer.");
-  }
-  if (!confirmed) return;
 
-  try {
-    const resp = await fetch("../php/inventario/ingredienteController.php", {
-      method: "POST",
-      body: new URLSearchParams({ id: id, action: "delete" })
-    });
-    const data = await resp.json();
-    if (data.success) {
-      if (typeof Alerts !== "undefined" && Alerts.success) Alerts.success(data.message || "Ingrediente eliminado correctamente.");
-      loadStorage();
-      reloadCategories();
-    } else {
-      if (typeof Alerts !== "undefined" && Alerts.warning) Alerts.warning(data.error || "No se pudo eliminar el ingrediente.");
-    }
-  } catch (err) {
-    if (typeof Alerts !== "undefined" && Alerts.error) Alerts.error("Error al eliminar ingrediente: " + err.message);
-    console.error(err);
+  const result = await Swal.fire({
+    title: "¿Eliminar ingrediente?",
+    text: "Esta acción no se puede deshacer.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+  });
+
+  if (!result.isConfirmed) return;
+
+  const data = await safeFetchJson("../php/inventario/ingredienteController.php", {
+    method: "POST",
+    body: new URLSearchParams({
+      id: id,
+      action: "delete"
+    })
+  });
+
+  if (data.status === "error") {
+    Alerts?.warning && Alerts.warning(data.message);
+    return;
   }
+
+  Alerts?.success && Alerts.success(data.message || "Eliminado correctamente.");
+  loadStorage();
+  reloadCategories();
 }
+
 
 const filterState = document.getElementById("filterState");
 const searchInput = document.getElementById("searchInput");
