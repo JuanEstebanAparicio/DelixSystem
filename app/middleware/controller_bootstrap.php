@@ -98,7 +98,14 @@ function getRoleAccess(): array
             'ver'      => ['ADMIN_LOCAL', 'GESTOR_EMPLEADOS', 'SUPERVISOR'],
             'listar'   => ['ADMIN_LOCAL', 'GESTOR_EMPLEADOS', 'SUPERVISOR'],
             'asignar'  => ['ADMIN_LOCAL', 'GESTOR_EMPLEADOS']
+         ],
+         'inventario' => [
+                'ver'      => ['ADMIN_LOCAL', 'GESTOR_INVENTARIO', 'SUPERVISOR'],
+                'crear'    => ['ADMIN_LOCAL', 'GESTOR_INVENTARIO'],
+                'editar'   => ['ADMIN_LOCAL', 'GESTOR_INVENTARIO'],
+                'eliminar' => ['ADMIN_LOCAL', 'GESTOR_INVENTARIO']
         ]
+
     ];
 }
 
