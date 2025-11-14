@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php'; /
 require_once __DIR__ . '/../../../middleware/employee_extended_guard.php';
 
 // Solo los empleados con rol de administrador o supervisor pueden acceder
-$usuario = employeeExtendedGuard(['ADMIN_LOCAL', 'SUPERVISOR']);
+$usuario = employeeExtendedGuard(['ADMIN_LOCAL', 'SUPERVISOR','GESTOR_EMPLEADOS']);
 
 // ✅ Protege el acceso (propietario o empleado)
 

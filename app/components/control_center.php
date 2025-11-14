@@ -63,6 +63,16 @@ $displayEmail = htmlspecialchars($empleado['email']);
           <i class="ri-bar-chart-2-fill text-fuchsia-500 text-3xl group-hover:scale-110 transition-transform"></i>
           <span>Reportes</span>
         </a>
+        
+        <a href="/DelixSystem/app/pages/dashboard_empleado/view/index.php" class="group card-control bg-cyan-50 hover:bg-cyan-100">
+          <i class="ri-dashboard-fill text-cyan-600 text-3xl group-hover:scale-110 transition-transform"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="/historial" class="group card-control bg-orange-50 hover:bg-orange-100">
+          <i class="ri-history-line text-orange-500 text-3xl group-hover:scale-110 transition-transform"></i>
+          <span>Historial</span>
+        </a>
       </div>
     </div>
 

@@ -7,6 +7,12 @@ class storage_crud {
 
     public function __construct() {
         require_once __DIR__ . '/../../../../config/supabase.php';
+        global $conexion;
+
+        if (!isset($conexion) || !$conexion instanceof PDO) {
+            throw new Exception("❌ Error: No se pudo establecer conexión con la base de datos.");
+        }
+
         $this->conn = $conexion;
     }
 

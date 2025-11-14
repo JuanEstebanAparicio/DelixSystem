@@ -1,10 +1,30 @@
 <?php
-require_once __DIR__ . '/../../../middleware/session_guard.php';
-protectPage();
+// DelixSystem/app/pages/inventory/view/ingredient_manager.php
 
-$id_usuario = $_SESSION['usuario']['id'];
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
+// 🧩 Inicialización de UI y sesiones (soporte para empleado y propietario)
+require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php';
+require_once __DIR__ . '/../../../middleware/universal_guard.php';
 require_once __DIR__ . '/../../../config/supabase.php';
+
+// ✅ Detecta el tipo de usuario activo
+$usuario = universalGuard();
+
+// Determinar el ID base para filtrar el inventario
+if ($usuario['tipo'] === 'propietario') {
+    $id_usuario = $usuario['id'];
+} elseif ($usuario['tipo'] === 'empleado') {
+    // El empleado usa el ID del restaurante asociado al propietario
+    $id_usuario = $usuario['restaurant_id'];
+} else {
+    header("Location: /DelixSystem/public/index.php");
+    exit;
+}
+
+// Nombre del usuario actual (solo para mostrar en encabezados)
+$nombreUsuario = $usuario['nombre'] ?? 'Usuario';
 
 try {
     $stmt = $conexion->prepare("SELECT * FROM storage WHERE id_user = :id_user ORDER BY category, name ASC");
@@ -32,12 +52,13 @@ try {
   <meta charset="UTF-8">
   <title>Gestor de Ingredientes</title>
   <link rel="stylesheet" href="../css/ingredient_manager.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 
 <body>
 <header class="navbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
-  <h1 class="navbar-title">Gestor de Ingredientes</h1>
+  <h1 class="navbar-title">🍽️ Gestor de Ingredientes</h1>
 
   <div class="button-group">
     <button class="create-btn" onclick="newIngredient()">+ Crear Ingrediente</button>
@@ -51,7 +72,7 @@ try {
   <button id="reloadBtn" class="reload-btn" onclick="reloadCategories()">🔄 Recargar</button>
 
   <ul class="sidebar-list" id="categoryList">
-    <li class="sidebar-item" onclick="mostrarCategoria('Todos')">Todos</li>
+    <li class="sidebar-item active" onclick="mostrarCategoria('Todos')">Todos</li>
     <?php foreach ($categorias as $categoria => $items): ?>
       <li class="sidebar-item" onclick="mostrarCategoria('<?= htmlspecialchars($categoria) ?>')">
         <?= htmlspecialchars($categoria) ?>
@@ -61,22 +82,28 @@ try {
 </nav>
 
 <main class="main-content container">
-  <h2 class="page-title">Gestor de Ingredientes</h2>
+  <div class="header-section" style="display: flex; justify-content: space-between; align-items: center;">
+    <h2 class="page-title">Inventario de Ingredientes</h2>
+    <button id="toggleFilters">Mostrar filtros</button>
+  </div>
+
+  <div class="filters hidden-filters">
+    <select id="filterState">
+      <option value="Todos">Todos</option>
+      <option value="Activo">Activos</option>
+      <option value="no_disponible">No disponibles</option>
+    </select>
+
+    <input type="text" id="searchInput" placeholder="Buscar por nombre..."> 
+  </div>
 
   <div class="card-container" id="ingredientGrid" data-user="<?= $id_usuario ?>">
-
     <?php foreach ($categorias as $categoria => $items): ?>
       <?php foreach ($items as $ing): ?>
         <div class="ingredient-card card" data-category="<?= htmlspecialchars($categoria) ?>">
-          <?php if (!empty($ing['photo'])): ?>
-            <div class="card-image">
-              <img src="<?= htmlspecialchars($ing['photo']) ?>" alt="<?= htmlspecialchars($ing['name']) ?>">
-            </div>
-          <?php else: ?>
-            <div class="card-image">
-              <img src="../img/default.png" alt="Sin imagen">
-            </div>
-          <?php endif; ?>
+          <div class="card-image">
+            <img src="<?= htmlspecialchars($ing['photo'] ?: '../img/default.png') ?>" alt="<?= htmlspecialchars($ing['name']) ?>">
+          </div>
 
           <div class="card-body">
             <h4 class="ingredient-name"><?= htmlspecialchars($ing['name']) ?></h4>
@@ -160,7 +187,6 @@ try {
           <?php foreach ($listaCategorias as $cat): ?>
             <option value="<?= htmlspecialchars($cat) ?>"><?= htmlspecialchars($cat) ?></option>
           <?php endforeach; ?>
-
           <option value="__new__">+ Nueva categoría...</option>
         </select>
         <input type="text" id="newCategoryInput" name="new_category" placeholder="Nueva categoría" class="hidden-input">
@@ -185,8 +211,7 @@ try {
         <label for="state">Estado:</label>
         <select name="state" id="state">
           <option value="Activo">Activo</option>
-          <option value="Agotado">Agotado</option>
-          <option value="no disponible">no disponible</option>
+          <option value="no_disponible">no disponible</option>
         </select>
       </div>
 
@@ -200,7 +225,7 @@ try {
         <input type="date" name="fecha_ingreso" id="fecha_ingreso">
       </div>
 
-      <div class="form-group inline"
+      <div class="form-group inline">
         <label for="fecha_vencimiento">Fecha vencimiento:</label>
         <input type="date" name="fecha_vencimiento" id="fecha_vencimiento">
       </div>

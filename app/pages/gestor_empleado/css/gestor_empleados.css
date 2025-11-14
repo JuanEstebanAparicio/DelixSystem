@@ -448,4 +448,29 @@ td span:hover {
 .role-card {
   transition: all 0.3s ease;
 }
+/* === Ajuste de scroll en modal de roles === */
+.modal-content {
+  max-height: 85vh;           /* evita que crezca más allá de la pantalla */
+  overflow-y: auto;            /* activa scroll vertical si es necesario */
+  overscroll-behavior: contain; /* evita que el fondo se desplace */
+}
+
+.roles-container {
+  max-height: 60vh;           /* el área de los roles no excede esta altura */
+  overflow-y: auto;            /* scroll interno si hay muchos roles */
+  padding-right: 6px;          /* evita que el scroll tape texto */
+}
+
+/* Scrollbar suave y estético (opcional) */
+.roles-container::-webkit-scrollbar {
+  width: 6px;
+}
+.roles-container::-webkit-scrollbar-thumb {
+  background: var(--color-muted);
+  border-radius: 3px;
+}
+.roles-container::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
 

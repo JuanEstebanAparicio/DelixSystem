@@ -120,32 +120,91 @@ window.mostrarCategoria = async function (categoria) {
 
     document.getElementById("sidebarMenu")?.classList.remove("active");
     document.getElementById("sidebarOverlay")?.classList.remove("active");
+    filtrarIngredientes();
+
   } catch (error) {
     grid.innerHTML = `<p class='error'>Error al filtrar: ${error.message}</p>`;
-    if (typeof Alerts !== "undefined" && Alerts.error) Alerts.error("Error al filtrar: " + error.message);
+    if (typeof Alerts !== "undefined" && Alerts.error) 
+      Alerts.error("Error al filtrar: " + error.message);
   }
 };
 
 window.reloadCategories = async function () {
   const categoryList = document.getElementById("categoryList");
-  if (!categoryList) return;
+  const categorySelect = document.getElementById("category");
+  if (!categoryList || !categorySelect) return;
+
+  // 🧩 Categorías base (no se eliminan nunca)
+  const categoriasBase = [
+    "Proteína", "Carbohidrato", "Vegetal", "Lácteo",
+    "Bebida", "Salsa", "Fruta", "Cereal / Harina", "Snack"
+  ];
 
   try {
     const res = await fetch("../php/utilidades/get_storage.php");
     const data = await res.json();
     if (!data.success) throw new Error(data.error || "Respuesta inválida");
-    const categorias = data.categorias || [];
+
+    const categoriasBD = data.categorias || [];
+
+    // 🧹 Limpiar lista lateral
     categoryList.innerHTML = `<li class="sidebar-item active" onclick="mostrarCategoria('Todos')">Todos</li>`;
-    categorias.forEach(cat => {
+
+    // Añadir categorías de la BD al sidebar
+    [...categoriasBase, ...categoriasBD].forEach(cat => {
       const li = document.createElement("li");
       li.classList.add("sidebar-item");
       li.textContent = cat;
       li.onclick = () => mostrarCategoria(cat);
       categoryList.appendChild(li);
     });
+
+    // 🧹 Limpiar y reconstruir el select sin eliminar las base
+    const opcionesFijas = Array.from(categorySelect.options).filter(opt =>
+      categoriasBase.includes(opt.value) ||
+      opt.value === "" ||
+      opt.value === "__new__"
+    );
+
+    // 🔄 Reescribir select: base + BD + "nueva categoría"
+    categorySelect.innerHTML = "";
+
+    // Opción de selección
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    defaultOption.textContent = "Seleccione o cree una categoría";
+    categorySelect.appendChild(defaultOption);
+
+    // Categorías base
+    categoriasBase.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat;
+      categorySelect.appendChild(opt);
+    });
+
+    // Categorías dinámicas desde BD
+    categoriasBD.forEach(cat => {
+      if (!categoriasBase.includes(cat)) {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = cat;
+        categorySelect.appendChild(opt);
+      }
+    });
+
+    // Última opción: crear nueva
+    const newOpt = document.createElement("option");
+    newOpt.value = "__new__";
+    newOpt.textContent = "+ Nueva categoría...";
+    categorySelect.appendChild(newOpt);
+
   } catch (error) {
-    if (typeof Alerts !== "undefined" && Alerts.error) Alerts.error("Error al recargar categorías: " + error.message);
     console.error(error);
+    if (typeof Alerts !== "undefined" && Alerts.error)
+      Alerts.error("Error al recargar categorías: " + error.message);
   }
 };
 
@@ -180,9 +239,33 @@ document.addEventListener("DOMContentLoaded", () => {
   if (form) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      const categorySelect = document.getElementById("category");
+      const newCategoryInput = document.getElementById("newCategoryInput");
+
+      if (categorySelect && newCategoryInput && categorySelect.value === "__new__" && newCategoryInput.value.trim() !== "") {
+        const newCat = newCategoryInput.value.trim().toLowerCase();
+
+        Array.from(categorySelect.options).forEach(opt => {
+          if (opt.value.trim().toLowerCase() === newCat || opt.textContent.trim().toLowerCase() === newCat) {
+            opt.remove();
+          }
+        });
+
+        const newOption = document.createElement("option");
+        newOption.value = newCat;
+        newOption.textContent = newCategoryInput.value.trim();
+        categorySelect.appendChild(newOption);
+        categorySelect.value = newCat;
+      }
+
       if (!validarFechas()) return;
 
       const formData = new FormData(form);
+      if (categorySelect && categorySelect.value) {
+        formData.set("category", categorySelect.value);
+      }
+
       try {
         const resp = await fetch("../php/inventario/ingredienteController.php", {
           method: "POST",
@@ -379,3 +462,35 @@ async function deleteIngredient(id) {
     console.error(err);
   }
 }
+
+const filterState = document.getElementById("filterState");
+const searchInput = document.getElementById("searchInput");
+const toggleFilters = document.getElementById("toggleFilters");
+const filtersContainer = document.querySelector(".filters");
+
+filterState.addEventListener("change", filtrarIngredientes);
+searchInput.addEventListener("input", filtrarIngredientes);
+
+function filtrarIngredientes() {
+  const stateValue = filterState.value;
+  const searchValue = searchInput.value.toLowerCase();
+  
+  const cards = document.querySelectorAll(".ingredient-card.card:not(.create-card)");
+
+  cards.forEach(card => {
+    const state = card.querySelector(".ingredient-state")?.textContent.trim() || "";
+    const name = card.querySelector(".ingredient-name")?.textContent.toLowerCase() || "";
+
+    const matchesState = stateValue === "Todos" || state.toLowerCase() === stateValue.toLowerCase();
+    const matchesSearch = name.includes(searchValue);
+
+    card.style.display = matchesState && matchesSearch ? "block" : "none";
+  });
+}
+
+toggleFilters.addEventListener("click", () => {
+  filtersContainer.classList.toggle("hidden-filters");
+  toggleFilters.textContent = filtersContainer.classList.contains("hidden-filters")
+    ? "Mostrar filtros"
+    : "Ocultar filtros";
+});

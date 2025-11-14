@@ -8,15 +8,40 @@ header('Content-Type: application/json');
 require_once(__DIR__ . '/products_constructor.php');
 require_once(__DIR__ . '/storage_crud.php');
 require_once(__DIR__ . '/../../../../config/supabase_img.php'); // helper de Supabase
+require_once(__DIR__ . '/../../../../config/supabase.php'); // 🟢 conexión a BD
 
 try {
-    if (empty($_SESSION['usuario']['id'])) {
+    // ======================================================
+    // 🧭 OBTENER USUARIO ACTIVO (propietario o empleado)
+    // ======================================================
+    if (isset($_SESSION['usuario']['id'])) {
+        // 👑 Sesión de propietario
+        $id_user = intval($_SESSION['usuario']['id']);
+    } elseif (isset($_SESSION['empleado_auth']['id'])) {
+        // 👷 Sesión de empleado → obtener el ID del propietario
+        $id_user = intval($_SESSION['empleado_auth']['user_id'] ?? 0);
+
+        if ($id_user === 0) {
+            // 🟠 Si no viene en la sesión, consultamos la tabla employees
+            $stmt = $conexion->prepare("SELECT user_id FROM employees WHERE id = :id_empleado LIMIT 1");
+            $stmt->execute([':id_empleado' => $_SESSION['empleado_auth']['id']]);
+            $owner = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$owner || empty($owner['user_id'])) {
+                throw new Exception("No se pudo determinar el propietario del empleado.");
+            }
+
+            $id_user = intval($owner['user_id']);
+        }
+    } else {
         throw new Exception("⚠️ No hay usuario autenticado.");
     }
 
-    $id_user = intval($_SESSION['usuario']['id']);
     $crud = new storage_crud();
 
+    // ======================================================
+    // 🧩 MAPEO DE ACCIONES
+    // ======================================================
     $roundAction = $_POST['action'] ?? '';
     $actionMap = [
         'create' => 'add',
@@ -43,12 +68,11 @@ try {
         $name = trim($_POST['name'] ?? '');
         if (!$name) throw new Exception("El nombre del ingrediente es obligatorio.");
 
-        // Subir imagen a Supabase si existe
         $photo = null;
         if (!empty($_FILES['photo']['name'])) {
             $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', $category ?: 'sin_categoria');
             $safeProduct = preg_replace('/[^a-zA-Z0-9_-]/', '_', $name);
-            $path = "inventario/$id_user/$safeCategory/$safeProduct"; // ruta dentro del bucket
+            $path = "inventario/$id_user/$safeCategory/$safeProduct";
             $photo = supabaseUploadImage($_FILES['photo'], 'storage_img', $path);
         }
 
@@ -97,15 +121,11 @@ try {
 
         $photo = $current['photo'];
 
-        // Si sube nueva imagen, reemplazarla en Supabase
         if (!empty($_FILES['photo']['name'])) {
             $path = "inventario/$id_user/$safeCategory/$safeProduct";
-
-            // Eliminar imagen anterior si existía
             if (!empty($photo)) {
                 supabaseDeleteImage('storage_img', str_replace(rtrim(SUPABASE_URL, '/') . "/storage/v1/object/public/storage_img/", '', $photo));
             }
-
             $photo = supabaseUploadImage($_FILES['photo'], 'storage_img', $path);
         }
 
@@ -142,7 +162,6 @@ try {
         $producto = $crud->getProductById($id, $id_user);
         if (!$producto) throw new Exception("Ingrediente no encontrado.");
 
-        // Eliminar imagen del bucket si existía
         if (!empty($producto['photo'])) {
             supabaseDeleteImage('storage_img', str_replace(rtrim(SUPABASE_URL, '/') . "/storage/v1/object/public/storage_img/", '', $producto['photo']));
         }
