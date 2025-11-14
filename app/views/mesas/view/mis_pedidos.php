@@ -83,6 +83,7 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <td data-label="Acción">
         <?php if (in_array($p['estado'], ['Pending', 'Accepted'])): ?>
             <button class="cancelar-btn" data-id="<?= $p['id'] ?>">❌ Cancelar</button>
+            <button class="detalles-btn" data-id="<?= $p['id'] ?>">👁 Ver detalles</button>
         <?php else: ?>
             <span style="color:gray;">No disponible</span>
         <?php endif; ?>
@@ -128,5 +129,18 @@ document.querySelectorAll('.cancelar-btn').forEach(btn => {
 });
 </script>
 
+<!-- MODAL DETALLES -->
+<div id="modalDetalles" class="modal">
+    <div class="modal-contenido">
+        <span class="cerrar">&times;</span>
+        <h3>Detalles del Pedido</h3>
+        <div id="detallesContenido">
+            Cargando...
+        </div>
+    </div>
+</div>
+
+
+<script src="/DelixSystem/app/views/mesas/js/menu.js"></script>
 </body>
 </html>

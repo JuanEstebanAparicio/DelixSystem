@@ -429,3 +429,63 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 });
+
+
+
+
+// ===============================
+// BOTONES VER DETALLES
+// ===============================
+document.querySelectorAll('.detalles-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+
+        fetch('/DelixSystem/app/views/mesas/php/obtener_items.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `id_pedido=${id}`
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.ok) {
+                Swal.fire('Error', data.error, 'error');
+                return;
+            }
+
+            let html = `
+                <table class="tabla-detalles">
+                    <tr><th>Platillo</th><th>Precio</th><th>Cantidad</th></tr>
+            `;
+
+            data.items.forEach(i => {
+                html += `
+                    <tr>
+                        <td>${i.nombre_platillo}</td>
+                        <td>$${Intl.NumberFormat('es-CO').format(i.precio)}</td>
+                        <td>${i.cantidad}</td>
+                    </tr>
+                `;
+            });
+
+            html += `</table>`;
+
+            document.getElementById('detallesContenido').innerHTML = html;
+
+            document.getElementById('modalDetalles').style.display = 'flex';
+        });
+    });
+});
+
+// ===============================
+// CERRAR MODAL
+// ===============================
+document.querySelector('.cerrar').onclick = () => {
+    document.getElementById('modalDetalles').style.display = 'none';
+};
+
+window.onclick = function(e) {
+    if (e.target == document.getElementById('modalDetalles')) {
+        document.getElementById('modalDetalles').style.display = 'none';
+    }
+}
+
