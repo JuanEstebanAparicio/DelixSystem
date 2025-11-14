@@ -1,6 +1,53 @@
 <?php
 // DelixSystem/app/views/mesas/view/mis_pedidos.php
 session_start();
+// Si no hay cliente en sesión, intentar reconstruir desde localStorage (vía JS)
+if (!isset($_SESSION['cliente'])) {
+    echo "
+    <script>
+        let cliente = localStorage.getItem('nombre_cliente');
+        let idMesa = localStorage.getItem('id_mesa');
+        let idArea = localStorage.getItem('id_area');
+        let mesaNombre = localStorage.getItem('mesa');
+
+        if (cliente && idMesa && idArea) {
+            // reenviar con reconstrucción en PHP vía POST
+            fetch(location.href, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    cliente: cliente,
+                    id_mesa: idMesa,
+                    id_area: idArea,
+                    mesa: mesaNombre
+                })
+            }).then(() => location.reload());
+        }
+    </script>
+    ";
+
+    // detener ejecución (esperamos recarga)
+    exit;
+}
+
+// Reconstrucción automática si vienen datos desde fetch()
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $json = json_decode(file_get_contents('php://input'), true);
+
+    if (!empty($json['cliente'])) {
+        $_SESSION['cliente'] = [
+            'nombre' => $json['cliente'],
+            'id_mesa' => $json['id_mesa'],
+            'id_area' => $json['id_area'],
+            'mesa' => $json['mesa']
+        ];
+    }
+
+    echo json_encode(['ok' => true]);
+    exit;
+}
+
+
 require_once __DIR__ . '/../../../config/supabase.php';
 
 // ================================
@@ -47,100 +94,73 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-<a class="boton-volver" href="/DelixSystem/app/views/mesas/view/menu.php?id=<?= $_SESSION['cliente']['id_mesa'] ?>&u=<?= $_SESSION['usuario']['id'] ?>">
+<a class="boton-volver" 
+   href="/DelixSystem/app/views/mesas/view/menu.php?id=<?= $_SESSION['cliente']['id_mesa'] ?>&u=<?= $_SESSION['usuario']['id'] ?>">
     <svg viewBox="0 0 24 24">
         <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
     </svg>
 </a>
 
+<h2 class="titulo-pedidos">📋 Mis Pedidos</h2>
 
-<h2>📋 Mis Pedidos</h2>
-<p><strong>Cliente:</strong> <?= htmlspecialchars($cliente) ?> |
-      <strong>Mesa:</strong> <?= htmlspecialchars($mesa_text) ?> 
+<div class="info-cliente">
+    <span><strong><?= htmlspecialchars($cliente) ?></strong></span>
+    <span class="mesa-pill">Mesa <?= htmlspecialchars($mesa_text) ?></span>
+</div>
 
 <?php if (empty($pedidos)): ?>
-    <p>No tienes pedidos aún.</p>
-<?php else: ?>
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Total</th>
-            <th>Pago</th>
-            <th>Estado</th>
-            <th>Fecha</th>
-            <th>Acción</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php foreach ($pedidos as $p): ?>
-       <tr>
-    <td data-label="ID">#<?= $p['id'] ?></td>
-    <td data-label="Total">$<?= number_format($p['total_pedido'], 0, ',', '.') ?></td>
-    <td data-label="Pago"><?= htmlspecialchars($p['metodo_pago']) ?></td>
-    <td data-label="Estado"><?= htmlspecialchars($p['estado']) ?></td>
-    <td data-label="Fecha"><?= htmlspecialchars($p['created_at']) ?></td>
-    <td data-label="Acción">
-        <?php if (in_array($p['estado'], ['Pending', 'Accepted'])): ?>
-            <button class="cancelar-btn" data-id="<?= $p['id'] ?>">❌ Cancelar</button>
-            <button class="detalles-btn" data-id="<?= $p['id'] ?>">👁 Ver detalles</button>
-        <?php else: ?>
-            <span style="color:gray;">No disponible</span>
-        <?php endif; ?>
-    </td>
-</tr>
+    <p class="no-pedidos">No tienes pedidos aún.</p>
 
-        <?php endforeach; ?>
-    </tbody>
-</table>
+<?php else: ?>
+
+<div class="pedidos-list">
+<?php foreach ($pedidos as $p): ?>
+
+    <div class="pedido-card">
+        <div class="pedido-top">
+            <span class="pedido-id">Pedido #<?= $p['id'] ?></span>
+            <span class="pedido-estado estado-<?= strtolower($p['estado']) ?>">
+                <?= htmlspecialchars($p['estado']) ?>
+            </span>
+        </div>
+
+        <div class="pedido-info">
+            <div><strong>Total:</strong> $<?= number_format($p['total_pedido'], 0, ',', '.') ?></div>
+            <div><strong>Pago:</strong> <?= htmlspecialchars($p['metodo_pago']) ?></div>
+            <div class="pedido-fecha"><?= htmlspecialchars($p['created_at']) ?></div>
+        </div>
+
+        <div class="pedido-acciones">
+            <?php if (in_array($p['estado'], ['Pending', 'Accepted'])): ?>
+                <button class="btn-cancelar cancelar-btn" data-id="<?= $p['id'] ?>">Cancelar</button>
+                <button class="btn-detalles detalles-btn" data-id="<?= $p['id'] ?>">Ver detalles</button>
+            <?php else: ?>
+                <span class="no-disponible">No disponible</span>
+            <?php endif; ?>
+        </div>
+    </div>
+
+<?php endforeach; ?>
+</div>
 <?php endif; ?>
 
-<script>
-document.querySelectorAll('.cancelar-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const id = btn.dataset.id;
 
-        Swal.fire({
-            title: '¿Cancelar pedido?',
-            text: 'Una vez cancelado no podrás revertirlo.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, cancelar',
-            cancelButtonText: 'No',
-        }).then(result => {
-            if (result.isConfirmed) {
-                fetch('/DelixSystem/app/pages/pedidos/php/cancelar_pedido.php', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: `pedido_id=${id}`
-                })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire('Cancelado', data.mensaje, 'success')
-                            .then(() => location.reload());
-                    } else {
-                        Swal.fire('Error', data.error || 'No se pudo cancelar el pedido', 'error');
-                    }
-                });
-            }
-        });
-    });
-});
-</script>
+<!-- MODAL DETALLES SLIDE -->
+<div id="modalDetalles" class="modal-slide">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span class="cerrar">&times;</span>
+            <h3>Detalles del Pedido</h3>
+        </div>
 
-<!-- MODAL DETALLES -->
-<div id="modalDetalles" class="modal">
-    <div class="modal-contenido">
-        <span class="cerrar">&times;</span>
-        <h3>Detalles del Pedido</h3>
-        <div id="detallesContenido">
+        <div id="detallesContenido" class="items-container">
             Cargando...
         </div>
     </div>
 </div>
 
 
-<script src="/DelixSystem/app/views/mesas/js/menu.js"></script>
+<script src="/DelixSystem/app/views/mesas/js/mis_pedidos.js"></script>
+
 </body>
 </html>

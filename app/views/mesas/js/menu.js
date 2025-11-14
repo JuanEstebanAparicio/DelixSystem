@@ -73,7 +73,7 @@ function renderDishCard(p){
     <div class="platillo-card" data-cat="${p.category}">
         <div class="img-box"
             onclick="openDishModal('${p.name_dish.replace(/'/g,"\\'")}', '${p.description?.replace(/'/g,"\\'") || ''}', '${p.photo}', '${p.price}', '${p.id}')">
-            <img src="/DelixSystem/app/pages/dishes_manager/${p.photo}" alt="${p.name_dish}">
+            <img src="${p.photo || '/DelixSystem/public/img/no-image.png'}" alt="${p.name_dish}">
         </div>
 
         <div class="info-box">
@@ -332,8 +332,20 @@ async function crearPedido(metodo_pago, pagado = false){
 
 
 // ====== MODAL INFO PLATO ======
-function openDishModal(name, desc, photo, price, id){
-    document.getElementById("dishModalImg").src = "/DelixSystem/app/pages/dishes_manager/" + photo;
+function openDishModal(name, desc, photo, price, id) {
+
+    // Si viene null o vacío → imagen por defecto
+    let finalPhoto = photo && photo.trim() !== "" 
+        ? photo 
+        : "/DelixSystem/public/img/no-image.png";
+
+    // Si NO empieza con http → es local (caso raro)
+    if (!finalPhoto.startsWith("http")) {
+        finalPhoto = "/DelixSystem/app/pages/dishes_manager/" + finalPhoto;
+    }
+
+    // Asignar datos al modal
+    document.getElementById("dishModalImg").src = finalPhoto;
     document.getElementById("dishModalName").innerText = name;
     document.getElementById("dishModalDesc").innerText = desc || "Sin descripción";
     document.getElementById("dishModalPrice").innerText = price;
@@ -345,6 +357,7 @@ function openDishModal(name, desc, photo, price, id){
 
     document.getElementById("dishModal").style.display = "block";
 }
+
 
 function closeDishModal(){
     document.getElementById("dishModal").style.display = "none";
@@ -429,63 +442,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 });
-
-
-
-
-// ===============================
-// BOTONES VER DETALLES
-// ===============================
-document.querySelectorAll('.detalles-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const id = btn.dataset.id;
-
-        fetch('/DelixSystem/app/views/mesas/php/obtener_items.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `id_pedido=${id}`
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (!data.ok) {
-                Swal.fire('Error', data.error, 'error');
-                return;
-            }
-
-            let html = `
-                <table class="tabla-detalles">
-                    <tr><th>Platillo</th><th>Precio</th><th>Cantidad</th></tr>
-            `;
-
-            data.items.forEach(i => {
-                html += `
-                    <tr>
-                        <td>${i.nombre_platillo}</td>
-                        <td>$${Intl.NumberFormat('es-CO').format(i.precio)}</td>
-                        <td>${i.cantidad}</td>
-                    </tr>
-                `;
-            });
-
-            html += `</table>`;
-
-            document.getElementById('detallesContenido').innerHTML = html;
-
-            document.getElementById('modalDetalles').style.display = 'flex';
-        });
-    });
-});
-
-// ===============================
-// CERRAR MODAL
-// ===============================
-document.querySelector('.cerrar').onclick = () => {
-    document.getElementById('modalDetalles').style.display = 'none';
-};
-
-window.onclick = function(e) {
-    if (e.target == document.getElementById('modalDetalles')) {
-        document.getElementById('modalDetalles').style.display = 'none';
-    }
-}
 

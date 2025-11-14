@@ -170,8 +170,11 @@ foreach($platillos as $p){
          '<?= $p['price'] ?>',
          '<?= $p['id'] ?>'
      )">
-    <img src="/DelixSystem/app/pages/dishes_manager/<?= htmlspecialchars($p['photo']) ?>" alt="<?= htmlspecialchars($p['name_dish']) ?>">
+
+    <img src="<?= htmlspecialchars($p['photo']) ?>" 
+         alt="<?= htmlspecialchars($p['name_dish']) ?>">
 </div>
+
 
         <div class="info-box">
     <h3><?= htmlspecialchars($p['name_dish']) ?></h3>
