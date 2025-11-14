@@ -1,7 +1,22 @@
 <?php
-// cancelar_pedido.php
 session_start();
-require_once __DIR__ . '/../../../config/supabase.php';
+
+header("Content-Type: application/json");
+
+// ⛔ Debug: verificar ruta exacta del archivo
+error_log("📍 cancelar_pedido.php está en: " . __DIR__);
+
+// ⛔ Debug: verificar si supabase existe desde este archivo
+$testPath = __DIR__ . '/../../../config/supabase.php';
+error_log("🔍 Buscando supabase.php en: $testPath");
+
+if (!file_exists($testPath)) {
+    error_log("❌ ERROR: supabase.php NO existe en esa ruta");
+    echo json_encode(["error" => "Ruta inválida: supabase.php no encontrado"]);
+    exit;
+}
+
+require_once $testPath;
 
 if (!isset($_POST['pedido_id'])) {
     http_response_code(400);

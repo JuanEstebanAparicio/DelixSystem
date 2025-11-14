@@ -7,12 +7,14 @@ require_once __DIR__ . '/../../../config/supabase.php';
 // 1️⃣ Verificar si hay cliente en sesión
 // ================================
 if (!isset($_SESSION['cliente'])) {
+
     die("<p style='color:red; font-size:18px;'>⚠️ No hay cliente identificado.</p>");
 }
 
 $cliente = $_SESSION['cliente']['nombre'];
 $id_mesa = $_SESSION['cliente']['id_mesa'];
 $id_area = $_SESSION['cliente']['id_area'];
+$mesa_text = $_SESSION['cliente']['mesa'];
 
 // ================================
 // 2️⃣ CONSULTA sin id_user
@@ -30,6 +32,7 @@ $stmt->execute([
     ':cliente' => $cliente,
     ':id_mesa' => $id_mesa,
     ':id_area' => $id_area
+    
 ]);
 
 $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -44,10 +47,16 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+<a class="boton-volver" href="/DelixSystem/app/views/mesas/view/menu.php?id=<?= $_SESSION['cliente']['id_mesa'] ?>&u=<?= $_SESSION['usuario']['id'] ?>">
+    <svg viewBox="0 0 24 24">
+        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+    </svg>
+</a>
+
 
 <h2>📋 Mis Pedidos</h2>
 <p><strong>Cliente:</strong> <?= htmlspecialchars($cliente) ?> |
-   <strong>Mesa ID:</strong> <?= htmlspecialchars($id_mesa) ?></p>
+      <strong>Mesa:</strong> <?= htmlspecialchars($mesa_text) ?> 
 
 <?php if (empty($pedidos)): ?>
     <p>No tienes pedidos aún.</p>
@@ -65,20 +74,21 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </thead>
     <tbody>
         <?php foreach ($pedidos as $p): ?>
-        <tr>
-            <td>#<?= $p['id'] ?></td>
-        <td>$<?= number_format($p['total_pedido'], 0, ',', '.') ?></td>
-            <td><?= htmlspecialchars($p['metodo_pago']) ?></td>
-            <td><?= htmlspecialchars($p['estado']) ?></td>
-            <td><?= htmlspecialchars($p['created_at']) ?></td>
-            <td>
-                <?php if (in_array($p['estado'], ['Pending', 'Accepted'])): ?>
-                    <button class="cancelar-btn" data-id="<?= $p['id'] ?>">❌ Cancelar</button>
-                <?php else: ?>
-                    <span style="color:gray;">No disponible</span>
-                <?php endif; ?>
-            </td>
-        </tr>
+       <tr>
+    <td data-label="ID">#<?= $p['id'] ?></td>
+    <td data-label="Total">$<?= number_format($p['total_pedido'], 0, ',', '.') ?></td>
+    <td data-label="Pago"><?= htmlspecialchars($p['metodo_pago']) ?></td>
+    <td data-label="Estado"><?= htmlspecialchars($p['estado']) ?></td>
+    <td data-label="Fecha"><?= htmlspecialchars($p['created_at']) ?></td>
+    <td data-label="Acción">
+        <?php if (in_array($p['estado'], ['Pending', 'Accepted'])): ?>
+            <button class="cancelar-btn" data-id="<?= $p['id'] ?>">❌ Cancelar</button>
+        <?php else: ?>
+            <span style="color:gray;">No disponible</span>
+        <?php endif; ?>
+    </td>
+</tr>
+
         <?php endforeach; ?>
     </tbody>
 </table>

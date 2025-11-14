@@ -1,69 +1,60 @@
 <?php
 session_start();
-header('Content-Type: application/json');
 
-require_once __DIR__ . '/../../../../config/supabase.php';
+header("Content-Type: application/json");
 
-// ================================
-// 1️⃣ Verificar parámetro recibido
-// ================================
-$pedido_id = $_POST['pedido_id'] ?? null;
+// Ruta absoluta REAL del archivo supabase.php
+$testPath = 'C:/xampp/htdocs/DelixSystem/app/config/supabase.php';
 
-if (!$pedido_id) {
-    echo json_encode([
-        "success" => false,
-        "error" => "No se recibió el ID del pedido."
-    ]);
+if (!file_exists($testPath)) {
+    echo json_encode(["error" => "No se encontró supabase.php en: $testPath"]);
     exit;
 }
 
-// ================================
-// 2️⃣ Obtener el pedido actual
-// ================================
-$stmt = $conexion->prepare("SELECT estado FROM orders WHERE id = :id");
-$stmt->execute([':id' => $pedido_id]);
-$pedido = $stmt->fetch(PDO::FETCH_ASSOC);
+require_once $testPath;
 
-if (!$pedido) {
-    echo json_encode([
-        "success" => false,
-        "error" => "El pedido no existe."
-    ]);
+// Verificación del ID
+if (!isset($_POST['pedido_id'])) {
+    http_response_code(400);
+    echo json_encode(["error" => "Falta el ID del pedido"]);
     exit;
 }
 
-$estadoActual = $pedido['estado'];
+$id = intval($_POST['pedido_id']);
 
-// ================================
-// 3️⃣ Validar si se puede cancelar
-// Solo permitido desde:
-//  - Pending
-//  - Accepted
-// ================================
-$estadosPermitidos = ["Pending", "Accepted"];
+try {
+    // Traer estado actual
+    $stmt = $conexion->prepare("SELECT estado FROM orders WHERE id = :id");
+    $stmt->execute([':id' => $id]);
+    $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!in_array($estadoActual, $estadosPermitidos)) {
-    echo json_encode([
-        "success" => false,
-        "error" => "Este pedido ya no se puede cancelar (estado actual: $estadoActual)."
-    ]);
-    exit;
+    if (!$pedido) {
+        http_response_code(404);
+        echo json_encode(["error" => "Pedido no encontrado"]);
+        exit;
+    }
+
+    $estadoActual = $pedido['estado'];
+
+    // Solo permitir cancelar si aún no está en preparación
+    $estadosPermitidos = ["Pending", "Accepted"];
+
+    if (!in_array($estadoActual, $estadosPermitidos)) {
+        http_response_code(403);
+        echo json_encode([
+            "error" => "No se puede cancelar el pedido porque ya está en preparación o fue entregado.",
+            "estado_actual" => $estadoActual
+        ]);
+        exit;
+    }
+
+    // Actualizar estado a "Canceled"
+    $update = $conexion->prepare("UPDATE orders SET estado = 'Canceled' WHERE id = :id");
+    $update->execute([':id' => $id]);
+
+    echo json_encode(["success" => true, "mensaje" => "Pedido cancelado correctamente."]);
+
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(["error" => "Error al cancelar pedido: " . $e->getMessage()]);
 }
-
-// ================================
-// 4️⃣ Actualizar estado → "Canceled"
-// ================================
-$update = $conexion->prepare("
-    UPDATE orders 
-    SET estado = 'Canceled'
-    WHERE id = :id
-");
-
-$update->execute([':id' => $pedido_id]);
-
-echo json_encode([
-    "success" => true,
-    "mensaje" => "El pedido #$pedido_id ha sido cancelado correctamente."
-]);
-exit;
-?>

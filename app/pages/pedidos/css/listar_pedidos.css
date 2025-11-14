@@ -180,6 +180,7 @@ body{
 .badge-in_progress{ background:#9C27B0; }
 .badge-ready{ background:#4CAF50; }
 .badge-delivered{ background:#1E88E5; }
+.badge-canceled{ background:#e51e1e; }
 
 
 /* ANIM */
