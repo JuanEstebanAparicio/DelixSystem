@@ -15,7 +15,7 @@ $password = $_POST['password'] ?? '';
 $restaurant_name = $_POST['restaurant_name'] ?? '';
 
 // 1️⃣ Insertar usuario directamente en la tabla 'usuarios'
-$insert = supabase('usuarios', 'POST', [
+$insert = supabaseRest('usuarios', 'POST', [
     'first_name' => $first_name,
     'last_name' => $last_name,
     'email' => $email,
