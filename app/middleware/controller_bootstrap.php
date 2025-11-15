@@ -8,6 +8,7 @@ ini_set('log_errors', 1);
 // --- CONFIG GLOBAL ---
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/role_guard.php';
+require_once __DIR__ . '/../api/audit.php';
 
 // --- HEADERS COMUNES ---
 header('Content-Type: application/json');
