@@ -1,0 +1,4 @@
+[15-Nov-2025 08:05:50 Europe/Berlin] ⚠️ Error en AreaController: Call to undefined method AreaModel::getAreaById() en C:\xampp\htdocs\DelixSystem\app\pages\gestion_mesas\php\area\AreaController.php:148
+[15-Nov-2025 08:06:09 Europe/Berlin] ⚠️ Error en AreaController: Call to undefined method AreaModel::getAreaById() en C:\xampp\htdocs\DelixSystem\app\pages\gestion_mesas\php\area\AreaController.php:148
+[15-Nov-2025 08:06:33 Europe/Berlin] ⚠️ Error en AreaController: Call to undefined method AreaModel::getAreaById() en C:\xampp\htdocs\DelixSystem\app\pages\gestion_mesas\php\area\AreaController.php:148
+[15-Nov-2025 08:25:58 Europe/Berlin] ⚠️ Error en AreaController: Call to undefined method AreaModel::getAreaById()
