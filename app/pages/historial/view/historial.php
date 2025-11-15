@@ -10,7 +10,7 @@ require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php';
     <title>Historial de Actividades | Delix</title>
     <link rel="stylesheet" href="../css/historial.css">
 </head>
-
+<br><br><br><br>
 <body>
 
 <div class="historial-wrapper">
