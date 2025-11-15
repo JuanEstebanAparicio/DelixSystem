@@ -1,0 +1,63 @@
+<div class="historial-container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h2>Historial de Actividades</h2>
+        <button id="btn-refresh" class="btn-refresh">
+            🔄 Actualizar
+        </button>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="filtros">
+        <input type="text" id="search" placeholder="Buscar por usuario, módulo o cambios...">
+
+        <select id="filtro-accion">
+            <option value="">Acción</option>
+            <option value="crear">Crear</option>
+            <option value="editar">Editar</option>
+            <option value="eliminar">Eliminar</option>
+            <option value="login">Login</option>
+        </select>
+
+        <select id="filtro-modulo">
+            <option value="">Módulo</option>
+            <option value="areas">Áreas</option>
+            <option value="mesas">Mesas</option>
+            <option value="categorias">Categorías</option>
+            <option value="productos">Productos</option>
+            <option value="usuarios">Usuarios</option>
+        </select>
+
+        <input type="date" id="fecha-desde">
+        <input type="date" id="fecha-hasta">
+
+        <button id="btn-filtrar" class="btn-filtrar">Filtrar</button>
+    </div>
+
+    <!-- TABLA -->
+    <table class="tabla-historial">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Usuario</th>
+                <th>Módulo</th>
+                <th>Acción</th>
+                <th>Descripción</th>
+                <th>Ver</th>
+            </tr>
+        </thead>
+        <tbody id="tabla-body">
+            <!-- aquí se rellenará con JS -->
+        </tbody>
+    </table>
+</div>
+
+<!-- MODAL DETALLE -->
+<div id="modal-detalle" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Detalle del Cambio</h3>
+        <div id="modal-body"></div>
+    </div>
+</div>
