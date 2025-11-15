@@ -2,9 +2,35 @@
 
 body {
     margin: 0;
-    background: #011439;
     font-family: "Poppins", sans-serif;
-    color: #e7e7e7;
+    color: #f2f2f2;
+    background: linear-gradient(135deg, #0c1220 0%, #131c33 100%);
+    overflow-x: hidden;
+}
+
+/* FONDO DECORATIVO CON FORMAS */
+body::before {
+    content: "";
+    position: fixed;
+    top: -150px;
+    left: -150px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255,180,60,0.18) 0%, transparent 70%);
+    filter: blur(40px);
+    z-index: -1;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    bottom: -200px;
+    right: -200px;
+    width: 550px;
+    height: 550px;
+    background: radial-gradient(circle, rgba(0,130,255,0.15) 0%, transparent 70%);
+    filter: blur(50px);
+    z-index: -1;
 }
 
 .historial-wrapper {
@@ -21,14 +47,14 @@ body {
 }
 
 .header h1 {
-    font-size: 2.3rem;
-    color: #fff;
-    margin-bottom: 8px;
+    font-size: 2.4rem;
+    color: #ffd27f;
+    text-shadow: 0 0 8px rgba(255, 210, 130, 0.4);
 }
 
 .header .sub {
     font-size: 1rem;
-    color: #bdbdbd;
+    color: #c6c6c6;
 }
 
 /* --- FILTROS --- */
@@ -38,10 +64,12 @@ body {
     gap: 20px;
     flex-wrap: wrap;
     margin-bottom: 35px;
-    background: #1a1f27;
+    background: rgba(20, 24, 37, 0.8);
+    backdrop-filter: blur(6px);
     padding: 20px;
     border-radius: 14px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.4);
+    border: 1px solid rgba(255, 190, 90, 0.15);
+    box-shadow: 0 0 25px rgba(0,0,0,0.4);
 }
 
 .filtro {
@@ -52,17 +80,24 @@ body {
 .filtro label {
     font-size: 0.9rem;
     margin-bottom: 4px;
-    color: #a5a5a5;
+    color: #ffdd9b;
 }
 
 .filtro select,
 .filtro input {
-    background: #242a33;
-    border: 1px solid #2f3540;
+    background: #1d2536;
+    border: 1px solid #323b50;
     padding: 8px 12px;
     border-radius: 8px;
-    color: #fff;
+    color: #f2f2f2;
     font-size: 0.95rem;
+    transition: 0.2s;
+}
+
+.filtro select:focus,
+.filtro input:focus {
+    box-shadow: 0 0 8px rgba(255,210,130,0.4);
+    border-color: #ffcd73;
 }
 
 /* --- BOTÓN FILTRAR --- */
@@ -70,26 +105,30 @@ body {
 .btn-filtrar {
     align-self: flex-end;
     padding: 10px 18px;
-    background: #0058ff;
+    background: linear-gradient(135deg, #ffb048, #ff8c42);
     border: none;
     border-radius: 8px;
-    color: #fff;
+    color: #242424;
     cursor: pointer;
-    font-weight: 500;
-    transition: 0.2s;
+    font-weight: 600;
+    transition: 0.25s;
+    box-shadow: 0 4px 14px rgba(255, 150, 50, 0.4);
 }
 
 .btn-filtrar:hover {
-    background: #1c6bff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(255,160,60,0.6);
 }
 
 /* --- TABLA HISTORIAL --- */
 
 .tabla-section {
-    background: #161a21;
+    background: rgba(18, 23, 35, 0.85);
+    backdrop-filter: blur(6px);
     padding: 20px;
     border-radius: 14px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255, 190, 90, 0.1);
+    box-shadow: 0 0 30px rgba(0,0,0,0.45);
 }
 
 .tabla-historial {
@@ -98,39 +137,43 @@ body {
 }
 
 .tabla-historial thead {
-    background: #1e2430;
+    background: rgba(245, 175, 80, 0.15);
 }
 
 .tabla-historial th {
     padding: 12px;
     text-align: left;
     font-weight: 600;
-    color: #aeb8c5;
+    letter-spacing: .5px;
+    color: #ffdca8;
+    border-bottom: 1px solid rgba(255,210,130,0.15);
 }
 
 .tabla-historial td {
     padding: 14px;
-    border-bottom: 1px solid #2a2f3b;
+    border-bottom: 1px solid rgba(255,210,130,0.08);
+    color: #e9e9e9;
 }
 
 .tabla-historial tr:hover {
-    background: #1d222b;
+    background: rgba(255, 200, 100, 0.06);
     transition: .2s;
 }
 
-/* --- DETALLES (mostrar JSON en tooltip) --- */
+/* --- DETALLES BUTTON --- */
 
 .detalles-btn {
     cursor: pointer;
     padding: 6px 10px;
-    background: #232a36;
+    background: linear-gradient(135deg, #233048, #2d3954);
     border-radius: 6px;
-    color: #d4d4d4;
+    color: #ffdd9b;
     font-size: 0.8rem;
-    border: 1px solid #2f3643;
-    transition: 0.2s;
+    border: 1px solid rgba(255,200,110,0.3);
+    transition: 0.25s;
 }
 
 .detalles-btn:hover {
-    background: #2e3542;
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, #2a3a58, #334567);
 }
