@@ -118,3 +118,14 @@ function verifyRoleAccess(string $resource, string $action): void
     $rolesPermitidos = getRoleAccess()[$resource][$action] ?? [];
     canEmployeePerform($rolesPermitidos);
 }
+/**
+ * 📝 Función global simple para registrar auditoría
+ */
+function auditLog(string $gestor, string $action, array $params = []): bool
+{
+    return Audit::log(array_merge([
+        'gestor' => $gestor,
+        'action' => $action
+    ], $params));
+}
+

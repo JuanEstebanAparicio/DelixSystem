@@ -1,31 +1,43 @@
 <?php
 // DelixSystem/app/helpers/audit.php
+
+require_once __DIR__ . '/../middleware/universal_guard.php';
 require_once __DIR__ . '/../config/supabase.php';
 
 class Audit
 {
     /**
-     * 🔎 Detecta automáticamente si el actor es propietario o empleado.
+     * Detecta actor REAL basándose en universalGuard
      */
-    private static function getCurrentActor(PDO $conexion): array
+    private static function getActor(PDO $conexion): array
     {
-        // Propietario autenticado (tabla usuarios)
-        if (isset($_SESSION['usuario']['id'])) {
+        $u = universalGuard(); // ← YA maneja propietario y empleado correctamente
+
+        // Propietario
+        if ($u['tipo'] === 'propietario') {
             return [
-                'owner_id'    => $_SESSION['usuario']['id'],
-                'actor_id'    => $_SESSION['usuario']['id'],
+                'owner_id'    => $u['id'],
+                'actor_id'    => $u['id'],
                 'actor_type'  => 'owner',
                 'actor_roles' => ['OWNER']
             ];
         }
 
-        // Empleado autenticado
-        if (isset($_SESSION['empleado_auth']['id'])) {
+        // Empleado
+        if ($u['tipo'] === 'empleado') {
 
-            $empleadoId = $_SESSION['empleado_auth']['id'];
-            $ownerId    = $_SESSION['empleado_auth']['user_id'];
+            $empleadoId = $u['id'];
+            $ownerId    = $u['restaurant_id']; // ← AQUÍ VIENE DEL UNIVERSAL GUARD
 
-            // Obtener roles del empleado
+            if (!$ownerId) {
+                // Fallback para seguridad
+                // Buscar owner desde employees
+                $stmt = $conexion->prepare("SELECT user_id FROM employees WHERE id = ?");
+                $stmt->execute([$empleadoId]);
+                $ownerId = $stmt->fetchColumn() ?: null;
+            }
+
+            // Obtener roles
             $stmt = $conexion->prepare("
                 SELECT r.nombre
                 FROM roles r
@@ -43,7 +55,7 @@ class Audit
             ];
         }
 
-        // Sin sesión → anónimo
+        // Anónimo
         return [
             'owner_id'    => null,
             'actor_id'    => null,
@@ -52,35 +64,31 @@ class Audit
         ];
     }
 
-    /**
-     * 🧩 Método principal para registrar auditoría.
-     */
     public static function log(array $params): bool
     {
         global $conexion;
 
-        $actor = self::getCurrentActor($conexion);
+        $actor = self::getActor($conexion);
 
-        // Fusión de parámetros
         $data = array_merge([
-            'owner_id'    => $actor['owner_id'],
-            'actor_id'    => $actor['actor_id'],
-            'actor_type'  => $actor['actor_type'],
-            'actor_roles' => json_encode($actor['actor_roles']),
-            'gestor'      => null,
-            'action'      => null,
-            'status'      => 'success',
+            'owner_id'     => $actor['owner_id'],
+            'actor_id'     => $actor['actor_id'],
+            'actor_type'   => $actor['actor_type'],
+            'actor_roles'  => json_encode($actor['actor_roles']),
+            'gestor'       => null,
+            'action'       => null,
+            'status'       => 'success',
             'target_table' => null,
             'target_id'    => null,
             'old'          => null,
             'new'          => null,
             'meta'         => json_encode([
-                'ip'        => $_SERVER['REMOTE_ADDR'] ?? null,
-                'agent'     => $_SERVER['HTTP_USER_AGENT'] ?? null
+                'ip'    => $_SERVER['REMOTE_ADDR'] ?? null,
+                'agent' => $_SERVER['HTTP_USER_AGENT'] ?? null
             ])
         ], $params);
 
-        // Validación mínima
+        // Validación
         if (!$data['owner_id'] || !$data['gestor'] || !$data['action']) {
             return false;
         }
@@ -101,24 +109,21 @@ class Audit
         ");
 
         return $stmt->execute([
-            ':owner_id'    => $data['owner_id'],
-            ':actor_id'    => $data['actor_id'],
-            ':actor_type'  => $data['actor_type'],
-            ':actor_roles' => $data['actor_roles'],
-            ':gestor'      => $data['gestor'],
-            ':action'      => $data['action'],
-            ':status'      => $data['status'],
-            ':target_table' => $data['target_table'],
-            ':target_id'    => $data['target_id'],
-            ':old'          => json_encode($data['old']),
-            ':new'          => json_encode($data['new']),
-            ':meta'         => $data['meta']
+            ":owner_id"     => $data["owner_id"],
+            ":actor_id"     => $data["actor_id"],
+            ":actor_type"   => $data["actor_type"],
+            ":actor_roles"  => $data["actor_roles"],
+            ":gestor"       => $data["gestor"],
+            ":action"       => $data["action"],
+            ":status"       => $data["status"],
+            ":target_table" => $data["target_table"],
+            ":target_id"    => $data["target_id"],
+            ":old"          => json_encode($data["old"]),
+            ":new"          => json_encode($data["new"]),
+            ":meta"         => $data["meta"]
         ]);
     }
 
-    /**
-     * 🚀 Método rápido para registrar acciones estándar.
-     */
     public static function quick(string $gestor, string $action, array $data = []): bool
     {
         return self::log(array_merge([
