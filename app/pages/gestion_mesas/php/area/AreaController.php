@@ -1,194 +1,142 @@
 <?php
-ob_start();
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/area_debug.log');
 
 header('Content-Type: application/json');
 
-require_once __DIR__ . '/../../../../middleware/controller_bootstrap.php';  // 🟢 Permisos + funciones globales
-require_once __DIR__ . '/products_constructor.php';
-require_once __DIR__ . '/storage_crud.php';
-require_once __DIR__ . '/../../../../config/supabase_img.php';
-require_once __DIR__ . '/../../../../config/supabase.php';
+try {
+    // Carga única centralizada
+    require_once __DIR__ . '/../../../../middleware/controller_bootstrap.php';
+    require_once __DIR__ . '/AreaModel.php';
+} catch (Throwable $e) {
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Error al cargar dependencias',
+        'debug'   => $e->getMessage(),
+        'trace'   => $e->getFile() . ':' . $e->getLine(),
+    ]);
+    exit;
+}
+
+// ✅ Verificar conexión PDO
+if (!isset($conexion) || !$conexion instanceof PDO) {
+    echo json_encode([
+        'status'  => 'error',
+        'message' => 'Conexión a base de datos no inicializada',
+    ]);
+    exit;
+}
+
+// Inicialización básica
+$areaModel = new AreaModel($conexion);
+$isAjax = isAjaxRequest();
+$accion = $_REQUEST['accion'] ?? '';
+
+// ✅ Obtener propietario (centralizado)
+[$id_propietario, $error] = getPropietarioID($conexion);
+if ($error) {
+    returnJson($isAjax, 'error', $error);
+}
 
 try {
+    switch ($accion) {
+        // 🟢 Crear área
+       case 'crear':
+    verifyRoleAccess('areas', 'crear');
 
-    // ======================================================
-    // 🟢 USO ESTÁNDAR DEL BOOTSTRAP
-    // ======================================================
-    $isAjax = isAjaxRequest();
-
-    // 🔹 Obtener propietario real (propietario o empleado del propietario)
-    [$id_user, $error] = getPropietarioID($conexion);
-    if ($error) {
-        returnJson($isAjax, 'error', $error);
+    $nombre = trim($_POST['nombre_area'] ?? '');
+    if (empty($nombre)) {
+        returnJson($isAjax, 'error', 'El nombre del área es obligatorio.');
     }
 
-    // ======================================================
-    // 🧩 MAPEO DE ACCIONES / PERMISOS
-    // ======================================================
-    $roundAction = $_POST['action'] ?? '';
-    $actionMap = [
-        'create' => 'crear',
-        'add'    => 'crear',
-        'update' => 'editar',
-        'edit'   => 'editar',
-        'delete' => 'eliminar'
-    ];
-    $accion = $actionMap[$roundAction] ?? null;
-
-    if (!$accion) {
-        returnJson($isAjax, 'error', 'Acción no válida.');
+    if ($areaModel->areaExiste($nombre, $id_propietario)) {
+        returnJson($isAjax, 'error', 'Ya existe un área con ese nombre en tu cuenta.');
     }
 
-    // ======================================================
-    // 🛡️ VERIFICAR PERMISOS SOLO PARA EMPLEADOS
-    // ======================================================
-    if (!isset($_SESSION['usuario'])) { // si NO es propietario
-        verifyRoleAccess('inventario', $accion);
+    $ok = $areaModel->crearArea($nombre, $id_propietario);
+    $id_area = $conexion->lastInsertId();
+
+    if (!$ok) {
+        returnJson($isAjax, 'error', 'Error al crear el área.');
     }
 
-    $crud = new storage_crud();
+    // ◀️ aquí consultamos el nombre del restaurante
+    $stmtR = $conexion->prepare("SELECT restaurant_name FROM areas WHERE id_area = ?");
+    $stmtR->execute([$id_area]);
+    $restaurant_name = $stmtR->fetchColumn();
 
-    $toDate = fn($d) => empty($d) ? null : (new DateTime($d))->format("Y-m-d H:i:s");
+    returnJson($isAjax, 'success', 'Área creada correctamente.', [
+        'id_area' => $id_area,
+        'nombre'  => $nombre,
+        'restaurant_name' => $restaurant_name
+    ]);
 
+            break;
 
-    // ======================================================
-    // 🟩 CREAR PRODUCTO
-    // ======================================================
-    if ($accion === 'crear') {
+        // 🟠 Editar área
+        case 'editar':
+            verifyRoleAccess('areas', 'editar');
 
-        $category = trim($_POST['category'] ?? '');
-        $newCategory = trim($_POST['new_category'] ?? '');
+            $id_area = $_POST['id_area'] ?? null;
+            $nombre  = trim($_POST['nombre_area'] ?? '');
 
-        if ($category === '__new__' && $newCategory !== '') {
-            $category = $newCategory;
-        }
-
-        $name = trim($_POST['name'] ?? '');
-        if (!$name) returnJson($isAjax, 'error', 'El nombre del ingrediente es obligatorio.');
-
-        $photo = null;
-        if (!empty($_FILES['photo']['name'])) {
-
-            $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', $category ?: 'sin_categoria');
-            $safeProduct  = preg_replace('/[^a-zA-Z0-9_-]/', '_', $name);
-
-            $path = "inventario/$id_user/$safeCategory/$safeProduct";
-
-            $photo = supabaseUploadImage($_FILES['photo'], 'storage_img', $path);
-        }
-
-        $producto = new Product(
-            $id_user,
-            $name,
-            floatval($_POST['amount'] ?? 0),
-            floatval($_POST['minimum_quantity'] ?? 0),
-            $_POST['unit'] ?? '',
-            floatval($_POST['unit_cost'] ?? 0),
-            $category,
-            $toDate($_POST['fecha_ingreso'] ?? null),
-            $toDate($_POST['fecha_vencimiento'] ?? null),
-            $_POST['batch'] ?? '',
-            $_POST['description'] ?? '',
-            $_POST['location'] ?? '',
-            $_POST['state'] ?? 'Activo',
-            $_POST['supplier'] ?? '',
-            $photo
-        );
-
-        $crud->insertProduct($producto);
-
-        returnJson($isAjax, 'success', 'Ingrediente agregado correctamente.');
-    }
-
-
-    // ======================================================
-    // 🟨 EDITAR PRODUCTO
-    // ======================================================
-    if ($accion === 'editar') {
-
-        $id = intval($_POST['id'] ?? 0);
-        if ($id <= 0) returnJson($isAjax, 'error', 'ID inválido.');
-
-        $current = $crud->getProductById($id, $id_user);
-        if (!$current) returnJson($isAjax, 'error', 'Ingrediente no encontrado.');
-
-        $category = trim($_POST['category'] ?? $current['category']);
-        $newCategory = trim($_POST['new_category'] ?? '');
-
-        if ($category === '__new__' && $newCategory !== '') {
-            $category = $newCategory;
-        }
-
-        $name = trim($_POST['name'] ?? $current['name']);
-
-        $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', $category ?: 'sin_categoria');
-        $safeProduct  = preg_replace('/[^a-zA-Z0-9_-]/', '_', $name);
-
-        $photo = $current['photo'];
-
-        if (!empty($_FILES['photo']['name'])) {
-
-            $path = "inventario/$id_user/$safeCategory/$safeProduct";
-
-            if (!empty($photo)) {
-                $relative = str_replace(rtrim(SUPABASE_URL, '/') . "/storage/v1/object/public/storage_img/", '', $photo);
-                supabaseDeleteImage('storage_img', $relative);
+            if (!$id_area || empty($nombre)) {
+                returnJson($isAjax, 'error', 'Datos incompletos para editar.');
             }
 
-            $photo = supabaseUploadImage($_FILES['photo'], 'storage_img', $path);
-        }
+            if ($areaModel->areaExiste($nombre, $id_propietario, $id_area)) {
+                returnJson($isAjax, 'error', 'Ya existe un área con ese nombre.');
+            }
 
-        $producto = new Product(
-            $id_user,
-            $name,
-            floatval($_POST['amount'] ?? $current['amount']),
-            floatval($_POST['minimum_quantity'] ?? $current['minimum_quantity']),
-            $_POST['unit'] ?? $current['unit'],
-            floatval($_POST['unit_cost'] ?? $current['unit_cost']),
-            $category,
-            $toDate($_POST['fecha_ingreso'] ?? $current['entrance_date']),
-            $toDate($_POST['fecha_vencimiento'] ?? $current['expiration_date']),
-            $_POST['batch'] ?? $current['batch'],
-            $_POST['description'] ?? $current['description'],
-            $_POST['location'] ?? $current['location'],
-            $_POST['state'] ?? $current['state'],
-            $_POST['supplier'] ?? $current['supplier'],
-            $photo
-        );
+            $areaModel->editarArea($id_area, $nombre, $id_propietario);
+            returnJson($isAjax, 'success', 'Área actualizada correctamente.', [
+                'id_area' => $id_area,
+                'nombre'  => $nombre
+            ]);
+            break;
 
-        $crud->updateProduct($producto, $id);
+        // 🔴 Eliminar área
+        case 'eliminar':
+            verifyRoleAccess('areas', 'eliminar');
 
-        returnJson($isAjax, 'success', 'Ingrediente actualizado correctamente.');
+            $id_area = $_POST['id_area'] ?? $_GET['id_area'] ?? null;
+            if (!$id_area) {
+                returnJson($isAjax, 'error', 'ID de área no válido.');
+            }
+
+            $areaModel->eliminarArea($id_area, $id_propietario);
+            returnJson($isAjax, 'success', 'Área eliminada correctamente.', [
+                'id_area' => $id_area
+            ]);
+            break;
+
+        // 🔵 Reordenar áreas
+        case 'ordenar':
+            verifyRoleAccess('areas', 'ordenar');
+
+            if (!isset($_POST['orden']) || !is_array($_POST['orden'])) {
+                returnJson($isAjax, 'error', 'Datos de orden inválidos.');
+            }
+
+            if ($areaModel->actualizarOrden($_POST['orden'])) {
+                returnJson($isAjax, 'success', 'Orden actualizado correctamente.');
+            } else {
+                returnJson($isAjax, 'error', 'Error al guardar el orden.');
+            }
+            break;
+
+        default:
+            returnJson($isAjax, 'error', 'Acción no válida.');
     }
-
-
-    // ======================================================
-    // 🟥 ELIMINAR PRODUCTO
-    // ======================================================
-    if ($accion === 'eliminar') {
-
-        $id = intval($_POST['id'] ?? 0);
-        if ($id <= 0) returnJson($isAjax, 'error', 'ID inválido.');
-
-        $producto = $crud->getProductById($id, $id_user);
-        if (!$producto) returnJson($isAjax, 'error', 'Ingrediente no encontrado.');
-
-        if (!empty($producto['photo'])) {
-            $relative = str_replace(rtrim(SUPABASE_URL, '/') . "/storage/v1/object/public/storage_img/", '', $producto['photo']);
-            supabaseDeleteImage('storage_img', $relative);
-        }
-
-        $crud->deleteProduct($id, $id_user);
-
-        returnJson($isAjax, 'success', 'Ingrediente eliminado correctamente.');
-    }
-
-
-} catch (Exception $e) {
-    ob_clean();
-    returnJson($isAjax, 'error', $e->getMessage());
+} catch (Throwable $e) {
+    error_log("⚠️ Error en AreaController: " . $e->getMessage() . ' en ' . $e->getFile() . ':' . $e->getLine());
+    echo json_encode([
+        'status'  => 'error',
+        'message' => 'Error interno en controlador',
+        'debug'   => $e->getMessage(),
+        'trace'   => $e->getFile() . ':' . $e->getLine()
+    ]);
+    exit;
 }
-?>
