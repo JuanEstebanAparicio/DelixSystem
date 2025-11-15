@@ -19,3 +19,15 @@ DETAIL:  Failing row contains (7, null, null, anonymous, [], areas, crear, succe
 [15-Nov-2025 09:00:21 Europe/Berlin] PHP Warning:  Undefined array key "actor_roles" in C:\xampp\htdocs\DelixSystem\app\api\audit.php on line 52
 [15-Nov-2025 09:00:21 Europe/Berlin] AuditLogger error: SQLSTATE[23502]: Not null violation: 7 ERROR:  null value in column "owner_id" of relation "audit_logs" violates not-null constraint
 DETAIL:  Failing row contains (8, null, null, anonymous, [], areas, crear, success, areas, 86, null, {"nombre": "Zona gamer"}, {"ip": "::1", "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) A..., 2025-11-15 08:00:21.628186+00).
+[15-Nov-2025 09:06:28 Europe/Berlin] PHP Warning:  Array to string conversion in C:\xampp\htdocs\DelixSystem\app\api\audit.php on line 111
+[15-Nov-2025 09:06:28 Europe/Berlin] ⚠️ Error en AreaController: SQLSTATE[22P02]: Invalid text representation: 7 ERROR:  invalid input syntax for type json
+LINE 12:                 'null', 'null', 'Array'
+                                         ^
+DETAIL:  Token "Array" is invalid.
+CONTEXT:  JSON data, line 1: Array
+[15-Nov-2025 09:11:56 Europe/Berlin] PHP Warning:  Array to string conversion in C:\xampp\htdocs\DelixSystem\app\api\audit.php on line 111
+[15-Nov-2025 09:11:56 Europe/Berlin] ⚠️ Error en AreaController: SQLSTATE[22P02]: Invalid text representation: 7 ERROR:  invalid input syntax for type json
+LINE 12:                 'null', 'null', 'Array'
+                                         ^
+DETAIL:  Token "Array" is invalid.
+CONTEXT:  JSON data, line 1: Array

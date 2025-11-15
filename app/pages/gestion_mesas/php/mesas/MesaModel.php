@@ -51,4 +51,17 @@ class MesaModel {
         $stmt->execute($params);
         return $stmt->fetchColumn() > 0;
     }
+    public function getMesaById($id_mesa)
+{
+    $stmt = $this->db->prepare("
+        SELECT *
+        FROM mesas
+        WHERE id_mesa = ?
+        LIMIT 1
+    ");
+    $stmt->execute([$id_mesa]);
+
+    return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+}
+    
 }
