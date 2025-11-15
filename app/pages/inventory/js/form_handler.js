@@ -21,7 +21,6 @@ async function safeFetchJson(url, options = {}) {
   }
 }
 
-
 function validarFechas() {
   const ingresoEl = document.getElementById("fecha_ingreso");
   const vencimientoEl = document.getElementById("fecha_vencimiento");
@@ -92,7 +91,7 @@ function renderStorage(ingredientes) {
         <div class="card-body">
           <h4 class="ingredient-name">${escapeHtml(ing.name || '')}</h4>
           <p class="ingredient-cost">$${Number(ing.unit_cost || 0).toLocaleString()}</p>
-          <p class="ingredient-state ${((ing.state||"inactivo").toLowerCase())}">${escapeHtml(ing.state || "Inactivo")}</p>
+          <p class="ingredient-state ${(ing.state || "inactivo").toLowerCase()}">${escapeHtml(ing.state || "Inactivo")}</p>
           <p><strong>Cantidad:</strong> ${escapeHtml(String(ing.amount || 0))} ${escapeHtml(ing.unit || '')}</p>
           <p><strong>Mínimo:</strong> ${escapeHtml(String(ing.minimum_quantity || '0'))}</p>
           <p class="ingredient-desc">${escapeHtml(ing.description || "Sin descripción")}</p>
@@ -148,7 +147,7 @@ window.mostrarCategoria = async function (categoria) {
 
   } catch (error) {
     grid.innerHTML = `<p class='error'>Error al filtrar: ${error.message}</p>`;
-    if (typeof Alerts !== "undefined" && Alerts.error) 
+    if (typeof Alerts !== "undefined" && Alerts.error)
       Alerts.error("Error al filtrar: " + error.message);
   }
 };
@@ -158,7 +157,6 @@ window.reloadCategories = async function () {
   const categorySelect = document.getElementById("category");
   if (!categoryList || !categorySelect) return;
 
-  // 🧩 Categorías base (no se eliminan nunca)
   const categoriasBase = [
     "Proteína", "Carbohidrato", "Vegetal", "Lácteo",
     "Bebida", "Salsa", "Fruta", "Cereal / Harina", "Snack"
@@ -171,10 +169,8 @@ window.reloadCategories = async function () {
 
     const categoriasBD = data.categorias || [];
 
-    // 🧹 Limpiar lista lateral
     categoryList.innerHTML = `<li class="sidebar-item active" onclick="mostrarCategoria('Todos')">Todos</li>`;
 
-    // Añadir categorías de la BD al sidebar
     [...categoriasBase, ...categoriasBD].forEach(cat => {
       const li = document.createElement("li");
       li.classList.add("sidebar-item");
@@ -183,17 +179,14 @@ window.reloadCategories = async function () {
       categoryList.appendChild(li);
     });
 
-    // 🧹 Limpiar y reconstruir el select sin eliminar las base
     const opcionesFijas = Array.from(categorySelect.options).filter(opt =>
       categoriasBase.includes(opt.value) ||
       opt.value === "" ||
       opt.value === "__new__"
     );
 
-    // 🔄 Reescribir select: base + BD + "nueva categoría"
     categorySelect.innerHTML = "";
 
-    // Opción de selección
     const defaultOption = document.createElement("option");
     defaultOption.value = "";
     defaultOption.disabled = true;
@@ -201,7 +194,6 @@ window.reloadCategories = async function () {
     defaultOption.textContent = "Seleccione o cree una categoría";
     categorySelect.appendChild(defaultOption);
 
-    // Categorías base
     categoriasBase.forEach(cat => {
       const opt = document.createElement("option");
       opt.value = cat;
@@ -209,7 +201,6 @@ window.reloadCategories = async function () {
       categorySelect.appendChild(opt);
     });
 
-    // Categorías dinámicas desde BD
     categoriasBD.forEach(cat => {
       if (!categoriasBase.includes(cat)) {
         const opt = document.createElement("option");
@@ -219,7 +210,6 @@ window.reloadCategories = async function () {
       }
     });
 
-    // Última opción: crear nueva
     const newOpt = document.createElement("option");
     newOpt.value = "__new__";
     newOpt.textContent = "+ Nueva categoría...";
@@ -262,31 +252,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("ingredientForm");
   if (form) {
     form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+      e.preventDefault();
 
-  if (!validarFechas()) return;
+      if (!validarFechas()) return;
 
-  const formData = new FormData(form);
+      const formData = new FormData(form);
 
-  const data = await safeFetchJson(
-    "../php/inventario/ingredienteController.php",
-    {
-      method: "POST",
-      body: formData
-    }
-  );
+      const data = await safeFetchJson(
+        "../php/inventario/ingredienteController.php",
+        {
+          method: "POST",
+          body: formData
+        }
+      );
 
-  if (data.status === "error") {
-    Alerts?.warning && Alerts.warning(data.message);
-    return;
-  }
+      if (data.status === "error") {
+        Alerts?.warning && Alerts.warning(data.message);
+        return;
+      }
 
-  Alerts?.success && Alerts.success(data.message || "Guardado correctamente.");
-  hideModal("formModal");
-  loadStorage();
-  reloadCategories();
-});
-  
+      Alerts?.success && Alerts.success(data.message || "Guardado correctamente.");
+      hideModal("formModal");
+      loadStorage();
+      reloadCategories();
+    });
   }
 
   const photoInput = document.getElementById("photo");
@@ -430,36 +419,25 @@ function editIngredient(ing) {
 }
 
 async function deleteIngredient(id) {
-
-  const result = await Swal.fire({
+  const confirm = await Swal.fire({
     title: "¿Eliminar ingrediente?",
-    text: "Esta acción no se puede deshacer.",
     icon: "warning",
     showCancelButton: true,
     confirmButtonText: "Sí, eliminar",
     cancelButtonText: "Cancelar",
   });
-
-  if (!result.isConfirmed) return;
+  if (!confirm.isConfirmed) return;
 
   const data = await safeFetchJson("../php/inventario/ingredienteController.php", {
     method: "POST",
-    body: new URLSearchParams({
-      id: id,
-      action: "delete"
-    })
+    body: new URLSearchParams({ id, action: "delete" }),
   });
 
-  if (data.status === "error") {
-    Alerts?.warning && Alerts.warning(data.message);
-    return;
-  }
-
-  Alerts?.success && Alerts.success(data.message || "Eliminado correctamente.");
+  if (data.status === "error") return Alerts?.warning(data.message);
+  Alerts?.success(data.message || "Eliminado.");
   loadStorage();
   reloadCategories();
 }
-
 
 const filterState = document.getElementById("filterState");
 const searchInput = document.getElementById("searchInput");
@@ -472,7 +450,7 @@ searchInput.addEventListener("input", filtrarIngredientes);
 function filtrarIngredientes() {
   const stateValue = filterState.value;
   const searchValue = searchInput.value.toLowerCase();
-  
+
   const cards = document.querySelectorAll(".ingredient-card.card:not(.create-card)");
 
   cards.forEach(card => {
