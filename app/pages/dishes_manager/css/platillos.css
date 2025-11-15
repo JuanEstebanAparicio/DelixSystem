@@ -330,6 +330,7 @@ body {
   background: rgba(240,200,255,0.6);
   border-color: #A98CFF;
 }
+
 .modal {
 position: fixed;
 top: 0;
@@ -432,7 +433,12 @@ max-height: 120px;
 border-radius: 8px;
 border: 1px solid #ccc;
 }
+
 .hidden-input {
+  display: none !important;
+}
+
+.hidden-img {
   display: none !important;
 }
 
