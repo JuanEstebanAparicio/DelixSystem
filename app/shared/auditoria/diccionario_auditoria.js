@@ -1,50 +1,54 @@
 // ==============================
-// 📘 Diccionario General
+// 📘 Diccionario General (solo lo útil, nada técnico)
 // ==============================
 window.diccionarioGeneral = {
-    id: "ID",
     nombre: "Nombre",
     created_at: "Fecha de creación",
     updated_at: "Última actualización",
     status: "Estado",
-    id_usuario: "ID del propietario",
-    actor_id: "ID del actor",
-    actor_type: "Tipo de usuario",
     gestor: "Gestor",
-    action: "Acción",
-    target_table: "Tabla afectada",
-    target_id: "ID afectado"
+    action: "Acción"
 };
 
 // ==============================
 // 📘 Diccionarios por Gestor
 // ==============================
 window.diccionarioPorGestor = {
+    
+    // ======================
+    // 📌 MESAS
+    // ======================
     mesas: {
-        id_mesa: "ID de la Mesa",
         nombre: "Nombre de la Mesa",
-        id_area: "ID del Área",
-        restaurant_name: "Restaurante",
-        orden: "Orden"
+        area_nombre: "Área",          // ✔ Mejor que id_area
+        orden: "Orden",
+        restaurante: "Restaurante"
     },
 
+    // ======================
+    // 📌 AREAS
+    // ======================
     areas: {
-        id_area: "ID del Área",
         nombre: "Nombre del Área",
         orden: "Orden",
-        id_usuario: "Propietario",
-        restaurant_name: "Restaurante"
+        propietario_nombre: "Propietario", // ✔ No id_usuario
+        restaurante: "Restaurante"
     },
 
+    // ======================
+    // 📌 PRODUCTOS
+    // ======================
     productos: {
-        id_producto: "ID del Producto",
+        nombre: "Nombre del Producto",
         precio: "Precio",
         categoria: "Categoría",
         stock: "Stock disponible"
     },
 
+    // ======================
+    // 📌 PEDIDOS
+    // ======================
     pedidos: {
-        id_pedido: "ID del Pedido",
         total: "Total",
         estado: "Estado del pedido",
         items: "Artículos"
@@ -52,7 +56,7 @@ window.diccionarioPorGestor = {
 };
 
 // ==============================
-// 📘 Función para formateo
+// 📘 Formateo de objetos
 // ==============================
 window.formatearObjetoAuditoria = function (obj, gestor) {
     if (!obj) return "<i>Sin datos</i>";
@@ -62,14 +66,18 @@ window.formatearObjetoAuditoria = function (obj, gestor) {
     let html = `<ul class="list-disc ml-4">`;
 
     for (const key in obj) {
+
+        // Obtener nombre legible
         const etiqueta =
             dicGestor[key] ||
             window.diccionarioGeneral[key] ||
-            key;
+            null;
+
+        // ❌ Si no existe etiqueta, NO mostrar esta clave
+        if (!etiqueta) continue;
 
         let valor = obj[key];
 
-        // Formateo bonito para objetos y arrays
         if (typeof valor === "object" && valor !== null) {
             valor = JSON.stringify(valor, null, 2)
                 .replace(/\n/g, "<br>")
@@ -84,6 +92,5 @@ window.formatearObjetoAuditoria = function (obj, gestor) {
     }
 
     html += "</ul>";
-
     return html;
 };
