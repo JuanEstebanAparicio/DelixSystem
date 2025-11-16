@@ -13,9 +13,12 @@ if(!$id_user){
 
 // traer platillos activos
 // traer platillos activos directo BD local (temporal)
-$stmtDish = $conexion->prepare("SELECT id, name_dish, price, photo, description, category 
-                                FROM dish 
-                                WHERE id_user = :id_user AND state = 'Activo'");
+$stmtDish = $conexion->prepare("
+    SELECT id, name_dish, price, photo, description, category, state
+    FROM dish
+    WHERE id_user = :id_user
+");
+
 
 $stmtDish->bindParam(":id_user", $id_user, PDO::PARAM_INT);
 $stmtDish->execute();
@@ -160,41 +163,49 @@ foreach($platillos as $p){
 
 <?php foreach($platillos as $p): ?>
 
-        <div class="platillo-card" data-cat="<?= htmlspecialchars($p['category']) ?>">
-        
-       <div class="img-box" 
-     onclick="openDishModal(
-         '<?= htmlspecialchars(addslashes($p['name_dish'])) ?>',
-         '<?= htmlspecialchars(addslashes($p['description'])) ?>',
-         '<?= htmlspecialchars($p['photo']) ?>',
-         '<?= $p['price'] ?>',
-         '<?= $p['id'] ?>'
-     )">
+    <?php 
+        // Detectar si está agotado
+        $agotado = ($p['state'] !== 'Activo');
+    ?>
 
-    <img src="<?= htmlspecialchars($p['photo']) ?>" 
-         alt="<?= htmlspecialchars($p['name_dish']) ?>">
-</div>
+    <div class="platillo-card <?= $agotado ? 'agotado' : '' ?>" 
+        data-cat="<?= htmlspecialchars($p['category']) ?>">
 
+        <div class="img-box"
+            <?php if (!$agotado): ?>
+                onclick="openDishModal(
+                    '<?= htmlspecialchars(addslashes($p['name_dish'])) ?>',
+                    '<?= htmlspecialchars(addslashes($p['description'])) ?>',
+                    '<?= htmlspecialchars($p['photo']) ?>',
+                    '<?= $p['price'] ?>',
+                    '<?= $p['id'] ?>'
+                )"
+            <?php endif; ?>
+        >
+            <img src="<?= htmlspecialchars($p['photo']) ?>" alt="<?= htmlspecialchars($p['name_dish']) ?>">
+        </div>
 
         <div class="info-box">
-    <h3><?= htmlspecialchars($p['name_dish']) ?></h3>
+            <h3><?= htmlspecialchars($p['name_dish']) ?></h3>
 
-    <?php if (!empty($p['description'])): ?>
-        <p class="dish-desc"><?= htmlspecialchars($p['description']) ?></p>
-    <?php endif; ?>
+            <?php if (!empty($p['description'])): ?>
+                <p class="dish-desc"><?= htmlspecialchars($p['description']) ?></p>
+            <?php endif; ?>
 
-    <p class="price">$<?= number_format($p['price'], 0, ',', '.') ?></p>
+            <p class="price">$<?= number_format($p['price'], 0, ',', '.') ?></p>
 
-    <button class="add-btn"
-        data-id="<?= $p['id'] ?>"
-        data-nombre="<?= htmlspecialchars($p['name_dish']) ?>"
-        data-precio="<?= $p['price'] ?>"
-        data-descripcion="<?= htmlspecialchars($p['description'] ?? '') ?>"
-    >Agregar al carrito</button>
-</div>
-
-
+            <?php if ($agotado): ?>
+                <button class="agotado-btn" disabled>AGOTADO</button>
+            <?php else: ?>
+                <button class="add-btn"
+                    data-id="<?= $p['id'] ?>"
+                    data-nombre="<?= htmlspecialchars($p['name_dish']) ?>"
+                    data-precio="<?= $p['price'] ?>"
+                >Agregar al carrito</button>
+            <?php endif; ?>
+        </div>
     </div>
+
 <?php endforeach; ?>
 
 </div>

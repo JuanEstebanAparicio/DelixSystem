@@ -513,3 +513,26 @@ button.secundario {
     gap: 14px;
     padding-bottom: 90px;
 }
+
+.platillo-card.agotado {
+    opacity: 0.55;
+    filter: grayscale(100%);
+}
+
+.badge-agotado {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: #d00000;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 0 6px rgba(0,0,0,0.25);
+}
+
+.platillo-card.agotado .add-btn {
+    background: #999 !important;
+    cursor: not-allowed;
+}

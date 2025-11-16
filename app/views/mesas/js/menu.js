@@ -68,12 +68,25 @@ async function refrescarPlatos(){
     }
 }
 
-function renderDishCard(p){
+function renderDishCard(p) {
+    const agotado = (p.state !== "Activo");
+
     return `
-    <div class="platillo-card" data-cat="${p.category}">
+    <div class="platillo-card ${agotado ? "agotado" : ""}" data-cat="${p.category}">
+        
         <div class="img-box"
-            onclick="openDishModal('${p.name_dish.replace(/'/g,"\\'")}', '${p.description?.replace(/'/g,"\\'") || ''}', '${p.photo}', '${p.price}', '${p.id}')">
-            <img src="${p.photo || '/DelixSystem/public/img/no-image.png'}" alt="${p.name_dish}">
+            ${agotado ? "" : `
+                onclick="openDishModal(
+                    '${p.name_dish.replace(/'/g,"\\'")}',
+                    '${(p.description || "").replace(/'/g,"\\'")}',
+                    '${p.photo}',
+                    '${p.price}',
+                    '${p.id}'
+                )"
+            `}
+        >
+            <img src="${p.photo || '/DelixSystem/public/img/no-image.png'}" 
+                 alt="${p.name_dish}">
         </div>
 
         <div class="info-box">
@@ -83,16 +96,21 @@ function renderDishCard(p){
 
             <p class="price">$${new Intl.NumberFormat().format(p.price)}</p>
 
-            <button class="add-btn"
-                data-id="${p.id}"
-                data-nombre="${p.name_dish}"
-                data-precio="${p.price}"
-            >
-                Agregar al carrito
-            </button>
+            ${agotado
+                ? `<button class="agotado-btn" disabled>AGOTADO</button>`
+                : `
+                    <button class="add-btn"
+                        data-id="${p.id}"
+                        data-nombre="${p.name_dish}"
+                        data-precio="${p.price}"
+                    >Agregar al carrito</button>
+                  `
+            }
         </div>
+
     </div>`;
 }
+
 
 function attachAddCartEvents(){
     document.querySelectorAll(".add-btn").forEach(btn=>{
