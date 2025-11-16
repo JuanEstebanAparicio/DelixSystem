@@ -1,9 +1,15 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 require_once __DIR__ . "/../../../../middleware/universal_guard.php";
 require_once __DIR__ . "/../../../../config/supabase.php";
 require_once "HistorialModel.php";
 
 header("Content-Type: application/json");
+
 
 $u = universalGuard();  // Detecta owner o empleado
 
@@ -21,11 +27,10 @@ if (!$ownerId) {
     exit;
 }
 
-$model = new HistorialModel($conexion);
+$model = new HistorialModel($conexion); // Ahora sí existe
 $action = $_GET['action'] ?? 'list';
 
 switch ($action) {
-
     case "list":
         try {
             $data = $model->getAuditsByOwner($ownerId);

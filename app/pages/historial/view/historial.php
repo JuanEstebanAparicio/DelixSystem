@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . "/../../../config/database.php";  // ← FALTA
 require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php';
 require_once __DIR__ . '/../../../middleware/universal_guard.php';
 require_once __DIR__ . '/../../../config/supabase.php';
