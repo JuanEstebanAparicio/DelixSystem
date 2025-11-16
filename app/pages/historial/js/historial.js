@@ -1,195 +1,165 @@
-// =============================================================
-// ⭐ HISTORIAL DEL SISTEMA — DelixSystem
-// Carga dinámica + filtros + refresco automático
-// =============================================================
-
-// --- DOM Elements ---
-const tablaBody = document.querySelector("#tablaHistorial tbody");
-const filtroUsuario = document.querySelector("#filtroUsuario");
-const filtroGestor = document.querySelector("#filtroGestor");
-const filtroAccion = document.querySelector("#filtroAccion");
-const filtroFecha = document.querySelector("#filtroFecha");
-const btnFiltrar = document.querySelector("#btnFiltrar");
+// ================================
+//  HISTORIAL.JS
+// ================================
 
 // URL del controlador
 const API_URL = "../php/HistorialController.php?action=list";
 
-// Datos en memoria
-let auditorias = [];
-let usuariosUnicos = new Set();
+// Referencias DOM
+const tablaBody = document.querySelector("#tablaHistorial tbody");
+const filtroUsuario = document.getElementById("filtroUsuario");
+const filtroGestor = document.getElementById("filtroGestor");
+const filtroAccion = document.getElementById("filtroAccion");
+const filtroFecha = document.getElementById("filtroFecha");
+const btnFiltrar = document.getElementById("btnFiltrar");
 
-// Refrescar cada X segundos
-const REFRESH_INTERVAL = 5000;
-
-
-// =============================================================
-// 🔥 1. Cargar auditorías desde el backend
-// =============================================================
+// ================================
+//  CARGAR AUDITORÍAS
+// ================================
 async function cargarAuditorias() {
     try {
         const res = await fetch(API_URL);
-        const data = await res.json();
+        const json = await res.json();
 
-        if (!data.status) {
-            console.error("Error al cargar auditorías:", data.error);
+        if (!json.status) {
+            console.error("Error del servidor:", json.error);
             return;
         }
 
-        auditorias = data.data;
+        const datos = json.data;
 
-        poblarUsuarios();
-        renderTabla();
+        // llenar selecciones dinámicas
+        llenarSelectUsuarios(datos);
 
-    } catch (e) {
-        console.error("Error fetch:", e);
+        // renderizar tabla
+        renderTabla(datos);
+
+        window.__AUDIT_DATA__ = datos; // cache global
+    } catch (error) {
+        console.error("Error fetch:", error);
     }
 }
 
+// ================================
+//  RENDERIZAR TABLA
+// ================================
+function renderTabla(data) {
+    tablaBody.innerHTML = "";
 
-// =============================================================
-// 👤 2. Poblar select de Usuario dinámicamente
-// =============================================================
-function poblarUsuarios() {
-    usuariosUnicos.clear();
-    filtroUsuario.innerHTML = `<option value="">Todos</option>`;
-
-    auditorias.forEach(a => {
-        if (a.actor_nombre) usuariosUnicos.add(a.actor_nombre);
-    });
-
-    usuariosUnicos.forEach(nombre => {
-        const opt = document.createElement("option");
-        opt.value = nombre;
-        opt.textContent = nombre;
-        filtroUsuario.appendChild(opt);
-    });
-}
-
-
-// =============================================================
-// 🎯 3. Filtros
-// =============================================================
-function filtrarAuditorias() {
-    return auditorias.filter(a => {
-
-        if (filtroUsuario.value && a.actor_nombre !== filtroUsuario.value) return false;
-        if (filtroGestor.value && a.gestor !== filtroGestor.value) return false;
-        if (filtroAccion.value && a.action !== filtroAccion.value) return false;
-
-        if (filtroFecha.value) {
-            const fechaAuditoria = a.created_at.split(" ")[0];
-            if (fechaAuditoria !== filtroFecha.value) return false;
-        }
-
-        return true;
-    });
-}
-
-
-// =============================================================
-// 📊 4. Renderizar tabla
-// =============================================================
-function renderTabla() {
-    tablaBody.innerHTML = ""; // limpiar
-
-    const filtradas = filtrarAuditorias();
-
-    filtradas.forEach(a => {
+    data.forEach(row => {
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-            <td>${a.actor_nombre || "Usuario desconocido"}</td>
-            <td>${a.gestor}</td>
-            <td>${a.action}</td>
-            <td><button class="detalles-btn" data-id="${a.id}">Ver detalles</button></td>
-            <td>${a.created_at}</td>
+            <td>${row.actor_nombre ?? "—"}</td>
+            <td>${row.gestor}</td>
+            <td>${row.action}</td>
+            <td>
+                <button class="detalles-btn" onclick='verDetalles(${JSON.stringify(row).replace(/'/g, "&#39;")})'>
+                    Ver
+                </button>
+            </td>
+            <td>${formatearFecha(row.created_at)}</td>
         `;
 
         tablaBody.appendChild(tr);
     });
-
-    activarBotonesDetalles();
 }
 
+// ================================
+//  LLENAR SELECT DE USUARIOS
+// ================================
+function llenarSelectUsuarios(data) {
+    // limpiar excepto "Todos"
+    filtroUsuario.innerHTML = `<option value="">Todos</option>`;
 
-// =============================================================
-// 🔍 5. Ver detalles — Modal elegante
-// =============================================================
-function activarBotonesDetalles() {
-    const botones = document.querySelectorAll(".detalles-btn");
+    const unicos = new Set();
 
-    botones.forEach(btn => {
-        btn.addEventListener("click", () => {
-            const id = btn.dataset.id;
-            const item = auditorias.find(a => a.id == id);
+    data.forEach(row => {
+        if (row.actor_nombre) unicos.add(row.actor_nombre);
+    });
 
-            mostrarDetalles(item);
-        });
+    unicos.forEach(nombre => {
+        const op = document.createElement("option");
+        op.value = nombre;
+        op.textContent = nombre;
+        filtroUsuario.appendChild(op);
     });
 }
 
-
-function mostrarDetalles(a) {
-    Swal.fire({
-        title: "📄 Detalles de la acción",
-        html: `
-            <div style="text-align:left; font-size:14px">
-                <b>Usuario:</b> ${a.actor_nombre}<br>
-                <b>Gestor:</b> ${a.gestor}<br>
-                <b>Acción:</b> ${a.action}<br><br>
-
-                <b>Datos antiguos:</b>
-                <pre>${formatJSON(a.old)}</pre>
-
-                <b>Datos nuevos:</b>
-                <pre>${formatJSON(a.new)}</pre>
-
-                <b>Metadata:</b>
-                <pre>${formatJSON(a.meta)}</pre>
-            </div>
-        `,
-        width: 650,
-        background: "#131c33",
-        color: "#f2f2f2",
-        confirmButtonColor: "#ff9f43"
-    });
-}
-
-function formatJSON(data) {
-    if (!data) return "—";
-    try {
-        return JSON.stringify(JSON.parse(data), null, 2);
-    } catch {
-        return data;
-    }
-}
-
-
-// =============================================================
-// 🔄 6. Refresco automático (cada 5 segundos)
-// =============================================================
-setInterval(async () => {
-    await cargarAuditorias();
-    animarActualizacion();
-}, REFRESH_INTERVAL);
-
-function animarActualizacion() {
-    tablaBody.style.opacity = 0;
-    setTimeout(() => {
-        tablaBody.style.opacity = 1;
-    }, 200);
-}
-
-
-// =============================================================
-// ⏯️ 7. Botón aplicar filtros
-// =============================================================
+// ================================
+//  FILTRAR DATOS
+// ================================
 btnFiltrar.addEventListener("click", () => {
-    renderTabla();
+    const datos = window.__AUDIT_DATA__ ?? [];
+
+    const usuario = filtroUsuario.value.trim();
+    const gestor = filtroGestor.value.trim();
+    const accion = filtroAccion.value.trim();
+    const fecha = filtroFecha.value.trim();
+
+    const filtrado = datos.filter(row => {
+        const rowFecha = row.created_at.substring(0, 10);
+
+        return (
+            (usuario === "" || row.actor_nombre === usuario) &&
+            (gestor === "" || row.gestor === gestor) &&
+            (accion === "" || row.action === accion) &&
+            (fecha === "" || rowFecha === fecha)
+        );
+    });
+
+    renderTabla(filtrado);
 });
 
+// ================================
+//  MODAL DE DETALLES
+// ================================
+function verDetalles(row) {
+    Swal.fire({
+        title: "Detalles de la acción",
+        width: 650,
+        html: `
+            <div style="text-align:left">
+                <p><b>Usuario:</b> ${row.actor_nombre ?? "—"}</p>
+                <p><b>Gestor:</b> ${row.gestor}</p>
+                <p><b>Acción:</b> ${row.action}</p>
+                <p><b>Estado:</b> ${row.status}</p>
+                <p><b>Fecha:</b> ${formatearFecha(row.created_at)}</p>
+                <hr>
 
-// =============================================================
-// 🚀 Inicializar
-// =============================================================
+                <p><b>Old:</b></p>
+                <pre style="background:#1e1e1e;padding:10px;border-radius:6px;color:#ddd;">${JSON.stringify(row.old, null, 2)}</pre>
+
+                <p><b>New:</b></p>
+                <pre style="background:#1e1e1e;padding:10px;border-radius:6px;color:#ddd;">${JSON.stringify(row.new, null, 2)}</pre>
+
+                <p><b>Meta:</b></p>
+                <pre style="background:#1e1e1e;padding:10px;border-radius:6px;color:#ddd;">${JSON.stringify(row.meta, null, 2)}</pre>
+            </div>
+        `,
+        confirmButtonText: "Cerrar"
+    });
+}
+
+// ================================
+//  FORMATEAR FECHA
+// ================================
+function formatearFecha(f) {
+    const d = new Date(f);
+    return d.toLocaleString("es-VE", { hour12: true });
+}
+
+// ================================
+//  TEMA OSCURO / CLARO
+// ================================
+document.getElementById("themeSwitch").addEventListener("change", e => {
+    document.body.classList.toggle("light", e.target.checked);
+});
+
+// ================================
+//  AUTO CARGA
+// ================================
 cargarAuditorias();
+
+// refrescar cada 30s (opcional)
+setInterval(cargarAuditorias, 30000);
