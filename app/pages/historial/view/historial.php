@@ -129,6 +129,7 @@ $usuario = employeeExtendedGuard(['ADMIN_LOCAL','SUPERVISOR']);
     </section>
 
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- JS -->
 <script src="../js/historial.js"></script>

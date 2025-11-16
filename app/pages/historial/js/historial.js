@@ -114,32 +114,47 @@ btnFiltrar.addEventListener("click", () => {
 // ================================
 //  MODAL DE DETALLES
 // ================================
-function verDetalles(row) {
+function prettyJSON(data) {
+    if (!data || data === "null") return "<i>Sin datos</i>";
+
+    try {
+        const parsed = typeof data === "string" ? JSON.parse(data) : data;
+        return `<pre>${JSON.stringify(parsed, null, 2)}</pre>`;
+    } catch (e) {
+        return `<pre>${data}</pre>`;
+    }
+}
+
+function verDetalles(log) {
     Swal.fire({
-        title: "Detalles de la acción",
-        width: 650,
+        title: "Detalles del Registro",
         html: `
             <div style="text-align:left">
-                <p><b>Usuario:</b> ${row.actor_nombre ?? "—"}</p>
-                <p><b>Gestor:</b> ${row.gestor}</p>
-                <p><b>Acción:</b> ${row.action}</p>
-                <p><b>Estado:</b> ${row.status}</p>
-                <p><b>Fecha:</b> ${formatearFecha(row.created_at)}</p>
+
+                <p><b>Usuario:</b> ${log.usuario_nombre}</p>
+                <p><b>Gestor:</b> ${log.gestor}</p>
+                <p><b>Acción:</b> ${log.action}</p>
+                <p><b>Estado:</b> ${log.status}</p>
+                <p><b>Fecha:</b> ${new Date(log.created_at).toLocaleString()}</p>
+
                 <hr>
 
                 <p><b>Old:</b></p>
-                <pre style="background:#1e1e1e;padding:10px;border-radius:6px;color:#ddd;">${JSON.stringify(row.old, null, 2)}</pre>
+                ${prettyJSON(log.old)}
 
                 <p><b>New:</b></p>
-                <pre style="background:#1e1e1e;padding:10px;border-radius:6px;color:#ddd;">${JSON.stringify(row.new, null, 2)}</pre>
+                ${prettyJSON(log.new)}
 
                 <p><b>Meta:</b></p>
-                <pre style="background:#1e1e1e;padding:10px;border-radius:6px;color:#ddd;">${JSON.stringify(row.meta, null, 2)}</pre>
+                ${prettyJSON(log.meta)}
+
             </div>
         `,
+        width: "700px",
         confirmButtonText: "Cerrar"
     });
 }
+
 
 // ================================
 //  FORMATEAR FECHA
