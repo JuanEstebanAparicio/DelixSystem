@@ -2,12 +2,23 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php';
 require_once __DIR__ . '/../../../middleware/universal_guard.php';
-require_once __DIR__ . '/../../../config/supabase.php';
-
 $usuario = universalGuard();
 
+if ($usuario['tipo'] === 'empleado') {
+    require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php';
+
+    // Evitar que tu navbar propietario se vea encima
+    echo "<style>
+        header.navbar { display: none !important; }
+        body { margin-top: 80px !important; }
+    </style>";
+}
+
+
+require_once __DIR__ . '/../../../config/supabase.php';
+
+// Obtener ID usuario o restaurante
 if ($usuario['tipo'] === 'propietario') {
     $id_usuario = $usuario['id'];
 } elseif ($usuario['tipo'] === 'empleado') {
@@ -44,11 +55,16 @@ try {
 <head>
   <meta charset="UTF-8">
   <title>Gestor de Ingredientes</title>
-  <link rel="stylesheet" href="../css/ingredient_manager.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/cards.css">
+  <link rel="stylesheet" href="../css/modal.css">
+  <link rel="stylesheet" href="../css/navbar.css">
+  <link rel="stylesheet" href="../css/sidebar.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 
 <body>
+
 <header class="navbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
   <h1 class="navbar-title">🍽️ Gestor de Ingredientes</h1>
@@ -243,7 +259,9 @@ try {
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../../../../public/js/alert.js"></script>
-<script src="../js/form_handler.js"></script>
+<script src="../js/core.js"></script>
+<script src="../js/modal.js"></script>
+<script src="../js/acciones.js"></script>
 <script>
   function goToDishes() {
     window.location.href = "/DelixSystem/app/pages/dishes_manager/view/dishes_manager.php";
@@ -253,5 +271,6 @@ try {
     window.location.href = "/DelixSystem/app/pages/dashboard_propietario/view/index.php";
   }
 </script>
+
 </body>
 </html>
