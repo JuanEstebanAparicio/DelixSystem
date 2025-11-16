@@ -1,26 +1,13 @@
 <?php
-require_once __DIR__ . "/../../../config/database.php";  // ← FALTA
-require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php';
-require_once __DIR__ . '/../../../middleware/universal_guard.php';
-require_once __DIR__ . '/../../../config/supabase.php';
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-// 1️⃣ Proteger la vista y obtener datos del usuario
-$usuario = universalGuard();
 
-// 2️⃣ Identificar el owner real para filtros
-if ($usuario['tipo'] === 'propietario') {
-    $ownerId = $usuario['id'];
-} elseif ($usuario['tipo'] === 'empleado') {
-    $ownerId = $usuario['restaurant_id'];
-} else {
-    header("Location: /DelixSystem/public/index.php");
-    exit;
-}
+require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php'; // carga header si es empleado
+require_once __DIR__ . '/../../../middleware/employee_extended_guard.php';
 
-// (Opcional) Nombre del usuario logueado
-$nombreUsuario = $usuario['nombre'];
+$usuario = employeeExtendedGuard(['ADMIN_LOCAL','SUPERVISOR']);
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
