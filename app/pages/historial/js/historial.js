@@ -1,8 +1,7 @@
 // ================================
 //  HISTORIAL.JS
 // ================================
-import { formatearObjetoAuditoria } 
-    from "../../../shared/auditoria/diccionario_auditoria.js";
+const diccionario = window.auditoriaDiccionario;
 
 // URL del controlador
 const API_URL = "../php/HistorialController.php?action=list";
@@ -128,33 +127,74 @@ function prettyJSON(data) {
 }
 
 function verDetalles(log) {
+    const gestor = log.gestor;
+    const oldData = log.old ? JSON.parse(log.old) : null;
+    const newData = log.new ? JSON.parse(log.new) : null;
+    const metaData = log.meta ? JSON.parse(log.meta) : null;
+
     Swal.fire({
         title: "Detalles del Registro",
         html: `
             <div style="text-align:left">
 
-                <p><b>Usuario:</b> ${log.usuario_nombre}</p>
-                <p><b>Gestor:</b> ${log.gestor}</p>
+                <p><b>Usuario:</b> ${log.usuario_nombre || "Desconocido"}</p>
+                <p><b>Gestor:</b> ${gestor}</p>
                 <p><b>Acción:</b> ${log.action}</p>
                 <p><b>Estado:</b> ${log.status}</p>
                 <p><b>Fecha:</b> ${new Date(log.created_at).toLocaleString()}</p>
 
                 <hr>
 
-                <p><b>Old:</b></p>
-                ${prettyJSON(log.old)}
+                <p><b>Antes (OLD):</b></p>
+                ${formatearObjetoAuditoria(oldData, gestor)}
 
-                <p><b>New:</b></p>
-                ${prettyJSON(log.new)}
+                <p><b>Después (NEW):</b></p>
+                ${formatearObjetoAuditoria(newData, gestor)}
 
                 <p><b>Meta:</b></p>
-                ${prettyJSON(log.meta)}
+                ${formatearObjetoAuditoria(metaData, gestor)}
 
             </div>
         `,
         width: "700px",
         confirmButtonText: "Cerrar"
     });
+}
+
+function formatearObjetoAuditoria(obj, gestor) {
+    if (!obj || typeof obj !== "object") {
+        return `<p style="color:#999">Sin datos</p>`;
+    }
+
+    // Verifica si existe un diccionario para este gestor
+    const dic = diccionarioAuditoria[gestor] || {};
+
+    let html = `<ul style="margin-left:15px">`;
+
+    for (const key in obj) {
+        const nombreLegible = dic[key] || key; // fallback por si la clave no existe
+        const valor = obj[key];
+
+        if (typeof valor === "object" && valor !== null) {
+            html += `
+                <li><b>${nombreLegible}:</b>
+                    <ul style="margin-left:15px">
+                        ${Object.entries(valor)
+                            .map(([k, v]) => {
+                                const subName = dic[k] || k;
+                                return `<li><b>${subName}:</b> ${v}</li>`;
+                            })
+                            .join("")}
+                    </ul>
+                </li>
+            `;
+        } else {
+            html += `<li><b>${nombreLegible}:</b> ${valor}</li>`;
+        }
+    }
+
+    html += `</ul>`;
+    return html;
 }
 
 

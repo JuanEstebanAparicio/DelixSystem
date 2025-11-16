@@ -130,9 +130,8 @@ $usuario = employeeExtendedGuard(['ADMIN_LOCAL','SUPERVISOR']);
 
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <!-- JS -->
 <script src="../js/historial.js"></script>
-
+<script src="../../../shared/auditoria/diccionario_auditoria.js"></script>
 </body>
 </html>
