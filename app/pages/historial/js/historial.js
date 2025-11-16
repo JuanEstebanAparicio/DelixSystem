@@ -133,6 +133,7 @@ function verDetalles(log) {
             <div style="text-align:left">
 
                 <p><b>Usuario:</b> ${log.usuario_nombre || "Desconocido"}</p>
+                <p><b>Tipo de Usuario:</b> ${log.actor_type || "N/D"}</p>
                 <p><b>Gestor:</b> ${gestor}</p>
                 <p><b>Acción:</b> ${log.action}</p>
                 <p><b>Estado:</b> ${log.status}</p>
