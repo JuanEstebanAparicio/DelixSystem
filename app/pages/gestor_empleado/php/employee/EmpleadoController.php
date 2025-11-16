@@ -19,7 +19,7 @@ try {
 
     $model = new EmpleadoModel($conexion);
 
-    // ----------------------------------------------------
+// ----------------------------------------------------
 // 🔹 ELIMINAR EMPLEADO (solo ADMIN_LOCAL)
 // ----------------------------------------------------
 if ($action === 'delete') {
@@ -28,21 +28,38 @@ if ($action === 'delete') {
     $id = $_POST['id'] ?? null;
     if (!$id) throw new Exception("ID de empleado no recibido.");
 
-    // 🟡 1. Marcar empleado como desconectado antes de eliminarlo
+    // 🟡 Obtener OLD antes de eliminar
+    $stmtOld = $conexion->prepare("SELECT * FROM employees WHERE id = :id LIMIT 1");
+    $stmtOld->execute(['id' => $id]);
+    $oldData = $stmtOld->fetch(PDO::FETCH_ASSOC);
+
+    // Si no existe, no tiene sentido eliminar
+    if (!$oldData) {
+        throw new Exception("Empleado no encontrado.");
+    }
+
+    // 🟡 1. Marcar empleado como desconectado
     $stmt = $conexion->prepare("UPDATE employees SET is_online = FALSE WHERE id = :id");
     $stmt->execute(['id' => $id]);
 
-    // 🟥 2. Eliminar el registro definitivamente
+    // 🟥 2. Eliminar empleado
     $deleted = $model->deleteEmployee($id);
     if (!$deleted) throw new Exception("No se pudo eliminar el empleado.");
 
-    // 🟢 3. Respuesta final
+    // 🟢 3. Auditoría
+    auditLog('empleados', 'eliminar', [
+        'target_table' => 'employees',
+        'target_id' => $id,
+        'old' => $oldData
+    ]);
+
     echo json_encode([
         "status" => "success",
         "message" => "Empleado eliminado correctamente."
     ]);
     exit;
 }
+
 
 
 // ----------------------------------------------------
