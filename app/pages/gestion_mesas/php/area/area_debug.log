@@ -31,3 +31,4 @@ LINE 12:                 'null', 'null', 'Array'
                                          ^
 DETAIL:  Token "Array" is invalid.
 CONTEXT:  JSON data, line 1: Array
+[16-Nov-2025 03:13:43 Europe/Berlin] ⚠️ Error en AreaController: SQLSTATE[22001]: String data, right truncated: 7 ERROR:  value too long for type character varying(100)
