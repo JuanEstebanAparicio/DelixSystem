@@ -1,4 +1,6 @@
-/* --- GENERAL --- */
+/* ==========================================================
+   🎨 ESTILO GENERAL
+========================================================== */
 
 body {
     margin: 0;
@@ -6,9 +8,33 @@ body {
     color: #f2f2f2;
     background: linear-gradient(135deg, #0c1220 0%, #131c33 100%);
     overflow-x: hidden;
+    transition: 0.4s ease;
 }
 
-/* FONDO DECORATIVO CON FORMAS */
+/* 🌙 MODO CLARO */
+body.light {
+    background: #fafafa;
+    color: #1a1a1a;
+}
+
+body.light .header h1 {
+    color: #ff9d2c;
+    text-shadow: none;
+}
+
+body.light .filtros,
+body.light .tabla-section,
+body.light .actividad-card {
+    background: rgba(255, 255, 255, 0.65);
+    color: #222;
+    border: 1px solid rgba(255,150,50,0.25);
+}
+
+
+/* ==========================================================
+   ✨ FONDOS DECORATIVOS
+========================================================== */
+
 body::before {
     content: "";
     position: fixed;
@@ -33,13 +59,89 @@ body::after {
     z-index: -1;
 }
 
+
+/* ==========================================================
+   🎬 ANIMACIONES
+========================================================== */
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeIn 0.8s forwards ease-out;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ==========================================================
+   🔘 MODO OSCURO / CLARO SWITCH
+========================================================== */
+
+.theme-toggle {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding-right: 10px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 26px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0;
+    right: 0; bottom: 0;
+    background-color: #555;
+    transition: 0.4s;
+    border-radius: 26px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px; width: 20px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #ff9b37;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+
+/* ==========================================================
+   🏷️ ESTRUCTURA PRINCIPAL
+========================================================== */
+
 .historial-wrapper {
     max-width: 1300px;
     margin: 30px auto;
     padding: 20px;
 }
-
-/* --- HEADER --- */
 
 .header {
     text-align: center;
@@ -57,7 +159,49 @@ body::after {
     color: #c6c6c6;
 }
 
-/* --- FILTROS --- */
+
+/* ==========================================================
+   📊 TARJETA MINI-GRÁFICO
+========================================================== */
+
+.actividad-card {
+    background: rgba(20, 24, 37, 0.7);
+    padding: 20px;
+    border-radius: 14px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(255,180,80,0.15);
+    box-shadow: 0 0 20px rgba(0,0,0,0.35);
+}
+
+.actividad-card h3 {
+    margin: 0 0 15px 0;
+    color: #ffcf8b;
+    font-weight: 600;
+}
+
+.mini-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    height: 120px;
+}
+
+.mini-chart .bar {
+    width: 18px;
+    background: linear-gradient(135deg, #ffad4d, #ff8c42);
+    border-radius: 6px;
+    box-shadow: 0 3px 10px rgba(255,150,50,0.4);
+    animation: growBar 1.2s ease-out;
+}
+
+@keyframes growBar {
+    from { height: 0%; }
+}
+
+
+/* ==========================================================
+   🔍 FILTROS
+========================================================== */
 
 .filtros {
     display: flex;
@@ -81,6 +225,9 @@ body::after {
     font-size: 0.9rem;
     margin-bottom: 4px;
     color: #ffdd9b;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .filtro select,
@@ -100,8 +247,8 @@ body::after {
     border-color: #ffcd73;
 }
 
-/* --- BOTÓN FILTRAR --- */
 
+/* Botón filtrar */
 .btn-filtrar {
     align-self: flex-end;
     padding: 10px 18px;
@@ -120,7 +267,10 @@ body::after {
     box-shadow: 0 6px 18px rgba(255,160,60,0.6);
 }
 
-/* --- TABLA HISTORIAL --- */
+
+/* ==========================================================
+   📄 TABLA
+========================================================== */
 
 .tabla-section {
     background: rgba(18, 23, 35, 0.85);
@@ -160,7 +310,10 @@ body::after {
     transition: .2s;
 }
 
-/* --- DETALLES BUTTON --- */
+
+/* ==========================================================
+   🔎 BOTÓN DETALLES
+========================================================== */
 
 .detalles-btn {
     cursor: pointer;
