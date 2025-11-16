@@ -71,7 +71,7 @@ function llenarSelectUsuarios(data) {
     const unicos = new Set();
 
     data.forEach(row => {
-        if (row.actor_nombre) unicos.add(row.actor_nombre);
+        if (row.usuario_nombre) unicos.add(row.usuario_nombre);
     });
 
     unicos.forEach(nombre => {
@@ -97,7 +97,7 @@ btnFiltrar.addEventListener("click", () => {
         const rowFecha = row.created_at.substring(0, 10);
 
         return (
-            (usuario === "" || row.actor_nombre === usuario) &&
+            (usuario === "" || row.usuario_nombre === usuario) &&
             (gestor === "" || row.gestor === gestor) &&
             (accion === "" || row.action === accion) &&
             (fecha === "" || rowFecha === fecha)
