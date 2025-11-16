@@ -1,5 +1,23 @@
 <?php
 require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php';
+require_once __DIR__ . '/../../../middleware/universal_guard.php';
+require_once __DIR__ . '/../../../config/supabase.php';
+
+// 1️⃣ Proteger la vista y obtener datos del usuario
+$usuario = universalGuard();
+
+// 2️⃣ Identificar el owner real para filtros
+if ($usuario['tipo'] === 'propietario') {
+    $ownerId = $usuario['id'];
+} elseif ($usuario['tipo'] === 'empleado') {
+    $ownerId = $usuario['restaurant_id'];
+} else {
+    header("Location: /DelixSystem/public/index.php");
+    exit;
+}
+
+// (Opcional) Nombre del usuario logueado
+$nombreUsuario = $usuario['nombre'];
 ?>
 
 <!DOCTYPE html>
