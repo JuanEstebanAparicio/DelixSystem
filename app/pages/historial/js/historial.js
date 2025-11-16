@@ -1,6 +1,8 @@
 // ================================
 //  HISTORIAL.JS
 // ================================
+import { formatearObjetoAuditoria } 
+    from "../../../shared/auditoria/diccionario_auditoria.js";
 
 // URL del controlador
 const API_URL = "../php/HistorialController.php?action=list";
