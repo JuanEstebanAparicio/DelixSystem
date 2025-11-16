@@ -15,49 +15,60 @@ class HistorialModel
      * Devuelve array asociativo apto para serializar en JSON.
      */
     public function getAuditsByOwner(int $ownerId, int $limit = 300)
-    {
-        $sql = "
-            SELECT
-                a.id,
-                a.owner_id,
-                a.actor_id,
-                a.actor_type,
-                a.actor_roles,
-                a.gestor,
-                a.action,
-                a.status,
-                a.target_table,
-                a.target_id,
-                a.old,
-                a.new,
-                a.meta,
-                a.created_at,
-                -- intentar resolver nombre legible del actor
-                COALESCE(u.first_name || ' ' || u.last_name, e.full_name, NULL) AS actor_nombre
-            FROM audit_logs a
-            LEFT JOIN usuarios u ON (a.actor_type = 'owner'   AND u.id = a.actor_id)
-            LEFT JOIN employees e ON (a.actor_type = 'employee' AND e.id = a.actor_id)
-            WHERE a.owner_id = :owner
-            ORDER BY a.created_at DESC
-            LIMIT :limit
-        ";
+{
+    $sql = "
+        SELECT
+            a.id,
+            a.owner_id,
+            a.actor_id,
+            a.actor_type,
+            a.actor_roles,
+            a.gestor,
+            a.action,
+            a.status,
+            a.target_table,
+            a.target_id,
+            a.old,
+            a.new,
+            a.meta,
+            a.created_at,
 
-        $stmt = $this->db->prepare($sql);
-        // bindValue para limitar y tipar bien
-        $stmt->bindValue(':owner', $ownerId, PDO::PARAM_INT);
-        $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
-        $stmt->execute();
+            -- ⬇ NOMBRE DEL USUARIO QUE REALIZÓ LA ACCIÓN
+            CASE 
+                WHEN a.actor_type = 'owner' THEN 
+                    (SELECT first_name || ' ' || last_name FROM usuarios WHERE id = a.actor_id LIMIT 1)
+                WHEN a.actor_type = 'employee' THEN 
+                    (SELECT full_name FROM employees WHERE id = a.actor_id LIMIT 1)
+                ELSE 'Usuario desconocido'
+            END AS usuario_nombre
 
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        FROM audit_logs a
+        WHERE a.owner_id = :owner
+        ORDER BY a.created_at DESC
+        LIMIT :limit
+    ";
 
-        // Normalizar columnas json para asegurar strings (evita problemas al JSON encode)
-        foreach ($rows as &$r) {
-            $r['actor_roles'] = $r['actor_roles'] !== null ? $r['actor_roles'] : '[]';
-            $r['old'] = $r['old'] !== null ? $r['old'] : null;
-            $r['new'] = $r['new'] !== null ? $r['new'] : null;
-            $r['meta'] = $r['meta'] !== null ? $r['meta'] : null;
+    $stmt = $this->db->prepare($sql);
+    $stmt->bindValue(':owner', $ownerId, PDO::PARAM_INT);
+    $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+    $stmt->execute();
+
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Normalizar columnas JSON
+    foreach ($rows as &$r) {
+        $r['actor_roles'] = $r['actor_roles'] !== null ? $r['actor_roles'] : '[]';
+        $r['old']         = $r['old'] !== null ? $r['old'] : null;
+        $r['new']         = $r['new'] !== null ? $r['new'] : null;
+        $r['meta']        = $r['meta'] !== null ? $r['meta'] : null;
+
+        // alias compatible con el JS
+        if (!isset($r['usuario_nombre']) || $r['usuario_nombre'] === null) {
+            $r['usuario_nombre'] = "Usuario desconocido";
         }
-
-        return $rows;
     }
+
+    return $rows;
+}
+
 }
