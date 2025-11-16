@@ -128,12 +128,25 @@ function prettyJSON(data) {
 
 function verDetalles(log) {
     const gestor = log.gestor;
-    const oldData = log.old ? JSON.parse(log.old) : null;
-    const newData = log.new ? JSON.parse(log.new) : null;
-    const metaData = log.meta ? JSON.parse(log.meta) : null;
+
+    // 🔥 Si old/new/meta vienen como strings, intentar parsear; si ya son objetos, no hacer nada
+    const parseSafe = (value) => {
+        if (!value) return null;
+        if (typeof value === "object") return value;
+
+        try {
+            return JSON.parse(value);
+        } catch {
+            return null;
+        }
+    };
+
+    const oldData = parseSafe(log.old);
+    const newData = parseSafe(log.new);
+    const metaData = parseSafe(log.meta);
 
     Swal.fire({
-        title: "Detalles del Registro",
+        title: `Detalles del Registro`,
         html: `
             <div style="text-align:left">
 
@@ -151,7 +164,7 @@ function verDetalles(log) {
                 <p><b>Después (NEW):</b></p>
                 ${formatearObjetoAuditoria(newData, gestor)}
 
-                <p><b>Meta:</b></p>
+                <p><b>Meta (Detalles técnicos):</b></p>
                 ${formatearObjetoAuditoria(metaData, gestor)}
 
             </div>
@@ -160,6 +173,7 @@ function verDetalles(log) {
         confirmButtonText: "Cerrar"
     });
 }
+
 
 function formatearObjetoAuditoria(obj, gestor) {
     if (!obj || typeof obj !== "object") {
