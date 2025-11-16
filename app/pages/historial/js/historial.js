@@ -47,7 +47,7 @@ function renderTabla(data) {
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-            <td>${row.actor_nombre ?? "—"}</td>
+            <td>${row.usuario_nombre ?? "—"}</td>
             <td>${row.gestor}</td>
             <td>${row.action}</td>
             <td>
@@ -146,8 +146,7 @@ function verDetalles(log) {
                 <p><b>Después (NEW):</b></p>
                 ${window.formatearObjetoAuditoria(newData, gestor)}
 
-                <p><b>Meta (Detalles técnicos):</b></p>
-                ${window.formatearObjetoAuditoria(metaData, gestor)}
+                
 
             </div>
         `,
