@@ -20,18 +20,21 @@ const diccionarioGeneral = {
 // 📘 Diccionarios por Gestor
 // ==============================
 const diccionarioPorGestor = {
-    areas: {
-        id_area: "ID del Área",
-        orden: "Orden",
-        restaurant_name: "Restaurante"
-    },
-
     mesas: {
-        id_mesa: "ID de la Mesa",
-        id_area: "ID del Área",
-        nombre: "Nombre de la mesa"
-    },
+    id_mesa: "ID de la Mesa",
+    nombre: "Nombre de la Mesa",
+    id_area: "ID del Área",
+    restaurant_name: "Restaurante",
+    orden: "Orden",
+},
 
+areas: {
+    id_area: "ID del Área",
+    nombre: "Nombre del Área",
+    orden: "Orden",
+    id_usuario: "Propietario",
+    restaurant_name: "Restaurante"
+},
     productos: {
         id_producto: "ID del Producto",
         precio: "Precio",
