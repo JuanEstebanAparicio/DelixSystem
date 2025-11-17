@@ -1,33 +1,42 @@
 let categoriaActual = "all";
 
-document.addEventListener("DOMContentLoaded", () => {
-
-
-
-    // ==== FILTRO CATEGORIAS NAV ====
-document.querySelectorAll(".nav-cat").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-    document.querySelectorAll(".nav-cat").forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-
-    categoriaActual = btn.dataset.cat; // <===== guardar
-
-    filtrarCategoria();
-});
-
-});
-
 function filtrarCategoria(){
-    document.querySelectorAll(".platillo-card").forEach(card=>{
-        if(categoriaActual === "all"){
+    console.log("➡️ Filtrando categoría:", categoriaActual);
+
+    document.querySelectorAll(".platillo-card").forEach(card => {
+        if (categoriaActual === "all") {
             card.style.display = "block";
         } else {
-            card.style.display = (card.dataset.cat === categoriaActual) ? "block" : "none";
+            card.style.display =
+                (card.dataset.cat === categoriaActual) ? "block" : "none";
         }
     });
 }
 
 
+// ==== FILTRO CATEGORIAS NAV ====
+document.addEventListener("DOMContentLoaded", () => {
+
+    const botones = document.querySelectorAll(".cat-btn");
+    const cards = document.querySelectorAll(".platillo-card");
+
+    botones.forEach(boton => {
+        boton.addEventListener("click", () => {
+
+            // actualizar variable global
+            categoriaActual = boton.dataset.cat;
+
+            // quitar highlight
+            botones.forEach(b => b.classList.remove("active"));
+            boton.classList.add("active");
+
+            // aplicar filtro
+            filtrarCategoria();
+        });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
     // ====== APP INFO ======
     const APP = {
         id_user: parseInt(document.body.dataset.id_user),

@@ -149,12 +149,18 @@ foreach($platillos as $p){
 }
 ?>
 
-<nav class="menu-nav">
-    <button class="nav-cat" data-cat="all">Todos</button>
-    <?php foreach(array_keys($categoriasMenu) as $c): ?>
-        <button class="nav-cat" data-cat="<?= htmlspecialchars($c) ?>"><?= htmlspecialchars($c) ?></button>
-    <?php endforeach; ?>
+<nav class="navbar-categorias">
+    <div class="categorias-scroll">
+        <button class="cat-btn active" data-cat="all">Todos</button>
+
+        <?php foreach(array_keys($categoriasMenu) as $c): ?>
+            <button class="cat-btn" data-cat="<?= htmlspecialchars($c) ?>">
+                <?= htmlspecialchars($c) ?>
+            </button>
+        <?php endforeach; ?>
+    </div>
 </nav>
+
 
 
 <main class="menu-container">
