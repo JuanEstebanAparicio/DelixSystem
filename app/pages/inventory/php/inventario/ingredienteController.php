@@ -96,6 +96,29 @@ try {
         $crud->insertProduct($producto);
 
         ob_clean();
+        // 🟢 Auditoría - CREAR
+        auditLog('inventario', 'crear', [
+            'target_table' => 'ingredients',
+            'target_id' => $crud->lastInsertId(), // si existe, si no lo ajustamos
+            'old' => null,
+            'new' => [
+                'name' => $name,
+                'category' => $category,
+                'amount' => $_POST['amount'] ?? 0,
+                'minimum_quantity' => $_POST['minimum_quantity'] ?? 0,
+                'unit' => $_POST['unit'] ?? '',
+                'unit_cost' => $_POST['unit_cost'] ?? 0,
+                'entrance_date' => $_POST['fecha_ingreso'] ?? null,
+                'expiration_date' => $_POST['fecha_vencimiento'] ?? null,
+                'batch' => $_POST['batch'] ?? '',
+                'description' => $_POST['description'] ?? '',
+                'location' => $_POST['location'] ?? '',
+                'state' => $_POST['state'] ?? 'Activo',
+                'supplier' => $_POST['supplier'] ?? '',
+                'photo' => $photo
+            ]
+        ]);
+
         returnJson(true, 'success', 'Ingrediente agregado correctamente.');
     }
 
@@ -159,6 +182,17 @@ try {
 
         $crud->updateProduct($producto, $id);
 
+         // 🟢 OBTENER NEW (DESPUÉS DE ACTUALIZAR)
+        $updated = $crud->getProductById($id, $id_user);
+
+        // 🟢 Auditoría - EDITAR
+        auditLog('inventario', 'editar', [
+            'target_table' => 'ingredients',
+            'target_id' => $id,
+            'old' => $current,
+            'new' => $updated
+        ]);
+
         ob_clean();
         returnJson(true, 'success', 'Ingrediente actualizado correctamente.');
     }
@@ -188,6 +222,13 @@ try {
         }
 
         $crud->deleteProduct($id, $id_user);
+
+        auditLog('inventario', 'eliminar', [
+        'target_table' => 'ingredients',
+        'target_id' => $id,
+        'old' => $producto,
+        'new' => null
+    ]);
 
         ob_clean();
         returnJson(true, 'success', 'Ingrediente eliminado correctamente.');

@@ -102,5 +102,10 @@ class storage_crud {
     return $stmt->fetchColumn() > 0;
 }
 
+public function lastInsertId() {
+    return $this->conn->lastInsertId();
+}
+
+
 }
 ?>
