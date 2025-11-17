@@ -125,8 +125,39 @@ function verDetalles(log) {
 
     const oldData = parseSafe(log.old);
     const newData = parseSafe(log.new);
-    const metaData = parseSafe(log.meta);
 
+    // ================================================
+    // 🟩 PREPARAR RENDERIZADO DE OLD/NEW
+    // ================================================
+    let oldRender = window.formatearObjetoAuditoria(oldData, gestor);
+    let newRender = window.formatearObjetoAuditoria(newData, gestor);
+
+    // ================================================
+    // 🟦 SOLO PARA INVENTARIO: MOSTRAR SOLO CAMBIOS
+    // ================================================
+    if (gestor === "inventario") {
+
+        if (!oldData) {
+            // CREAR ➜ mostrar todo NEW
+            oldRender = "<i>Sin datos</i>";
+            newRender = window.formatearObjetoAuditoria(newData, gestor);
+        } 
+        else {
+            // EDITAR ➜ mostrar solo campos cambiados
+            const cambios = window.prepararDatosInventario(oldData, newData);
+
+            oldRender = window.formatearObjetoAuditoria(oldData, gestor);
+            newRender = window.formatearObjetoAuditoria(cambios, gestor);
+
+            if (Object.keys(cambios).length === 0) {
+                newRender = "<i>No hubo cambios</i>";
+            }
+        }
+    }
+
+    // ================================================
+    // 🟧 MOSTRAR MODAL
+    // ================================================
     Swal.fire({
         title: `Detalles del Registro`,
         html: `
@@ -142,12 +173,10 @@ function verDetalles(log) {
                 <hr>
 
                 <p><b>Antes (OLD):</b></p>
-                ${window.formatearObjetoAuditoria(oldData, gestor)}
+                ${oldRender}
 
                 <p><b>Después (NEW):</b></p>
-                ${window.formatearObjetoAuditoria(newData, gestor)}
-
-                
+                ${newRender}
 
             </div>
         `,

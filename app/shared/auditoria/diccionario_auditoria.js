@@ -54,8 +54,63 @@ window.diccionarioPorGestor = {
     empleado_id: "ID del Empleado"
 },
 
+// ======================
+// 📦 INVENTARIO (STORAGE)
+// ======================
+inventario: {
+    name: "Nombre del Ingrediente",
+    category: "Categoría",
+    amount: "Cantidad",
+    minimum_quantity: "Cantidad Mínima",
+    unit: "Unidad de Medida",
+    unit_cost: "Costo por Unidad",
+    entrance_date: "Fecha de Ingreso",
+    expiration_date: "Fecha de Vencimiento",
+    batch: "Lote",
+    description: "Descripción",
+    location: "Ubicación en Almacén",
+    state: "Estado",
+    supplier: "Proveedor",
+    photo: "Fotografía",
+    
+    // Identificación
+    id: "ID del Ingrediente",
+    target_id: "ID del Ingrediente",
+
+    // Auditoría
+    old: "Datos Anteriores",
+    new: "Datos Nuevos"
+}
+
+
 
 };
+
+// ===========================================
+// 🔍 Detectar solo los campos modificados
+// ===========================================
+window.detectarCambios = function (oldObj, newObj) {
+    const cambios = {};
+
+    for (const key in newObj) {
+        if (!oldObj || oldObj[key] !== newObj[key]) {
+            cambios[key] = newObj[key];
+        }
+    }
+
+    return cambios;
+};
+// ==========================================================
+// 🎯 Filtra SOLO los cambios del inventario antes de mostrar
+// ==========================================================
+window.prepararDatosInventario = function (oldObj, newObj) {
+    // Caso crear → no hay OLD
+    if (!oldObj) return newObj;
+
+    // Detectar solo cambios reales
+    return window.detectarCambios(oldObj, newObj);
+};
+
 
 // ==============================
 // 📘 Formateo de objetos
