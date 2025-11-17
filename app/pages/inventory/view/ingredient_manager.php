@@ -259,9 +259,9 @@ try {
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../../../../public/js/alert.js"></script>
-<script src="../js/core.js"></script>
-<script src="../js/modal.js"></script>
-<script src="../js/acciones.js"></script>
+<script src="../js/form_handler.js"></script>
+<script src="../js/check.js"></script>
+
 <script>
   function goToDishes() {
     window.location.href = "/DelixSystem/app/pages/dishes_manager/view/dishes_manager.php";
