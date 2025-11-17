@@ -179,6 +179,59 @@
   background: rgba(255,255,255,0.4);
 }
 
+/* === QR MODAL === */
+.qr-modal {
+  width: 350px;
+  max-width: 90%;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.qr-content {
+  text-align: center;
+  padding: 20px;
+}
+
+/* === HEADER === */
+.header-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-section .page-title {
+  margin-right: auto;
+}
+
+/* === HEADER BUTTONS (Crear, Categorías, QR, Filtros) === */
+.header-section button {
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  background: linear-gradient(90deg, #f97316, #ef4444);
+  color: #fff;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(249,115,22,0.25);
+  height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.header-section button:hover {
+  transform: scale(1.04);
+  background: linear-gradient(90deg, #fb923c, #f43f5e);
+}
+
+/* === GENERIC HIDDEN === */
+.hidden {
+  display: none;
+}
+
 /* === RESPONSIVE === */
 @media (max-width: 992px) {
   .ingredient-card { width: 45%; }

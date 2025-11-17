@@ -93,7 +93,12 @@ try {
 <main class="main-content container">
   <div class="header-section" style="display: flex; justify-content: space-between; align-items: center;">
     <h2 class="page-title">Inventario de Ingredientes</h2>
+    <button id="openQRIngredientModal" class="btn btn-secondary">QR Ingredientes</button>
     <button id="toggleFilters">Mostrar filtros</button>
+    <?php if ($usuario['tipo'] === 'empleado'): ?>
+      <button id="btnCreateIngredient" class="btn btn-secondary" onclick="newIngredient()">+ Crear</button>
+      <button id="btnOpenSidebar" class="btn btn-secondary" onclick="toggleSidebar()">📂 Categorías</button>
+    <?php endif; ?>
   </div>
 
   <div class="filters hidden-filters">
@@ -128,6 +133,7 @@ try {
           <div class="card-footer">
             <button class="btn btn-edit" onclick='editIngredient(<?= json_encode($ing, JSON_HEX_APOS|JSON_HEX_QUOT) ?>)'>✏️</button>
             <button class="btn btn-delete" onclick="deleteIngredient(<?= $ing['id'] ?>)">🗑️</button>
+            <button class="btn-icon qr" data-id-ingredient="<?= $ing['id'] ?>" data-modal-target="#qrIngredientModal">🔍</button>
           </div>
         </div>
       <?php endforeach; ?>
@@ -256,12 +262,26 @@ try {
     </form>
   </div>
 </div>
+<div id="qrIngredientModal" class="modal hidden">
+  <div class="modal-content qr-modal">
+    <span class="close" onclick="hideModal('qrIngredientModal')">&times;</span>
+    <h2>QR del Ingrediente</h2>
+    <div id="qrIngredientModalContent" class="qr-content">
+      <p>Cargando QR...</p>
+    </div>
+
+    <div style="text-align:center; margin-top:15px;">
+      <button id="scanIngredientQRBtn" class="btn btn-primary">Escanear QR</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../../../../public/js/alert.js"></script>
-<script src="../js/form_handler.js"></script>
+<script src="../js/base.js"></script>
+<script src="../js/modal.js"></script>
 <script src="../js/check.js"></script>
-
+<script src="../js/qr.js"></script>
 <script>
   function goToDishes() {
     window.location.href = "/DelixSystem/app/pages/dishes_manager/view/dishes_manager.php";
