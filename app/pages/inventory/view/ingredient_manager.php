@@ -1,29 +1,33 @@
 <?php
-// DelixSystem/app/pages/inventory/view/ingredient_manager.php
-
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// 🧩 Inicialización de UI y sesiones (soporte para empleado y propietario)
-require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php';
 require_once __DIR__ . '/../../../middleware/universal_guard.php';
-require_once __DIR__ . '/../../../config/supabase.php';
-
-// ✅ Detecta el tipo de usuario activo
 $usuario = universalGuard();
 
-// Determinar el ID base para filtrar el inventario
+if ($usuario['tipo'] === 'empleado') {
+    require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php';
+
+    // Evitar que tu navbar propietario se vea encima
+    echo "<style>
+        header.navbar { display: none !important; }
+        body { margin-top: 80px !important; }
+    </style>";
+}
+
+
+require_once __DIR__ . '/../../../config/supabase.php';
+
+// Obtener ID usuario o restaurante
 if ($usuario['tipo'] === 'propietario') {
     $id_usuario = $usuario['id'];
 } elseif ($usuario['tipo'] === 'empleado') {
-    // El empleado usa el ID del restaurante asociado al propietario
     $id_usuario = $usuario['restaurant_id'];
 } else {
     header("Location: /DelixSystem/public/index.php");
     exit;
 }
 
-// Nombre del usuario actual (solo para mostrar en encabezados)
 $nombreUsuario = $usuario['nombre'] ?? 'Usuario';
 
 try {
@@ -51,11 +55,16 @@ try {
 <head>
   <meta charset="UTF-8">
   <title>Gestor de Ingredientes</title>
-  <link rel="stylesheet" href="../css/ingredient_manager.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/cards.css">
+  <link rel="stylesheet" href="../css/modal.css">
+  <link rel="stylesheet" href="../css/navbar.css">
+  <link rel="stylesheet" href="../css/sidebar.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 
 <body>
+
 <header class="navbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
   <h1 class="navbar-title">🍽️ Gestor de Ingredientes</h1>
@@ -84,7 +93,12 @@ try {
 <main class="main-content container">
   <div class="header-section" style="display: flex; justify-content: space-between; align-items: center;">
     <h2 class="page-title">Inventario de Ingredientes</h2>
+    <button id="openQRIngredientModal" class="btn btn-secondary">QR Ingredientes</button>
     <button id="toggleFilters">Mostrar filtros</button>
+    <?php if ($usuario['tipo'] === 'empleado'): ?>
+      <button id="btnCreateIngredient" class="btn btn-secondary" onclick="newIngredient()">+ Crear</button>
+      <button id="btnOpenSidebar" class="btn btn-secondary" onclick="toggleSidebar()">📂 Categorías</button>
+    <?php endif; ?>
   </div>
 
   <div class="filters hidden-filters">
@@ -119,6 +133,7 @@ try {
           <div class="card-footer">
             <button class="btn btn-edit" onclick='editIngredient(<?= json_encode($ing, JSON_HEX_APOS|JSON_HEX_QUOT) ?>)'>✏️</button>
             <button class="btn btn-delete" onclick="deleteIngredient(<?= $ing['id'] ?>)">🗑️</button>
+            <button class="btn-icon qr" data-id-ingredient="<?= $ing['id'] ?>" data-modal-target="#qrIngredientModal">🔍</button>
           </div>
         </div>
       <?php endforeach; ?>
@@ -184,9 +199,11 @@ try {
           <option value="Fruta">Fruta</option>
           <option value="Cereal / Harina">Cereal / Harina</option>
           <option value="Snack">Snack</option>
+
           <?php foreach ($listaCategorias as $cat): ?>
             <option value="<?= htmlspecialchars($cat) ?>"><?= htmlspecialchars($cat) ?></option>
           <?php endforeach; ?>
+
           <option value="__new__">+ Nueva categoría...</option>
         </select>
         <input type="text" id="newCategoryInput" name="new_category" placeholder="Nueva categoría" class="hidden-input">
@@ -245,10 +262,26 @@ try {
     </form>
   </div>
 </div>
+<div id="qrIngredientModal" class="modal hidden">
+  <div class="modal-content qr-modal">
+    <span class="close" onclick="hideModal('qrIngredientModal')">&times;</span>
+    <h2>QR del Ingrediente</h2>
+    <div id="qrIngredientModalContent" class="qr-content">
+      <p>Cargando QR...</p>
+    </div>
+
+    <div style="text-align:center; margin-top:15px;">
+      <button id="scanIngredientQRBtn" class="btn btn-primary">Escanear QR</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../../../../public/js/alert.js"></script>
-<script src="../js/form_handler.js"></script>
+<script src="../js/base.js"></script>
+<script src="../js/modal.js"></script>
+<script src="../js/check.js"></script>
+<script src="../js/qr.js"></script>
 <script>
   function goToDishes() {
     window.location.href = "/DelixSystem/app/pages/dishes_manager/view/dishes_manager.php";
@@ -258,5 +291,6 @@ try {
     window.location.href = "/DelixSystem/app/pages/dashboard_propietario/view/index.php";
   }
 </script>
+
 </body>
 </html>

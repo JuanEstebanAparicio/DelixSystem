@@ -90,5 +90,17 @@ class storage_crud {
         $stmt->bindParam(':id_user', $id_user);
         return $stmt->execute();
     }
+    public function isIngredientUsed($id, $id_user) {
+    $sql = "SELECT COUNT(*) 
+            FROM dish_ingredient 
+            WHERE ingredient_id = :id";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetchColumn() > 0;
+}
+
 }
 ?>

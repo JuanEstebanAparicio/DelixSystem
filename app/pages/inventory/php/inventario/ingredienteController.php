@@ -1,23 +1,17 @@
 <?php
 
-// 🔧 Forzar a que siempre se trate como AJAX (evita redirecciones HTML)
 $_SERVER['HTTP_X_REQUESTED_WITH'] = 'xmlhttprequest';
 
-// 🔧 Iniciar sesión si no existe
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 🔧 Limpiar headers previos del bootstrap
 header_remove("Content-Type");
 header("Content-Type: application/json; charset=utf-8");
 
-// 🔧 ACTIVAR BUFFER PARA ELIMINAR CUALQUIER OUTPUT ACCIDENTAL
 ob_start();
 
-// 🟢 Bootstrap de permisos
 require_once __DIR__ . '/../../../../middleware/controller_bootstrap.php';
-
 require_once(__DIR__ . '/products_constructor.php');
 require_once(__DIR__ . '/storage_crud.php');
 require_once(__DIR__ . '/../../../../config/supabase_img.php');
@@ -25,10 +19,7 @@ require_once(__DIR__ . '/../../../../config/supabase.php');
 
 try {
 
-    // ======================================================
-    // 🟢 Obtener propietario real (propietario o empleado)
-    // ======================================================
-    $isAjax = true; // ya NO confiamos en PHP, forzamos AJAX siempre
+    $isAjax = true;
 
     [$id_user, $error] = getPropietarioID($conexion);
     if ($error) {
@@ -38,9 +29,6 @@ try {
 
     $crud = new storage_crud();
 
-    // ======================================================
-    // 🧩 MAPEO DE ACCIONES → PERMISOS
-    // ======================================================
     $roundAction = $_POST['action'] ?? '';
 
     $actionMap = [
@@ -58,22 +46,14 @@ try {
         returnJson(true, 'error', 'Acción no válida.');
     }
 
-    // ======================================================
-    // 🛡️ Verificar permisos (solo empleados)
-    // ======================================================
     if (!isset($_SESSION['usuario'])) { 
         verifyRoleAccess('inventario', $accion);
     }
 
-    // ======================================================
-    // 🔧 Helper para fechas
-    // ======================================================
     $toDate = fn($d) => empty($d) ? null : (new DateTime($d))->format("Y-m-d H:i:s");
 
-    // ======================================================
-    // 🟩 CREAR PRODUCTO
-    // ======================================================
     if ($accion === 'crear') {
+
         $category = trim($_POST['category'] ?? '');
         $newCategory = trim($_POST['new_category'] ?? '');
 
@@ -119,10 +99,8 @@ try {
         returnJson(true, 'success', 'Ingrediente agregado correctamente.');
     }
 
-    // ======================================================
-    // 🟨 EDITAR PRODUCTO
-    // ======================================================
     if ($accion === 'editar') {
+
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) {
             ob_clean();
@@ -150,6 +128,7 @@ try {
         $photo = $current['photo'];
 
         if (!empty($_FILES['photo']['name'])) {
+
             $path = "inventario/$id_user/$safeCategory/$safeProduct";
 
             if (!empty($photo)) {
@@ -184,9 +163,6 @@ try {
         returnJson(true, 'success', 'Ingrediente actualizado correctamente.');
     }
 
-    // ======================================================
-    // 🟥 ELIMINAR PRODUCTO
-    // ======================================================
     if ($accion === 'eliminar') {
 
         $id = intval($_POST['id'] ?? 0);
@@ -199,6 +175,11 @@ try {
         if (!$producto) {
             ob_clean();
             returnJson(true, 'error', 'Ingrediente no encontrado.');
+        }
+
+        if ($crud->isIngredientUsed($id, $id_user)) {
+            ob_clean();
+            returnJson(true, 'error', 'Este ingrediente está asociado a uno o varios platillos y no puede eliminarse.');
         }
 
         if (!empty($producto['photo'])) {
