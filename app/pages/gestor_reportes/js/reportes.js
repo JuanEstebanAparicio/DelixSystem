@@ -47,3 +47,58 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    // ============================
+    // 📌 Ventas últimos 7 días
+    // ============================
+    if (document.getElementById("chartVentas7Dias")) {
+        new Chart(document.getElementById("chartVentas7Dias"), {
+            type: 'line',
+            data: {
+                labels: ventas7Dias.map(v => v.fecha),
+                datasets: [{
+                    label: "Ventas",
+                    data: ventas7Dias.map(v => v.total),
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.2
+                }]
+            }
+        });
+    }
+
+    // ============================
+    // 📌 Pedidos por área
+    // ============================
+    if (document.getElementById("chartPedidosArea")) {
+        new Chart(document.getElementById("chartPedidosArea"), {
+            type: 'doughnut',
+            data: {
+                labels: pedidosArea.map(a => a.area),
+                datasets: [{
+                    data: pedidosArea.map(a => a.pedidos),
+                }]
+            }
+        });
+    }
+
+    // ============================
+    // 📌 Ventas del mes actual
+    // ============================
+    if (document.getElementById("chartVentasMes")) {
+        new Chart(document.getElementById("chartVentasMes"), {
+            type: 'bar',
+            data: {
+                labels: ventasMes.map(v => v.fecha),
+                datasets: [{
+                    label: "Ventas",
+                    data: ventasMes.map(v => v.total),
+                }]
+            }
+        });
+    }
+
+});

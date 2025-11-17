@@ -38,5 +38,32 @@ public function obtenerDetalleDiario($id_user, $inicio = null, $fin = null){
         public function obtenerReportesPorRango($id_user, $fecha_inicio, $fecha_fin, $area) {
         return $this->model->getReportesPorRango($id_user, $fecha_inicio, $fecha_fin, $area);
     }
+ 
+    /* ================================
+       📊 FUNCIONES DE GRÁFICAS
+    ================================= */
+
+    // 🔹 Ventas últimos 7 días
+    public function ventasUltimos7Dias($id_user){
+        return $this->model->getVentasUltimos7Dias($id_user);
+    }
+
+    // 🔹 Pedidos por área
+    public function pedidosPorArea($id_user){
+        // Ajustamos el nombre para que coincida con el JS (pedidos en vez de total_pedidos)
+        $data = $this->model->getPedidosPorArea($id_user);
+
+        return array_map(function ($row) {
+            return [
+                "area" => $row["area"],
+                "pedidos" => $row["total_pedidos"]  // JS usa "pedidos"
+            ];
+        }, $data);
+    }
+
+    // 🔹 Ventas del mes actual
+    public function ventasMesActual($id_user){
+        return $this->model->getVentasMesActual($id_user);
+    }
     
 }

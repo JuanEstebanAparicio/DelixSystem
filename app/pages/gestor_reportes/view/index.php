@@ -31,6 +31,10 @@ if ($inicio && $fin) {
     $reporteRango = $reportController->obtenerReportePorRango($id_usuario, $inicio, $fin, $area);
 }
 
+$ventas7 = $reportController->ventasUltimos7Dias($id_usuario);
+$areas = $reportController->pedidosPorArea($id_usuario);
+$ventasMes = $reportController->ventasMesActual($id_usuario);
+
 ?>
 
 <!DOCTYPE html>
@@ -67,9 +71,16 @@ if ($inicio && $fin) {
                 <button class="nav-item" data-section="detalle">
                     <i class="ri-list-unordered"></i> Detalle diario
                 </button>
+                  <button class="nav-item" data-section="graficas">
+                  <i class="ri-bar-chart-fill"></i> Gráficas
+                </button>
+
                 <button class="nav-item" data-section="exportar">
                     <i class="ri-download-line"></i> Exportar datos
                 </button>
+
+              
+
             </nav>
         </div>
 
@@ -108,6 +119,36 @@ if ($inicio && $fin) {
                     </div>
                 </div>
             </section>
+
+
+            <section id="graficas" class="report-section hidden">
+    <h2 class="text-2xl font-semibold mb-6 flex items-center gap-2">
+        <i class="ri-bar-chart-2-line text-emerald-600"></i> Gráficas estadísticas
+    </h2>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- Ventas últimos 7 días -->
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <h3 class="font-semibold mb-3">Ventas últimos 7 días</h3>
+            <canvas id="chartVentas7Dias" height="150"></canvas>
+        </div>
+
+        <!-- Pedidos por área -->
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <h3 class="font-semibold mb-3">Pedidos por área</h3>
+            <canvas id="chartPedidosArea" height="150"></canvas>
+        </div>
+
+        <!-- Ventas del mes -->
+        <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2">
+            <h3 class="font-semibold mb-3">Ventas del mes</h3>
+            <canvas id="chartVentasMes" height="120"></canvas>
+        </div>
+
+    </div>
+</section>
+
 
    <section id="rango" class="report-section hidden">
     <div class="bg-white p-6 rounded-2xl shadow-md mb-8">
@@ -198,5 +239,11 @@ if ($inicio && $fin) {
 
     <script src="../js/reportes.js"></script>
     <script src="/DelixSystem/app/shared/js/control_center_propietario.js"></script>
+    <script>
+const ventas7Dias = <?= json_encode($ventas7) ?>;
+const pedidosArea = <?= json_encode($areas) ?>;
+const ventasMes = <?= json_encode($ventasMes) ?>;
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
