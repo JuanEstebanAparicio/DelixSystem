@@ -34,25 +34,22 @@ window.diccionarioPorGestor = {
         propietario_nombre: "Propietario", // ✔ No id_usuario
         restaurante: "Restaurante"
     },
-
+    
     // ======================
-    // 📌 PRODUCTOS
+    // 📌 EMPLEADOS
     // ======================
-    productos: {
-        nombre: "Nombre del Producto",
-        precio: "Precio",
-        categoria: "Categoría",
-        stock: "Stock disponible"
-    },
-
-    // ======================
-    // 📌 PEDIDOS
-    // ======================
-    pedidos: {
-        total: "Total",
-        estado: "Estado del pedido",
-        items: "Artículos"
+    empleados: {
+        full_name: "Nombre Completo",
+        email: "Correo Electrónico",
+        document: "Documento",
+        is_online: "Estado en Línea",
+        user_id: "Propietario",
+        // Campos de auditoría de registro / eliminación
+        empleado_id: "ID del Empleado",
+        // Para asignación de roles
+        roles: "Roles Asignados"
     }
+
 };
 
 // ==============================
