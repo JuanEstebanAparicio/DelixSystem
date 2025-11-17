@@ -79,6 +79,7 @@ $usuario = employeeExtendedGuard(['ADMIN_LOCAL','SUPERVISOR']);
                 <option value="areas">Áreas</option>
                 <option value="mesas">Mesas</option>
                 <option value="empleados">Empleados</option>
+                <option value="inventario">Inventario</option>
                 <option value="roles">Roles</option>
                 
             </select>
