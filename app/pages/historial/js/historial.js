@@ -127,23 +127,22 @@ function verDetalles(log) {
     const newData = parseSafe(log.new);
 
     // ================================================
-    // 🟩 PREPARAR RENDERIZADO DE OLD/NEW
+    // 🟩 RENDER BÁSICO
     // ================================================
     let oldRender = window.formatearObjetoAuditoria(oldData, gestor);
     let newRender = window.formatearObjetoAuditoria(newData, gestor);
 
     // ================================================
-    // 🟦 SOLO PARA INVENTARIO: MOSTRAR SOLO CAMBIOS
+    // 🟦 LÓGICA ESPECIAL PARA INVENTARIO
     // ================================================
     if (gestor === "inventario") {
 
         if (!oldData) {
-            // CREAR ➜ mostrar todo NEW
+            // CREAR → mostrar todo NEW
             oldRender = "<i>Sin datos</i>";
             newRender = window.formatearObjetoAuditoria(newData, gestor);
-        } 
-        else {
-            // EDITAR ➜ mostrar solo campos cambiados
+        } else {
+            // EDITAR → mostrar solo cambios
             const cambios = window.prepararDatosInventario(oldData, newData);
 
             oldRender = window.formatearObjetoAuditoria(oldData, gestor);
@@ -156,7 +155,33 @@ function verDetalles(log) {
     }
 
     // ================================================
-    // 🟧 MOSTRAR MODAL
+    // 🎨 ESTILOS ELEGANTES
+    // ================================================
+    const OLD_BOX = `
+        <div style="
+            padding:12px;
+            border:1px solid #ccc;
+            background:#fafafa;
+            border-radius:10px;
+            margin-bottom:15px;
+        ">
+            ${oldRender}
+        </div>
+    `;
+
+    const NEW_BOX = `
+        <div style="
+            padding:12px;
+            border:1px solid #4caf50;
+            background:#f0fff4;
+            border-radius:10px;
+        ">
+            ${newRender}
+        </div>
+    `;
+
+    // ================================================
+    // 🟧 MOSTRAR MODAL FINAL
     // ================================================
     Swal.fire({
         title: `Detalles del Registro`,
@@ -172,11 +197,11 @@ function verDetalles(log) {
 
                 <hr>
 
-                <p><b>Antes (OLD):</b></p>
-                ${oldRender}
+                <h3 style="margin-bottom:6px; color:#333;">🔵 Antes (OLD)</h3>
+                ${OLD_BOX}
 
-                <p><b>Después (NEW):</b></p>
-                ${newRender}
+                <h3 style="margin-bottom:6px; color:#333;">🟢 Después (NEW)</h3>
+                ${NEW_BOX}
 
             </div>
         `,
@@ -184,6 +209,7 @@ function verDetalles(log) {
         confirmButtonText: "Cerrar"
     });
 }
+
 
 // ================================
 //  FORMATEAR FECHA
