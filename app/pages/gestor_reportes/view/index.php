@@ -34,6 +34,7 @@ if ($inicio && $fin) {
 $ventas7 = $reportController->ventasUltimos7Dias($id_usuario);
 $areas = $reportController->pedidosPorArea($id_usuario);
 $ventasMes = $reportController->ventasMesActual($id_usuario);
+$topProductos = $reportController->topProductos($id_usuario, 5);
 
 ?>
 
@@ -77,10 +78,8 @@ $ventasMes = $reportController->ventasMesActual($id_usuario);
 
                 <button class="nav-item" data-section="exportar">
                     <i class="ri-download-line"></i> Exportar datos
-                </button>
-
+                </button>            
               
-
             </nav>
         </div>
 
@@ -146,8 +145,17 @@ $ventasMes = $reportController->ventasMesActual($id_usuario);
             <canvas id="chartVentasMes" height="120"></canvas>
         </div>
 
+        <!-- Top productos más vendidos -->
+<div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2">
+    <h3 class="font-semibold mb-3">Top productos más vendidos</h3>
+    <canvas id="chartTopProductos" height="120"></canvas>
+</div>
+
+
     </div>
 </section>
+
+
 
 
    <section id="rango" class="report-section hidden">
@@ -243,6 +251,7 @@ $ventasMes = $reportController->ventasMesActual($id_usuario);
 const ventas7Dias = <?= json_encode($ventas7) ?>;
 const pedidosArea = <?= json_encode($areas) ?>;
 const ventasMes = <?= json_encode($ventasMes) ?>;
+const topProductos = <?= json_encode($topProductos) ?>;
 </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>

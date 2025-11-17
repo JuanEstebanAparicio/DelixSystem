@@ -101,4 +101,24 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+
+
+    // ============================
+// 📌 Top productos más vendidos
+// ============================
+if (document.getElementById("chartTopProductos")) {
+    new Chart(document.getElementById("chartTopProductos"), {
+        type: 'bar',
+        data: {
+            labels: topProductos.map(p => p.producto),
+            datasets: [{
+                label: "Vendidos",
+                data: topProductos.map(p => p.total_vendidos),
+                borderWidth: 2
+            }]
+        }
+    });
+}
+
+
 });

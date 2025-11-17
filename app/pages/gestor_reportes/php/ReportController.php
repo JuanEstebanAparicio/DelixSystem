@@ -65,5 +65,11 @@ public function obtenerDetalleDiario($id_user, $inicio = null, $fin = null){
     public function ventasMesActual($id_user){
         return $this->model->getVentasMesActual($id_user);
     }
+
+    // 🔹 Top productos más vendidos
+public function topProductos($id_user, $limite = 5){
+    return $this->model->getTopProductos($id_user, $limite);
+}
+
     
 }

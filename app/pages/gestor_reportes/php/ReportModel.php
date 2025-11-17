@@ -202,5 +202,29 @@ public function getVentasMesActual($id_user)
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+
+public function getTopProductos($id_user, $limite = 5)
+{
+    $query = "
+        SELECT 
+            oi.nombre_platillo AS producto,
+            SUM(oi.cantidad) AS total_vendidos
+        FROM order_items oi
+        INNER JOIN orders o ON oi.order_id = o.id
+        WHERE o.id_user = :id_user
+        GROUP BY oi.nombre_platillo
+        ORDER BY total_vendidos DESC
+        LIMIT :limite
+    ";
+
+    $stmt = $this->db->prepare($query);
+    $stmt->bindValue(':id_user', $id_user, PDO::PARAM_INT);
+    $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
 }
 
