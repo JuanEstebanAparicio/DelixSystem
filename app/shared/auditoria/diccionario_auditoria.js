@@ -64,22 +64,52 @@ window.formatearObjetoAuditoria = function (obj, gestor) {
     if (!obj) return "<i>Sin datos</i>";
 
     const dicGestor = window.diccionarioPorGestor[gestor] || {};
-
     let html = `<ul class="list-disc ml-4">`;
 
     for (const key in obj) {
-
-        // Obtener nombre legible
         const etiqueta =
             dicGestor[key] ||
             window.diccionarioGeneral[key] ||
             null;
 
-        // ❌ Si no existe etiqueta, NO mostrar esta clave
         if (!etiqueta) continue;
 
         let valor = obj[key];
 
+        // ============================================
+        // 🎯 FORMATO ESPECIAL PARA ROLES
+        // ============================================
+        if (key === "roles" && Array.isArray(valor)) {
+            if (valor.length === 0) {
+                html += `<li><b>${etiqueta}:</b> <i>Sin roles asignados</i></li>`;
+            } else {
+                let listaRoles = "<ul style='margin-left:15px'>";
+                valor.forEach(r => {
+                    // Si viene como {id, nombre}
+                    if (typeof r === "object" && r.nombre) {
+                        listaRoles += `<li>${r.nombre}</li>`;
+                    }
+                    // Si solo es un número ID (caso viejo)
+                    else {
+                        listaRoles += `<li>Rol #${r}</li>`;
+                    }
+                });
+                listaRoles += "</ul>";
+
+                html += `
+                    <li>
+                        <b>${etiqueta}:</b><br>
+                        ${listaRoles}
+                    </li>
+                `;
+            }
+
+            continue;
+        }
+
+        // ============================================
+        // 📌 Formato estándar
+        // ============================================
         if (typeof valor === "object" && valor !== null) {
             valor = JSON.stringify(valor, null, 2)
                 .replace(/\n/g, "<br>")
@@ -96,3 +126,4 @@ window.formatearObjetoAuditoria = function (obj, gestor) {
     html += "</ul>";
     return html;
 };
+
