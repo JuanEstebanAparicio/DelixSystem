@@ -71,7 +71,7 @@ try {
     // ======================================================
     // 🟢 4. AUDITORÍA final con datos completos
     // ======================================================
-    auditLog('roles', 'asignar', [
+    auditLog('roles', 'editar', [
         'target_table' => 'employee_roles',
         'target_id' => $empleadoId,
         'old' => ['roles' => $oldRoles],
