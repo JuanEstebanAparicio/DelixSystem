@@ -48,7 +48,12 @@ window.diccionarioPorGestor = {
         empleado_id: "ID del Empleado",
         // Para asignación de roles
         roles: "Roles Asignados"
-    }
+    },
+    roles: {
+    roles: "Roles Asignados",
+    empleado_id: "ID del Empleado"
+},
+
 
 };
 
