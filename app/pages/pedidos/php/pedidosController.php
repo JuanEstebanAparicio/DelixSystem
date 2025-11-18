@@ -35,6 +35,9 @@ $estado_inicial = "Pending";
 try {
     $conexion->beginTransaction();
 
+    // ===============================
+    // 1. CREAR ORDEN
+    // ===============================
     $stmt = $conexion->prepare("INSERT INTO orders
         (id_user, restaurant_name, id_area, area, id_mesa, mesa, nombre_cliente, total_pedido, metodo_pago, pagado, estado)
         VALUES (:id_user,:restaurant_name,:id_area,:area,:id_mesa,:mesa,:nombre_cliente,:total_pedido,:metodo_pago,:pagado,:estado)
@@ -56,9 +59,11 @@ try {
 
     $order = $stmt->fetch(PDO::FETCH_ASSOC);
     if(!$order || !isset($order['id'])) throw new Exception("No se creó la orden");
-
     $order_id = $order['id'];
 
+    // ===============================
+    // 2. GUARDAR ITEMS
+    // ===============================
     $stmtItem = $conexion->prepare("INSERT INTO order_items
         (order_id,id_platillo,nombre_platillo,precio,cantidad)
         VALUES(:order_id,:id_platillo,:nombre_platillo,:precio,:cantidad)");
@@ -73,7 +78,70 @@ try {
         ]);
     }
 
+    // =======================================================
+    // 3. DESCONTAR INGREDIENTES POR CADA PLATILLO DEL PEDIDO
+    // =======================================================
+    $stmtIng = $conexion->prepare("
+        SELECT ingredient_id, quantity_used
+        FROM dish_ingredient
+        WHERE dish_id = :dish_id
+    ");
+
+    $stmtStock = $conexion->prepare("
+        SELECT amount
+        FROM storage
+        WHERE id = :ingredient_id
+        FOR UPDATE
+    ");
+
+    $stmtUpdateStock = $conexion->prepare("
+        UPDATE storage
+        SET amount = amount - :consumo
+        WHERE id = :ingredient_id
+    ");
+
+    foreach($data['items'] as $item){
+
+        $dish_id = $item['id_platillo'];
+        $cantidadPedido = $item['cantidad'];
+
+        // ingredientes del platillo
+        $stmtIng->execute([":dish_id"=>$dish_id]);
+        $ingredientes = $stmtIng->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach($ingredientes as $ing){
+
+            $ingredient_id = $ing['ingredient_id'];
+            $qty_por_plato = floatval($ing['quantity_used']);
+
+            // consumo total = qty_plato × cantidad pedida
+            $consumo = $qty_por_plato * $cantidadPedido;
+
+            // verificar stock
+            $stmtStock->execute([":ingredient_id"=>$ingredient_id]);
+            $stock = $stmtStock->fetch(PDO::FETCH_ASSOC);
+
+            if(!$stock){
+                throw new Exception("Ingrediente ID $ingredient_id no existe.");
+            }
+
+            if(floatval($stock['amount']) < $consumo){
+                throw new Exception("Stock insuficiente para ingrediente ID $ingredient_id");
+            }
+
+            // actualizar stock
+            $stmtUpdateStock->execute([
+                ":consumo"=>$consumo,
+                ":ingredient_id"=>$ingredient_id
+            ]);
+        }
+    }
+
+    // ===============================
+    // 4. CONFIRMAR TODO
+    // ===============================
     $conexion->commit();
+
     echo json_encode(["success"=>true,"order_id"=>$order_id]);
 
 } catch (Throwable $e){
@@ -81,3 +149,4 @@ try {
     error_log("pedidoController error: ".$e->getMessage());
     echo json_encode(["success"=>false,"error"=>$e->getMessage()]);
 }
+

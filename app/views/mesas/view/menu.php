@@ -13,9 +13,12 @@ if(!$id_user){
 
 // traer platillos activos
 // traer platillos activos directo BD local (temporal)
-$stmtDish = $conexion->prepare("SELECT id, name_dish, price, photo, description, category 
-                                FROM dish 
-                                WHERE id_user = :id_user AND state = 'Activo'");
+$stmtDish = $conexion->prepare("
+    SELECT id, name_dish, price, photo, description, category, state
+    FROM dish
+    WHERE id_user = :id_user
+");
+
 
 $stmtDish->bindParam(":id_user", $id_user, PDO::PARAM_INT);
 $stmtDish->execute();
@@ -128,6 +131,11 @@ try {
   <button id="verCarritoBtn">
     🛒 <span id="cartCount" style="background:red;color:white;padding:2px 6px;border-radius:12px;font-size:12px;position:absolute;margin-left:4px;top:6px;right:10px;">0</span>
   </button>
+<button id="verPedidosBtn" <?= empty($_SESSION['cliente']) ? "disabled" : "" ?>>
+    Ver mis pedidos
+</button>
+
+
 </header>
 
 <?php
@@ -141,12 +149,18 @@ foreach($platillos as $p){
 }
 ?>
 
-<nav class="menu-nav">
-    <button class="nav-cat" data-cat="all">Todos</button>
-    <?php foreach(array_keys($categoriasMenu) as $c): ?>
-        <button class="nav-cat" data-cat="<?= htmlspecialchars($c) ?>"><?= htmlspecialchars($c) ?></button>
-    <?php endforeach; ?>
+<nav class="navbar-categorias">
+    <div class="categorias-scroll">
+        <button class="cat-btn active" data-cat="all">Todos</button>
+
+        <?php foreach(array_keys($categoriasMenu) as $c): ?>
+            <button class="cat-btn" data-cat="<?= htmlspecialchars($c) ?>">
+                <?= htmlspecialchars($c) ?>
+            </button>
+        <?php endforeach; ?>
+    </div>
 </nav>
+
 
 
 <main class="menu-container">
@@ -155,38 +169,49 @@ foreach($platillos as $p){
 
 <?php foreach($platillos as $p): ?>
 
-        <div class="platillo-card" data-cat="<?= htmlspecialchars($p['category']) ?>">
-        
-       <div class="img-box" 
-     onclick="openDishModal(
-         '<?= htmlspecialchars(addslashes($p['name_dish'])) ?>',
-         '<?= htmlspecialchars(addslashes($p['description'])) ?>',
-         '<?= htmlspecialchars($p['photo']) ?>',
-         '<?= $p['price'] ?>',
-         '<?= $p['id'] ?>'
-     )">
-    <img src="/DelixSystem/app/pages/dishes_manager/<?= htmlspecialchars($p['photo']) ?>" alt="<?= htmlspecialchars($p['name_dish']) ?>">
-</div>
+    <?php 
+        // Detectar si está agotado
+        $agotado = ($p['state'] !== 'Activo');
+    ?>
+
+    <div class="platillo-card <?= $agotado ? 'agotado' : '' ?>" 
+        data-cat="<?= htmlspecialchars($p['category']) ?>">
+
+        <div class="img-box"
+            <?php if (!$agotado): ?>
+                onclick="openDishModal(
+                    '<?= htmlspecialchars(addslashes($p['name_dish'])) ?>',
+                    '<?= htmlspecialchars(addslashes($p['description'])) ?>',
+                    '<?= htmlspecialchars($p['photo']) ?>',
+                    '<?= $p['price'] ?>',
+                    '<?= $p['id'] ?>'
+                )"
+            <?php endif; ?>
+        >
+            <img src="<?= htmlspecialchars($p['photo']) ?>" alt="<?= htmlspecialchars($p['name_dish']) ?>">
+        </div>
 
         <div class="info-box">
-    <h3><?= htmlspecialchars($p['name_dish']) ?></h3>
+            <h3><?= htmlspecialchars($p['name_dish']) ?></h3>
 
-    <?php if (!empty($p['description'])): ?>
-        <p class="dish-desc"><?= htmlspecialchars($p['description']) ?></p>
-    <?php endif; ?>
+            <?php if (!empty($p['description'])): ?>
+                <p class="dish-desc"><?= htmlspecialchars($p['description']) ?></p>
+            <?php endif; ?>
 
-    <p class="price">$<?= number_format($p['price'], 0, ',', '.') ?></p>
+            <p class="price">$<?= number_format($p['price'], 0, ',', '.') ?></p>
 
-    <button class="add-btn"
-        data-id="<?= $p['id'] ?>"
-        data-nombre="<?= htmlspecialchars($p['name_dish']) ?>"
-        data-precio="<?= $p['price'] ?>"
-        data-descripcion="<?= htmlspecialchars($p['description'] ?? '') ?>"
-    >Agregar al carrito</button>
-</div>
-
-
+            <?php if ($agotado): ?>
+                <button class="agotado-btn" disabled>AGOTADO</button>
+            <?php else: ?>
+                <button class="add-btn"
+                    data-id="<?= $p['id'] ?>"
+                    data-nombre="<?= htmlspecialchars($p['name_dish']) ?>"
+                    data-precio="<?= $p['price'] ?>"
+                >Agregar al carrito</button>
+            <?php endif; ?>
+        </div>
     </div>
+
 <?php endforeach; ?>
 
 </div>

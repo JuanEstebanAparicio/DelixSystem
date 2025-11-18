@@ -1,23 +1,17 @@
 <?php
 
-// 🔧 Forzar a que siempre se trate como AJAX (evita redirecciones HTML)
 $_SERVER['HTTP_X_REQUESTED_WITH'] = 'xmlhttprequest';
 
-// 🔧 Iniciar sesión si no existe
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 🔧 Limpiar headers previos del bootstrap
 header_remove("Content-Type");
 header("Content-Type: application/json; charset=utf-8");
 
-// 🔧 ACTIVAR BUFFER PARA ELIMINAR CUALQUIER OUTPUT ACCIDENTAL
 ob_start();
 
-// 🟢 Bootstrap de permisos
 require_once __DIR__ . '/../../../../middleware/controller_bootstrap.php';
-
 require_once(__DIR__ . '/products_constructor.php');
 require_once(__DIR__ . '/storage_crud.php');
 require_once(__DIR__ . '/../../../../config/supabase_img.php');
@@ -25,10 +19,7 @@ require_once(__DIR__ . '/../../../../config/supabase.php');
 
 try {
 
-    // ======================================================
-    // 🟢 Obtener propietario real (propietario o empleado)
-    // ======================================================
-    $isAjax = true; // ya NO confiamos en PHP, forzamos AJAX siempre
+    $isAjax = true;
 
     [$id_user, $error] = getPropietarioID($conexion);
     if ($error) {
@@ -38,9 +29,6 @@ try {
 
     $crud = new storage_crud();
 
-    // ======================================================
-    // 🧩 MAPEO DE ACCIONES → PERMISOS
-    // ======================================================
     $roundAction = $_POST['action'] ?? '';
 
     $actionMap = [
@@ -58,22 +46,14 @@ try {
         returnJson(true, 'error', 'Acción no válida.');
     }
 
-    // ======================================================
-    // 🛡️ Verificar permisos (solo empleados)
-    // ======================================================
     if (!isset($_SESSION['usuario'])) { 
         verifyRoleAccess('inventario', $accion);
     }
 
-    // ======================================================
-    // 🔧 Helper para fechas
-    // ======================================================
     $toDate = fn($d) => empty($d) ? null : (new DateTime($d))->format("Y-m-d H:i:s");
 
-    // ======================================================
-    // 🟩 CREAR PRODUCTO
-    // ======================================================
     if ($accion === 'crear') {
+
         $category = trim($_POST['category'] ?? '');
         $newCategory = trim($_POST['new_category'] ?? '');
 
@@ -116,13 +96,34 @@ try {
         $crud->insertProduct($producto);
 
         ob_clean();
+        // 🟢 Auditoría - CREAR
+        auditLog('inventario', 'crear', [
+            'target_table' => 'ingredients',
+            'target_id' => $crud->lastInsertId(), // si existe, si no lo ajustamos
+            'old' => null,
+            'new' => [
+                'name' => $name,
+                'category' => $category,
+                'amount' => $_POST['amount'] ?? 0,
+                'minimum_quantity' => $_POST['minimum_quantity'] ?? 0,
+                'unit' => $_POST['unit'] ?? '',
+                'unit_cost' => $_POST['unit_cost'] ?? 0,
+                'entrance_date' => $_POST['fecha_ingreso'] ?? null,
+                'expiration_date' => $_POST['fecha_vencimiento'] ?? null,
+                'batch' => $_POST['batch'] ?? '',
+                'description' => $_POST['description'] ?? '',
+                'location' => $_POST['location'] ?? '',
+                'state' => $_POST['state'] ?? 'Activo',
+                'supplier' => $_POST['supplier'] ?? '',
+                'photo' => $photo
+            ]
+        ]);
+
         returnJson(true, 'success', 'Ingrediente agregado correctamente.');
     }
 
-    // ======================================================
-    // 🟨 EDITAR PRODUCTO
-    // ======================================================
     if ($accion === 'editar') {
+
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) {
             ob_clean();
@@ -150,6 +151,7 @@ try {
         $photo = $current['photo'];
 
         if (!empty($_FILES['photo']['name'])) {
+
             $path = "inventario/$id_user/$safeCategory/$safeProduct";
 
             if (!empty($photo)) {
@@ -180,13 +182,21 @@ try {
 
         $crud->updateProduct($producto, $id);
 
+         // 🟢 OBTENER NEW (DESPUÉS DE ACTUALIZAR)
+        $updated = $crud->getProductById($id, $id_user);
+
+        // 🟢 Auditoría - EDITAR
+        auditLog('inventario', 'editar', [
+            'target_table' => 'ingredients',
+            'target_id' => $id,
+            'old' => $current,
+            'new' => $updated
+        ]);
+
         ob_clean();
         returnJson(true, 'success', 'Ingrediente actualizado correctamente.');
     }
 
-    // ======================================================
-    // 🟥 ELIMINAR PRODUCTO
-    // ======================================================
     if ($accion === 'eliminar') {
 
         $id = intval($_POST['id'] ?? 0);
@@ -201,12 +211,24 @@ try {
             returnJson(true, 'error', 'Ingrediente no encontrado.');
         }
 
+        if ($crud->isIngredientUsed($id, $id_user)) {
+            ob_clean();
+            returnJson(true, 'error', 'Este ingrediente está asociado a uno o varios platillos y no puede eliminarse.');
+        }
+
         if (!empty($producto['photo'])) {
             $relative = str_replace(rtrim(SUPABASE_URL, '/') . "/storage/v1/object/public/storage_img/", '', $producto['photo']);
             supabaseDeleteImage('storage_img', $relative);
         }
 
         $crud->deleteProduct($id, $id_user);
+
+        auditLog('inventario', 'eliminar', [
+        'target_table' => 'ingredients',
+        'target_id' => $id,
+        'old' => $producto,
+        'new' => null
+    ]);
 
         ob_clean();
         returnJson(true, 'success', 'Ingrediente eliminado correctamente.');

@@ -1,26 +1,13 @@
 <?php
-require_once __DIR__ . "/../../../config/database.php";  // ← FALTA
-require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php';
-require_once __DIR__ . '/../../../middleware/universal_guard.php';
-require_once __DIR__ . '/../../../config/supabase.php';
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-// 1️⃣ Proteger la vista y obtener datos del usuario
-$usuario = universalGuard();
 
-// 2️⃣ Identificar el owner real para filtros
-if ($usuario['tipo'] === 'propietario') {
-    $ownerId = $usuario['id'];
-} elseif ($usuario['tipo'] === 'empleado') {
-    $ownerId = $usuario['restaurant_id'];
-} else {
-    header("Location: /DelixSystem/public/index.php");
-    exit;
-}
+require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php'; // carga header si es empleado
+require_once __DIR__ . '/../../../middleware/employee_extended_guard.php';
 
-// (Opcional) Nombre del usuario logueado
-$nombreUsuario = $usuario['nombre'];
+$usuario = employeeExtendedGuard(['ADMIN_LOCAL','SUPERVISOR']);
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -92,8 +79,9 @@ $nombreUsuario = $usuario['nombre'];
                 <option value="areas">Áreas</option>
                 <option value="mesas">Mesas</option>
                 <option value="empleados">Empleados</option>
-                <option value="ordenes">Órdenes</option>
-                <option value="productos">Productos</option>
+                <option value="inventario">Inventario</option>
+                <option value="roles">Roles</option>
+                
             </select>
         </div>
 
@@ -105,7 +93,6 @@ $nombreUsuario = $usuario['nombre'];
                 <option value="editar">Editar</option>
                 <option value="eliminar">Eliminar</option>
                 <option value="ordenar">Ordenar</option>
-                <option value="login">Login</option>
             </select>
         </div>
 
@@ -142,9 +129,9 @@ $nombreUsuario = $usuario['nombre'];
     </section>
 
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- JS -->
 <script src="../js/historial.js"></script>
-
+<script src="../../../shared/auditoria/diccionario_auditoria.js"></script>
 </body>
 </html>
