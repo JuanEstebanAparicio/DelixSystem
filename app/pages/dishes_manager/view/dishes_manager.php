@@ -1,8 +1,14 @@
 <?php
-require_once __DIR__ . '/../../../middleware/session_guard.php';
-protectPage();
+require_once __DIR__ . '/../../../middleware/universal_guard.php';
 
-$id_usuario = $_SESSION['usuario']['id'];
+// 🔥 Devuelve array con: tipo (propietario/empleado), id y restaurant_id si aplica
+$user = universalGuard();
+
+// SI es propietario → usar su propio ID
+// SI es empleado → usar su restaurant_id (dueño)
+$id_usuario = ($user['tipo'] === 'propietario')
+    ? $user['id']
+    : $user['restaurant_id'];
 
 require_once __DIR__ . '/../../../config/supabase.php';
 

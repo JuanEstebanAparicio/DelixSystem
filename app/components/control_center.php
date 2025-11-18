@@ -44,7 +44,7 @@ $displayEmail = htmlspecialchars($empleado['email']);
           <span>Mesas</span>
         </a>
 
-        <a href="/DelixSystem/app/pages/dishes_manager/view/index.php" class="group card-control bg-amber-50 hover:bg-amber-100">
+        <a href="/DelixSystem/app/pages/dishes_manager/view/dishes_manager.php" class="group card-control bg-amber-50 hover:bg-amber-100">
           <i class="ri-restaurant-2-fill text-amber-500 text-3xl group-hover:scale-110 transition-transform"></i>
           <span>Gestor Menú</span>
         </a>
