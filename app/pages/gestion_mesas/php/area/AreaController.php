@@ -7,75 +7,86 @@ ini_set('error_log', __DIR__ . '/area_debug.log');
 header('Content-Type: application/json');
 
 try {
-    // Carga única centralizada
+    // Bootstrap general + Auditoría + Roles
     require_once __DIR__ . '/../../../../middleware/controller_bootstrap.php';
+
+    // Modelo
     require_once __DIR__ . '/AreaModel.php';
+
 } catch (Throwable $e) {
     echo json_encode([
-        'status' => 'error',
+        'status'  => 'error',
         'message' => 'Error al cargar dependencias',
         'debug'   => $e->getMessage(),
-        'trace'   => $e->getFile() . ':' . $e->getLine(),
+        'trace'   => $e->getFile() . ':' . $e->getLine()
     ]);
     exit;
 }
 
-// ✅ Verificar conexión PDO
+// Validar conexión
 if (!isset($conexion) || !$conexion instanceof PDO) {
     echo json_encode([
         'status'  => 'error',
-        'message' => 'Conexión a base de datos no inicializada',
+        'message' => 'Conexión a base de datos no inicializada'
     ]);
     exit;
 }
 
-// Inicialización básica
 $areaModel = new AreaModel($conexion);
 $isAjax = isAjaxRequest();
 $accion = $_REQUEST['accion'] ?? '';
 
-// ✅ Obtener propietario (centralizado)
+// Obtener el propietario real
 [$id_propietario, $error] = getPropietarioID($conexion);
 if ($error) {
     returnJson($isAjax, 'error', $error);
 }
 
+
 try {
+
     switch ($accion) {
-        // 🟢 Crear área
-       case 'crear':
-    verifyRoleAccess('areas', 'crear');
 
-    $nombre = trim($_POST['nombre_area'] ?? '');
-    if (empty($nombre)) {
-        returnJson($isAjax, 'error', 'El nombre del área es obligatorio.');
-    }
+        /* =====================================================
+         * 🟢 CREAR ÁREA
+         * ===================================================== */
+        case 'crear':
+            verifyRoleAccess('areas', 'crear');
 
-    if ($areaModel->areaExiste($nombre, $id_propietario)) {
-        returnJson($isAjax, 'error', 'Ya existe un área con ese nombre en tu cuenta.');
-    }
+            $nombre = trim($_POST['nombre_area'] ?? '');
 
-    $ok = $areaModel->crearArea($nombre, $id_propietario);
-    $id_area = $conexion->lastInsertId();
+            if (empty($nombre)) {
+                returnJson($isAjax, 'error', 'El nombre del área es obligatorio.');
+            }
 
-    if (!$ok) {
-        returnJson($isAjax, 'error', 'Error al crear el área.');
-    }
+            if ($areaModel->areaExiste($nombre, $id_propietario)) {
+                returnJson($isAjax, 'error', 'Ya existe un área con ese nombre.');
+            }
 
-    // ◀️ aquí consultamos el nombre del restaurante
-    $stmtR = $conexion->prepare("SELECT restaurant_name FROM areas WHERE id_area = ?");
-    $stmtR->execute([$id_area]);
-    $restaurant_name = $stmtR->fetchColumn();
+            $ok = $areaModel->crearArea($nombre, $id_propietario);
+            $id_area = $conexion->lastInsertId();
 
-    returnJson($isAjax, 'success', 'Área creada correctamente.', [
-        'id_area' => $id_area,
-        'nombre'  => $nombre,
-        'restaurant_name' => $restaurant_name
-    ]);
+            if (!$ok) {
+                returnJson($isAjax, 'error', 'Error al crear el área.');
+            }
 
+            // Auditoría
+            auditLog('areas', 'crear', [
+                'target_table' => 'areas',
+                'target_id'    => $id_area,
+                'new'          => ['nombre' => $nombre]
+            ]);
+
+            returnJson($isAjax, 'success', 'Área creada correctamente.', [
+                'id_area' => $id_area,
+                'nombre'  => $nombre
+            ]);
             break;
 
-        // 🟠 Editar área
+
+        /* =====================================================
+         * 🟠 EDITAR ÁREA
+         * ===================================================== */
         case 'editar':
             verifyRoleAccess('areas', 'editar');
 
@@ -90,29 +101,59 @@ try {
                 returnJson($isAjax, 'error', 'Ya existe un área con ese nombre.');
             }
 
+            // Obtener OLD antes del cambio
+            $oldData = $areaModel->getAreaById($id_area, $id_propietario);
+
             $areaModel->editarArea($id_area, $nombre, $id_propietario);
+
+            // Auditoría
+            auditLog('areas', 'editar', [
+                'target_table' => 'areas',
+                'target_id'    => $id_area,
+                'old'          => $oldData,
+                'new'          => ['nombre' => $nombre]
+            ]);
+
             returnJson($isAjax, 'success', 'Área actualizada correctamente.', [
                 'id_area' => $id_area,
                 'nombre'  => $nombre
             ]);
             break;
 
-        // 🔴 Eliminar área
+
+        /* =====================================================
+         * 🔴 ELIMINAR ÁREA
+         * ===================================================== */
         case 'eliminar':
             verifyRoleAccess('areas', 'eliminar');
 
             $id_area = $_POST['id_area'] ?? $_GET['id_area'] ?? null;
+
             if (!$id_area) {
                 returnJson($isAjax, 'error', 'ID de área no válido.');
             }
 
+            // Obtener OLD antes de eliminar
+            $oldData = $areaModel->getAreaById($id_area, $id_propietario);
+
             $areaModel->eliminarArea($id_area, $id_propietario);
+
+            // Auditoría
+            auditLog('areas', 'eliminar', [
+                'target_table' => 'areas',
+                'target_id'    => $id_area,
+                'old'          => $oldData
+            ]);
+
             returnJson($isAjax, 'success', 'Área eliminada correctamente.', [
                 'id_area' => $id_area
             ]);
             break;
 
-        // 🔵 Reordenar áreas
+
+        /* =====================================================
+         * 🔵 ORDENAR ÁREAS
+         * ===================================================== */
         case 'ordenar':
             verifyRoleAccess('areas', 'ordenar');
 
@@ -120,18 +161,29 @@ try {
                 returnJson($isAjax, 'error', 'Datos de orden inválidos.');
             }
 
-            if ($areaModel->actualizarOrden($_POST['orden'])) {
-                returnJson($isAjax, 'success', 'Orden actualizado correctamente.');
-            } else {
-                returnJson($isAjax, 'error', 'Error al guardar el orden.');
-            }
+            $areaModel->actualizarOrden($_POST['orden']);
+
+            // Auditoría
+            auditLog('areas', 'ordenar', [
+                'meta' => ['orden' => $_POST['orden']]
+            ]);
+
+            returnJson($isAjax, 'success', 'Orden actualizado correctamente.');
             break;
 
+
+        /* =====================================================
+         * 🚫 ACCIÓN NO VÁLIDA
+         * ===================================================== */
         default:
             returnJson($isAjax, 'error', 'Acción no válida.');
     }
+
 } catch (Throwable $e) {
-    error_log("⚠️ Error en AreaController: " . $e->getMessage() . ' en ' . $e->getFile() . ':' . $e->getLine());
+
+    // Registrar error en log del sistema
+    error_log("⚠️ Error en AreaController: " . $e->getMessage());
+
     echo json_encode([
         'status'  => 'error',
         'message' => 'Error interno en controlador',

@@ -1,72 +1,71 @@
 <?php
-ob_start();
+
+$_SERVER['HTTP_X_REQUESTED_WITH'] = 'xmlhttprequest';
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-header('Content-Type: application/json');
 
+header_remove("Content-Type");
+header("Content-Type: application/json; charset=utf-8");
+
+ob_start();
+
+require_once __DIR__ . '/../../../../middleware/controller_bootstrap.php';
 require_once(__DIR__ . '/products_constructor.php');
 require_once(__DIR__ . '/storage_crud.php');
-require_once(__DIR__ . '/../../../../config/supabase_img.php'); // helper de Supabase
-require_once(__DIR__ . '/../../../../config/supabase.php'); // 🟢 conexión a BD
+require_once(__DIR__ . '/../../../../config/supabase_img.php');
+require_once(__DIR__ . '/../../../../config/supabase.php');
 
 try {
-    // ======================================================
-    // 🧭 OBTENER USUARIO ACTIVO (propietario o empleado)
-    // ======================================================
-    if (isset($_SESSION['usuario']['id'])) {
-        // 👑 Sesión de propietario
-        $id_user = intval($_SESSION['usuario']['id']);
-    } elseif (isset($_SESSION['empleado_auth']['id'])) {
-        // 👷 Sesión de empleado → obtener el ID del propietario
-        $id_user = intval($_SESSION['empleado_auth']['user_id'] ?? 0);
 
-        if ($id_user === 0) {
-            // 🟠 Si no viene en la sesión, consultamos la tabla employees
-            $stmt = $conexion->prepare("SELECT user_id FROM employees WHERE id = :id_empleado LIMIT 1");
-            $stmt->execute([':id_empleado' => $_SESSION['empleado_auth']['id']]);
-            $owner = $stmt->fetch(PDO::FETCH_ASSOC);
+    $isAjax = true;
 
-            if (!$owner || empty($owner['user_id'])) {
-                throw new Exception("No se pudo determinar el propietario del empleado.");
-            }
-
-            $id_user = intval($owner['user_id']);
-        }
-    } else {
-        throw new Exception("⚠️ No hay usuario autenticado.");
+    [$id_user, $error] = getPropietarioID($conexion);
+    if ($error) {
+        ob_clean();
+        returnJson(true, 'error', $error);
     }
 
     $crud = new storage_crud();
 
-    // ======================================================
-    // 🧩 MAPEO DE ACCIONES
-    // ======================================================
     $roundAction = $_POST['action'] ?? '';
+
     $actionMap = [
-        'create' => 'add',
-        'add' => 'add',
-        'update' => 'edit',
-        'edit' => 'edit',
-        'delete' => 'delete'
+        'create' => 'crear',
+        'add'    => 'crear',
+        'update' => 'editar',
+        'edit'   => 'editar',
+        'delete' => 'eliminar'
     ];
-    $method = $actionMap[$roundAction] ?? null;
-    if (!$method) throw new Exception("Acción no válida.");
+
+    $accion = $actionMap[$roundAction] ?? null;
+
+    if (!$accion) {
+        ob_clean();
+        returnJson(true, 'error', 'Acción no válida.');
+    }
+
+    if (!isset($_SESSION['usuario'])) { 
+        verifyRoleAccess('inventario', $accion);
+    }
 
     $toDate = fn($d) => empty($d) ? null : (new DateTime($d))->format("Y-m-d H:i:s");
 
-    // ======================================================
-    // 🟩 CREAR PRODUCTO
-    // ======================================================
-    if ($method === 'add') {
+    if ($accion === 'crear') {
+
         $category = trim($_POST['category'] ?? '');
         $newCategory = trim($_POST['new_category'] ?? '');
+
         if ($category === '__new__' && $newCategory !== '') {
             $category = $newCategory;
         }
 
         $name = trim($_POST['name'] ?? '');
-        if (!$name) throw new Exception("El nombre del ingrediente es obligatorio.");
+        if (!$name) {
+            ob_clean();
+            returnJson(true, 'error', 'El nombre del ingrediente es obligatorio.');
+        }
 
         $photo = null;
         if (!empty($_FILES['photo']['name'])) {
@@ -95,37 +94,71 @@ try {
         );
 
         $crud->insertProduct($producto);
-        echo json_encode(["success" => true, "message" => "✅ Ingrediente agregado correctamente."]);
-        exit;
+
+        ob_clean();
+        // 🟢 Auditoría - CREAR
+        auditLog('inventario', 'crear', [
+            'target_table' => 'ingredients',
+            'target_id' => $crud->lastInsertId(), // si existe, si no lo ajustamos
+            'old' => null,
+            'new' => [
+                'name' => $name,
+                'category' => $category,
+                'amount' => $_POST['amount'] ?? 0,
+                'minimum_quantity' => $_POST['minimum_quantity'] ?? 0,
+                'unit' => $_POST['unit'] ?? '',
+                'unit_cost' => $_POST['unit_cost'] ?? 0,
+                'entrance_date' => $_POST['fecha_ingreso'] ?? null,
+                'expiration_date' => $_POST['fecha_vencimiento'] ?? null,
+                'batch' => $_POST['batch'] ?? '',
+                'description' => $_POST['description'] ?? '',
+                'location' => $_POST['location'] ?? '',
+                'state' => $_POST['state'] ?? 'Activo',
+                'supplier' => $_POST['supplier'] ?? '',
+                'photo' => $photo
+            ]
+        ]);
+
+        returnJson(true, 'success', 'Ingrediente agregado correctamente.');
     }
 
-    // ======================================================
-    // 🟨 EDITAR PRODUCTO
-    // ======================================================
-    if ($method === 'edit') {
+    if ($accion === 'editar') {
+
         $id = intval($_POST['id'] ?? 0);
-        if ($id <= 0) throw new Exception("ID inválido.");
+        if ($id <= 0) {
+            ob_clean();
+            returnJson(true, 'error', 'ID inválido.');
+        }
 
         $current = $crud->getProductById($id, $id_user);
-        if (!$current) throw new Exception("Ingrediente no encontrado.");
+        if (!$current) {
+            ob_clean();
+            returnJson(true, 'error', 'Ingrediente no encontrado.');
+        }
 
         $category = trim($_POST['category'] ?? $current['category']);
         $newCategory = trim($_POST['new_category'] ?? '');
+
         if ($category === '__new__' && $newCategory !== '') {
             $category = $newCategory;
         }
 
         $name = trim($_POST['name'] ?? $current['name']);
+
         $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', $category ?: 'sin_categoria');
-        $safeProduct = preg_replace('/[^a-zA-Z0-9_-]/', '_', $name);
+        $safeProduct  = preg_replace('/[^a-zA-Z0-9_-]/', '_', $name);
 
         $photo = $current['photo'];
 
         if (!empty($_FILES['photo']['name'])) {
+
             $path = "inventario/$id_user/$safeCategory/$safeProduct";
+
             if (!empty($photo)) {
-                supabaseDeleteImage('storage_img', str_replace(rtrim(SUPABASE_URL, '/') . "/storage/v1/object/public/storage_img/", '', $photo));
+                $relative = str_replace(rtrim(SUPABASE_URL, '/') . "/storage/v1/object/public/storage_img/", '', $photo);
+                supabaseDeleteImage('storage_img', $relative);
             }
+
             $photo = supabaseUploadImage($_FILES['photo'], 'storage_img', $path);
         }
 
@@ -148,31 +181,62 @@ try {
         );
 
         $crud->updateProduct($producto, $id);
-        echo json_encode(["success" => true, "message" => "✅ Ingrediente actualizado correctamente."]);
-        exit;
+
+         // 🟢 OBTENER NEW (DESPUÉS DE ACTUALIZAR)
+        $updated = $crud->getProductById($id, $id_user);
+
+        // 🟢 Auditoría - EDITAR
+        auditLog('inventario', 'editar', [
+            'target_table' => 'ingredients',
+            'target_id' => $id,
+            'old' => $current,
+            'new' => $updated
+        ]);
+
+        ob_clean();
+        returnJson(true, 'success', 'Ingrediente actualizado correctamente.');
     }
 
-    // ======================================================
-    // 🟥 ELIMINAR PRODUCTO
-    // ======================================================
-    if ($method === 'delete') {
+    if ($accion === 'eliminar') {
+
         $id = intval($_POST['id'] ?? 0);
-        if ($id <= 0) throw new Exception("ID inválido.");
+        if ($id <= 0) {
+            ob_clean();
+            returnJson(true, 'error', 'ID inválido.');
+        }
 
         $producto = $crud->getProductById($id, $id_user);
-        if (!$producto) throw new Exception("Ingrediente no encontrado.");
+        if (!$producto) {
+            ob_clean();
+            returnJson(true, 'error', 'Ingrediente no encontrado.');
+        }
+
+        if ($crud->isIngredientUsed($id, $id_user)) {
+            ob_clean();
+            returnJson(true, 'error', 'Este ingrediente está asociado a uno o varios platillos y no puede eliminarse.');
+        }
 
         if (!empty($producto['photo'])) {
-            supabaseDeleteImage('storage_img', str_replace(rtrim(SUPABASE_URL, '/') . "/storage/v1/object/public/storage_img/", '', $producto['photo']));
+            $relative = str_replace(rtrim(SUPABASE_URL, '/') . "/storage/v1/object/public/storage_img/", '', $producto['photo']);
+            supabaseDeleteImage('storage_img', $relative);
         }
 
         $crud->deleteProduct($id, $id_user);
-        echo json_encode(["success" => true, "message" => "🗑️ Ingrediente eliminado correctamente."]);
-        exit;
+
+        auditLog('inventario', 'eliminar', [
+        'target_table' => 'ingredients',
+        'target_id' => $id,
+        'old' => $producto,
+        'new' => null
+    ]);
+
+        ob_clean();
+        returnJson(true, 'success', 'Ingrediente eliminado correctamente.');
     }
 
 } catch (Exception $e) {
     ob_clean();
-    echo json_encode(["success" => false, "error" => $e->getMessage()]);
+    returnJson(true, 'error', $e->getMessage());
 }
+
 ?>

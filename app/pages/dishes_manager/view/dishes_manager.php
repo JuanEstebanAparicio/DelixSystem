@@ -121,7 +121,7 @@ try {
             <div class="card-footer">
               <button class="btn btn-edit"
                 onclick='editDish(<?= json_encode($dish, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>✏️</button>
-              <button class="btn btn-delet"
+              <button class="btn btn-delete"
                  onclick="deleteDish('<?= htmlspecialchars($dish['id']) ?>')">🗑️</button>
             </div>
           </div>

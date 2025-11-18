@@ -41,6 +41,20 @@ class AreaModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /** Obtener un área específica del propietario */
+public function getAreaById($id_area, $id_usuario)
+{
+    $stmt = $this->db->prepare("
+        SELECT * FROM areas
+        WHERE id_area = ? AND id_usuario = ?
+        LIMIT 1
+    ");
+    $stmt->execute([$id_area, $id_usuario]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+
+
     /** Crear nueva área */
   public function crearArea($nombre, $id_usuario) {
 

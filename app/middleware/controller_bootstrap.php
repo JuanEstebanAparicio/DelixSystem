@@ -8,6 +8,7 @@ ini_set('log_errors', 1);
 // --- CONFIG GLOBAL ---
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/role_guard.php';
+require_once __DIR__ . '/../api/audit.php';
 
 // --- HEADERS COMUNES ---
 header('Content-Type: application/json');
@@ -98,7 +99,14 @@ function getRoleAccess(): array
             'ver'      => ['ADMIN_LOCAL', 'GESTOR_EMPLEADOS', 'SUPERVISOR'],
             'listar'   => ['ADMIN_LOCAL', 'GESTOR_EMPLEADOS', 'SUPERVISOR'],
             'asignar'  => ['ADMIN_LOCAL', 'GESTOR_EMPLEADOS']
+         ],
+         'inventario' => [
+                'ver'      => ['ADMIN_LOCAL', 'GESTOR_INVENTARIO', 'SUPERVISOR'],
+                'crear'    => ['ADMIN_LOCAL', 'GESTOR_INVENTARIO'],
+                'editar'   => ['ADMIN_LOCAL', 'GESTOR_INVENTARIO'],
+                'eliminar' => ['ADMIN_LOCAL', 'GESTOR_INVENTARIO']
         ]
+
     ];
 }
 
@@ -110,3 +118,14 @@ function verifyRoleAccess(string $resource, string $action): void
     $rolesPermitidos = getRoleAccess()[$resource][$action] ?? [];
     canEmployeePerform($rolesPermitidos);
 }
+/**
+ * 📝 Función global simple para registrar auditoría
+ */
+function auditLog(string $gestor, string $action, array $params = []): bool
+{
+    return Audit::log(array_merge([
+        'gestor' => $gestor,
+        'action' => $action
+    ], $params));
+}
+
