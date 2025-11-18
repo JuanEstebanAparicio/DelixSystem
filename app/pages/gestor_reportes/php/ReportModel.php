@@ -135,5 +135,96 @@ public function getDailyDetail($id_user, $inicio = null, $fin = null){
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /* ==========================================================
+   📊 GRAFICA 1 — Ventas últimos 7 días
+========================================================== */
+public function getVentasUltimos7Dias($id_user)
+{
+    $query = "
+        SELECT 
+            DATE(created_at) AS fecha,
+            COALESCE(SUM(total_pedido), 0) AS total
+        FROM orders
+        WHERE id_user = :id_user
+        AND created_at >= NOW() - INTERVAL '7 days'
+        GROUP BY DATE(created_at)
+        ORDER BY fecha ASC;
+    ";
+
+    $stmt = $this->db->prepare($query);
+    $stmt->execute(['id_user' => $id_user]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+
+/* ==========================================================
+   📊 GRAFICA 2 — Pedidos agrupados por área
+========================================================== */
+public function getPedidosPorArea($id_user)
+{
+    $query = "
+        SELECT 
+            area,
+            COUNT(*) AS total_pedidos
+        FROM orders
+        WHERE id_user = :id_user
+        GROUP BY area
+        ORDER BY total_pedidos DESC;
+    ";
+
+    $stmt = $this->db->prepare($query);
+    $stmt->execute(['id_user' => $id_user]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+
+/* ==========================================================
+   📊 GRAFICA 3 — Ventas del mes actual (por día)
+========================================================== */
+public function getVentasMesActual($id_user)
+{
+    $query = "
+        SELECT 
+            DATE(created_at) AS fecha,
+            COALESCE(SUM(total_pedido), 0) AS total
+        FROM orders
+        WHERE id_user = :id_user
+        AND DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)
+        GROUP BY DATE(created_at)
+        ORDER BY fecha ASC;
+    ";
+
+    $stmt = $this->db->prepare($query);
+    $stmt->execute(['id_user' => $id_user]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+public function getTopProductos($id_user, $limite = 5)
+{
+    $query = "
+        SELECT 
+            oi.nombre_platillo AS producto,
+            SUM(oi.cantidad) AS total_vendidos
+        FROM order_items oi
+        INNER JOIN orders o ON oi.order_id = o.id
+        WHERE o.id_user = :id_user
+        GROUP BY oi.nombre_platillo
+        ORDER BY total_vendidos DESC
+        LIMIT :limite
+    ";
+
+    $stmt = $this->db->prepare($query);
+    $stmt->bindValue(':id_user', $id_user, PDO::PARAM_INT);
+    $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
 }
 

@@ -1,33 +1,42 @@
 let categoriaActual = "all";
 
-document.addEventListener("DOMContentLoaded", () => {
-
-
-
-    // ==== FILTRO CATEGORIAS NAV ====
-document.querySelectorAll(".nav-cat").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-    document.querySelectorAll(".nav-cat").forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-
-    categoriaActual = btn.dataset.cat; // <===== guardar
-
-    filtrarCategoria();
-});
-
-});
-
 function filtrarCategoria(){
-    document.querySelectorAll(".platillo-card").forEach(card=>{
-        if(categoriaActual === "all"){
+    console.log("➡️ Filtrando categoría:", categoriaActual);
+
+    document.querySelectorAll(".platillo-card").forEach(card => {
+        if (categoriaActual === "all") {
             card.style.display = "block";
         } else {
-            card.style.display = (card.dataset.cat === categoriaActual) ? "block" : "none";
+            card.style.display =
+                (card.dataset.cat === categoriaActual) ? "block" : "none";
         }
     });
 }
 
 
+// ==== FILTRO CATEGORIAS NAV ====
+document.addEventListener("DOMContentLoaded", () => {
+
+    const botones = document.querySelectorAll(".cat-btn");
+    const cards = document.querySelectorAll(".platillo-card");
+
+    botones.forEach(boton => {
+        boton.addEventListener("click", () => {
+
+            // actualizar variable global
+            categoriaActual = boton.dataset.cat;
+
+            // quitar highlight
+            botones.forEach(b => b.classList.remove("active"));
+            boton.classList.add("active");
+
+            // aplicar filtro
+            filtrarCategoria();
+        });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
     // ====== APP INFO ======
     const APP = {
         id_user: parseInt(document.body.dataset.id_user),
@@ -68,12 +77,25 @@ async function refrescarPlatos(){
     }
 }
 
-function renderDishCard(p){
+function renderDishCard(p) {
+    const agotado = (p.state !== "Activo");
+
     return `
-    <div class="platillo-card" data-cat="${p.category}">
+    <div class="platillo-card ${agotado ? "agotado" : ""}" data-cat="${p.category}">
+        
         <div class="img-box"
-            onclick="openDishModal('${p.name_dish.replace(/'/g,"\\'")}', '${p.description?.replace(/'/g,"\\'") || ''}', '${p.photo}', '${p.price}', '${p.id}')">
-            <img src="/DelixSystem/app/pages/dishes_manager/${p.photo}" alt="${p.name_dish}">
+            ${agotado ? "" : `
+                onclick="openDishModal(
+                    '${p.name_dish.replace(/'/g,"\\'")}',
+                    '${(p.description || "").replace(/'/g,"\\'")}',
+                    '${p.photo}',
+                    '${p.price}',
+                    '${p.id}'
+                )"
+            `}
+        >
+            <img src="${p.photo || '/DelixSystem/public/img/no-image.png'}" 
+                 alt="${p.name_dish}">
         </div>
 
         <div class="info-box">
@@ -83,16 +105,21 @@ function renderDishCard(p){
 
             <p class="price">$${new Intl.NumberFormat().format(p.price)}</p>
 
-            <button class="add-btn"
-                data-id="${p.id}"
-                data-nombre="${p.name_dish}"
-                data-precio="${p.price}"
-            >
-                Agregar al carrito
-            </button>
+            ${agotado
+                ? `<button class="agotado-btn" disabled>AGOTADO</button>`
+                : `
+                    <button class="add-btn"
+                        data-id="${p.id}"
+                        data-nombre="${p.name_dish}"
+                        data-precio="${p.price}"
+                    >Agregar al carrito</button>
+                  `
+            }
         </div>
+
     </div>`;
 }
+
 
 function attachAddCartEvents(){
     document.querySelectorAll(".add-btn").forEach(btn=>{
@@ -332,8 +359,20 @@ async function crearPedido(metodo_pago, pagado = false){
 
 
 // ====== MODAL INFO PLATO ======
-function openDishModal(name, desc, photo, price, id){
-    document.getElementById("dishModalImg").src = "/DelixSystem/app/pages/dishes_manager/" + photo;
+function openDishModal(name, desc, photo, price, id) {
+
+    // Si viene null o vacío → imagen por defecto
+    let finalPhoto = photo && photo.trim() !== "" 
+        ? photo 
+        : "/DelixSystem/public/img/no-image.png";
+
+    // Si NO empieza con http → es local (caso raro)
+    if (!finalPhoto.startsWith("http")) {
+        finalPhoto = "/DelixSystem/app/pages/dishes_manager/" + finalPhoto;
+    }
+
+    // Asignar datos al modal
+    document.getElementById("dishModalImg").src = finalPhoto;
     document.getElementById("dishModalName").innerText = name;
     document.getElementById("dishModalDesc").innerText = desc || "Sin descripción";
     document.getElementById("dishModalPrice").innerText = price;
@@ -346,7 +385,88 @@ function openDishModal(name, desc, photo, price, id){
     document.getElementById("dishModal").style.display = "block";
 }
 
+
 function closeDishModal(){
     document.getElementById("dishModal").style.display = "none";
 }
+
+// ====== SINCRONIZAR CLIENTE CON SERVIDOR ======
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("=== Sincronizando cliente ===");
+
+    // 1️⃣ Leer localStorage (el nombre está en nombre_cliente)
+    const rawName = localStorage.getItem("nombre_cliente");
+
+    console.log("Contenido actual del localStorage (nombre_cliente):", rawName);
+
+    let clienteObj = null;
+
+    // 2️⃣ Construir clienteObj aunque rawName NO sea JSON
+    if (rawName) {
+        // Obtenemos valores desde los data-atributos del <body>
+        const body = document.body;
+
+        clienteObj = {
+            nombre: rawName,
+            mesa: body.dataset.mesa,
+            id_mesa: body.dataset.id_mesa,
+            id_area: body.dataset.id_area
+        };
+    }
+
+    // 3️⃣ Si NO hay cliente, mostrar advertencia y salir
+    if (!clienteObj) {
+        console.warn("⚠️ No hay cliente guardado en localStorage");
+        return;
+    }
+
+    console.log("Cliente armado:", clienteObj);
+
+    // 4️⃣ Ocultar modal de identificación si ya existe
+    const modalCliente = document.getElementById("clienteLoginModal");
+    if (modalCliente) {
+        modalCliente.style.display = "none";
+    }
+
+    // 5️⃣ Mostrar el nombre del cliente en el header
+    const nombreClienteHeader = document.getElementById("nombreClienteHeader");
+    if (nombreClienteHeader) {
+        nombreClienteHeader.textContent = `Cliente: ${clienteObj.nombre}`;
+    }
+
+    // 6️⃣ Sincronizar con servidor: sincronizar_cliente.php
+    fetch("/DelixSystem/app/views/mesas/php/sincronizar_cliente.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cliente: clienteObj })
+    })
+    .then(r => r.json())
+    .then(data => {
+        console.log("Respuesta del servidor:", data);
+    })
+    .catch(err => console.error("Error enviando cliente al servidor:", err));
+});
+
+// ====== BOTÓN "VER MIS PEDIDOS" ======
+document.addEventListener("DOMContentLoaded", () => {
+
+    const btnVer = document.getElementById("verPedidosBtn");
+
+    if (btnVer) {
+        btnVer.addEventListener("click", () => {
+
+            // Si por algún motivo no está sincronizado, evitamos errores
+            const nombre = localStorage.getItem("nombre_cliente");
+
+            if (!nombre) {
+                Swal.fire("⚠️ Debes identificarte primero");
+                return;
+            }
+
+            // Redirigir a la vista correcta
+            window.location.href = "/DelixSystem/app/views/mesas/view/mis_pedidos.php";
+        });
+    }
+
+});
 

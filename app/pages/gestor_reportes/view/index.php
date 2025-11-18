@@ -31,6 +31,11 @@ if ($inicio && $fin) {
     $reporteRango = $reportController->obtenerReportePorRango($id_usuario, $inicio, $fin, $area);
 }
 
+$ventas7 = $reportController->ventasUltimos7Dias($id_usuario);
+$areas = $reportController->pedidosPorArea($id_usuario);
+$ventasMes = $reportController->ventasMesActual($id_usuario);
+$topProductos = $reportController->topProductos($id_usuario, 5);
+
 ?>
 
 <!DOCTYPE html>
@@ -42,7 +47,7 @@ if ($inicio && $fin) {
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/DelixSystem/app/shared/css/globals.css">
-    <link rel="stylesheet" href="/DelixSystem/app/shared/css/control_center_propietario.css">
+    <link rel="stylesheet" href="/DelixSystem/app/shared/css/control_center.css">
 </head>
 
 <body class="bg-gray-100 min-h-screen flex">
@@ -67,9 +72,14 @@ if ($inicio && $fin) {
                 <button class="nav-item" data-section="detalle">
                     <i class="ri-list-unordered"></i> Detalle diario
                 </button>
+                  <button class="nav-item" data-section="graficas">
+                  <i class="ri-bar-chart-fill"></i> Gráficas
+                </button>
+
                 <button class="nav-item" data-section="exportar">
                     <i class="ri-download-line"></i> Exportar datos
-                </button>
+                </button>            
+              
             </nav>
         </div>
 
@@ -109,21 +119,60 @@ if ($inicio && $fin) {
                 </div>
             </section>
 
-          <section id="rango" class="report-section hidden">
+
+            <section id="graficas" class="report-section hidden">
+    <h2 class="text-2xl font-semibold mb-6 flex items-center gap-2">
+        <i class="ri-bar-chart-2-line text-emerald-600"></i> Gráficas estadísticas
+    </h2>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- Ventas últimos 7 días -->
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <h3 class="font-semibold mb-3">Ventas últimos 7 días</h3>
+            <canvas id="chartVentas7Dias" height="150"></canvas>
+        </div>
+
+        <!-- Pedidos por área -->
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <h3 class="font-semibold mb-3">Pedidos por área</h3>
+            <canvas id="chartPedidosArea" height="150"></canvas>
+        </div>
+
+        <!-- Ventas del mes -->
+        <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2">
+            <h3 class="font-semibold mb-3">Ventas del mes</h3>
+            <canvas id="chartVentasMes" height="120"></canvas>
+        </div>
+
+        <!-- Top productos más vendidos -->
+<div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2">
+    <h3 class="font-semibold mb-3">Top productos más vendidos</h3>
+    <canvas id="chartTopProductos" height="120"></canvas>
+</div>
+
+
+    </div>
+</section>
+
+
+
+
+   <section id="rango" class="report-section hidden">
     <div class="bg-white p-6 rounded-2xl shadow-md mb-8">
         <h2 class="text-2xl font-semibold mb-4 text-gray-700 flex items-center gap-2">
-            <i class="ri-filter-3-line text-emerald-600"></i> Filtrar por rango de fechas
+            <i class="ri-filter-3-line text-emerald-600"></i> Reporte por rango de fechas
         </h2>
 
         <form id="filtro-form" class="filtros-form grid grid-cols-1 sm:grid-cols-4 gap-6" method="GET">
             <div class="filtro-item flex flex-col">
                 <label for="fecha_inicio" class="text-gray-600 font-medium">Desde:</label>
-                <input type="date" name="inicio" id="fecha_inicio" class="input-filtro" value="<?= htmlspecialchars($inicio ?? '') ?>">
+                <input type="date" name="fecha_inicio" id="fecha_inicio" class="input-filtro">
             </div>
 
             <div class="filtro-item flex flex-col">
                 <label for="fecha_fin" class="text-gray-600 font-medium">Hasta:</label>
-                <input type="date" name="fin" id="fecha_fin" class="input-filtro" value="<?= htmlspecialchars($fin ?? '') ?>">
+                <input type="date" name="fecha_fin" id="fecha_fin" class="input-filtro">
             </div>
 
             <div class="filtro-item flex flex-col">
@@ -133,8 +182,7 @@ if ($inicio && $fin) {
                     <?php
                     $stmt = $conexion->query("SELECT DISTINCT area FROM orders ORDER BY area ASC");
                     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                        $selected = (isset($_GET['area']) && $_GET['area'] === $row['area']) ? 'selected' : '';
-                        echo "<option value='{$row['area']}' $selected>{$row['area']}</option>";
+                        echo "<option value='{$row['area']}'>{$row['area']}</option>";
                     }
                     ?>
                 </select>
@@ -146,35 +194,10 @@ if ($inicio && $fin) {
         </form>
     </div>
 
-    <?php if ($inicio && $fin): ?>
-        <div class="bg-white p-8 rounded-2xl shadow-lg fade-in">
-            <h3 class="text-xl font-semibold text-gray-800 mb-2">
-                Resultados del <?= htmlspecialchars($inicio) ?> al <?= htmlspecialchars($fin) ?>
-            </h3>
-            <?php if (!empty($_GET['area'])): ?>
-                <p class="text-gray-500 mb-4">Área: <strong><?= htmlspecialchars($_GET['area']) ?></strong></p>
-            <?php endif; ?>
-
-            <?php if (!empty($reporteRango)): ?>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="report-card bg-range">
-                        <h3>Total pedidos</h3>
-                        <p class="amount"><?= $reporteRango['total_orders'] ?? 0 ?></p>
-                    </div>
-                    <div class="report-card bg-daily">
-                        <h3>Ventas totales</h3>
-                        <p>$<?= number_format($reporteRango['total_sales'] ?? 0, 0, ',', '.') ?></p>
-                    </div>
-                </div>
-            <?php else: ?>
-                <p class="text-gray-500 mt-4">No se encontraron resultados en este rango.</p>
-            <?php endif; ?>
-        </div>
-    <?php else: ?>
-        <p class="text-gray-500 mt-8">Selecciona un rango de fechas para generar el reporte.</p>
-    <?php endif; ?>
+    <div class="reportes-container bg-white p-8 rounded-2xl shadow-lg fade-in">
+        <p class="text-gray-500">Selecciona un rango de fechas y un área para ver el reporte.</p>
+    </div>
 </section>
-
 
 
             <section id="detalle" class="report-section hidden">
@@ -224,5 +247,12 @@ if ($inicio && $fin) {
 
     <script src="../js/reportes.js"></script>
     <script src="/DelixSystem/app/shared/js/control_center_propietario.js"></script>
+    <script>
+const ventas7Dias = <?= json_encode($ventas7) ?>;
+const pedidosArea = <?= json_encode($areas) ?>;
+const ventasMes = <?= json_encode($ventasMes) ?>;
+const topProductos = <?= json_encode($topProductos) ?>;
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>

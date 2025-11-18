@@ -67,7 +67,7 @@ body{
 /* ===== CARDS ===== */
 .order-card{
   background:white;
-  border-radius:14px;
+  border-radius:22px;   /* antes era 14px */
   padding:18px 20px;
   box-shadow:0 3px 12px rgba(0,0,0,0.06);
   border:2px solid #e7e7e7;
@@ -76,8 +76,9 @@ body{
 
 .order-card:hover{
   transform:translateY(-4px);
-  box-shadow:0 5px 14px rgba(0,0,0,0.09);
+  box-shadow:0 8px 18px rgba(0,0,0,0.12); /* un poquito mas */
 }
+
 
 /* cuando NO está pagado borde naranja suave */
 .order-card.pending{
@@ -94,11 +95,12 @@ body{
   position:absolute;
   left:0;
   top:0;
-  width:6px;
+  width:8px;  /* 6 → 8 se siente más premium */
   height:100%;
   background:#ff9800;
-  border-radius:3px 0 0 3px;
+  border-radius:22px 0 0 22px; /* antes 3px */
 }
+
 
 /* ===== TEXTO ===== */
 .order-id{
@@ -178,6 +180,7 @@ body{
 .badge-in_progress{ background:#9C27B0; }
 .badge-ready{ background:#4CAF50; }
 .badge-delivered{ background:#1E88E5; }
+.badge-canceled{ background:#e51e1e; }
 
 
 /* ANIM */

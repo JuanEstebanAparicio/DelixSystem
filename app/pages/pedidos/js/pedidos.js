@@ -66,13 +66,17 @@
       // If server returned a .orders-grid wrapper, replace inner. If just article nodes, replace inner as well.
       const newGrid = tmp.querySelector('.orders-grid');
       if (newGrid) {
-        // Replace current .orders-grid
+        // Safer: replace only innerHTML of the existing .orders-grid to keep references
         const oldGrid = container.querySelector('.orders-grid');
         if (oldGrid) {
-          oldGrid.replaceWith(newGrid);
+          oldGrid.innerHTML = newGrid.innerHTML;
         } else {
+          // If oldGrid missing, append the newGrid's innerHTML inside a wrapper
+          const wrapper = document.createElement('div');
+          wrapper.className = 'orders-grid';
+          wrapper.innerHTML = newGrid.innerHTML;
           container.innerHTML = '';
-          container.appendChild(newGrid);
+          container.appendChild(wrapper);
         }
       } else {
         // server returned fragment (maybe only articles). We'll replace innerHTML
@@ -91,12 +95,16 @@
       setActiveButton();
       filtrarPedidosEnDOM();
       console.log("DEBUG REFRESH GRID: reaplicando eventos y reinit control center", new Date().toLocaleTimeString());
-if (typeof initControlCenterPropietario === "function") {
-    console.log("DEBUG REFRESH GRID: initControlCenterPropietario SI existe, ejecutando...");
-    initControlCenterPropietario();
-} else {
-    console.log("DEBUG REFRESH GRID: initControlCenterPropietario NO existe");
-}
+
+      // Re-init header/control center if page exposes the initializer
+      if (typeof window.initControlCenterPropietario === "function") {
+        try {
+          console.log("DEBUG REFRESH GRID: re-inicializando control center");
+          window.initControlCenterPropietario();
+        } catch (err) {
+          console.warn('Error re-inicializando control center:', err);
+        }
+      }
 
     } catch (err) {
       // silent fail (network temporarily down)
@@ -118,6 +126,9 @@ if (typeof initControlCenterPropietario === "function") {
       await refreshGridFromServer();
     }, POLL_INTERVAL);
   }
+
+  // Expose programmatic refresh for other scripts (avoid full page reloads)
+  window.refreshOrdersGrid = refreshGridFromServer;
 
   // Wait DOM loaded
   if (document.readyState === 'loading') {
@@ -150,8 +161,13 @@ document.addEventListener("DOMContentLoaded", ()=>{
                     const sonido = new Audio("/DelixSystem/public/audio/pagado.mp3");
                     sonido.play();
                     
-                    alert("Pedido marcado como pagado");
-                    location.reload();
+          alert("Pedido marcado como pagado");
+          // Preferir recargar sólo el grid si la función está disponible
+          if (typeof window.refreshOrdersGrid === 'function') {
+            window.refreshOrdersGrid();
+          } else {
+            location.reload();
+          }
                 }
             });
         });
