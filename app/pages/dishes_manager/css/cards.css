@@ -1,0 +1,108 @@
+/* CARDS */
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.6rem;
+}
+
+.ingredient-card {
+  width: 260px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  transition: 0.3s ease;
+  border: 1px solid rgba(120,120,255,0.15);
+  backdrop-filter: blur(3px);
+}
+
+.ingredient-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+}
+
+.ingredient-card img {
+  width: 100%;
+  height: 150px;
+  border-radius: 12px;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.ingredient-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2D2A4A;
+}
+
+.ingredient-cost {
+  color: #7A5FFF;
+  font-weight: bold;
+}
+
+.ingredient-state.activo {
+  color: #2EE6A8;
+  font-weight: 700;
+}
+
+.ingredient-state.agotado {
+  color: #FF4F5A;
+  font-weight: 700;
+}
+
+.ingredient-desc {
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.btn {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.25s ease;
+}
+
+.btn-edit {
+  background: linear-gradient(135deg, #3A86FF, #00C8FF);
+  color: white;
+}
+
+.btn-edit:hover {
+  transform: translateY(-2px);
+}
+
+.btn-delete {
+  background: linear-gradient(135deg, #FF6A4C, #FF2665);
+  color: white;
+}
+
+.btn-delete:hover {
+  transform: translateY(-2px);
+}
+
+/* CREATE CARD */
+.create-card {
+  border: 2px dashed #C0AFFF;
+  background: rgba(240,230,255,0.45);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.create-card:hover {
+  background: rgba(240,200,255,0.6);
+  border-color: #A98CFF;
+}
+
+@media (max-width: 768px) {
+  .ingredient-card { width: 100%; }
+}

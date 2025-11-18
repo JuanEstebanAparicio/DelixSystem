@@ -1,0 +1,31 @@
+/* RESET */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #FFEEE5, #FFF8FC);
+  color: #333;
+  min-height: 100vh;
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.5;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.page-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #2D2A4A;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
