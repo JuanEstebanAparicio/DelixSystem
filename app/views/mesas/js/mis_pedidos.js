@@ -1,60 +1,46 @@
-// ===============================
-// BOTONES VER DETALLES (NUEVO)
-// ===============================
-document.querySelectorAll('.detalles-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const id = btn.dataset.id;
+// Código JS para cargar el detalle del pedido en el modal
+const btnVerDetalles = document.querySelectorAll('.btnVerDetalles');
+const modal = document.getElementById("modalDetalles");
+const modalBody = document.getElementById("modalBody");
+const closeModal = document.getElementById("closeModal");
 
-        fetch('/DelixSystem/app/views/mesas/php/obtener_items.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `id_pedido=${id}`
-        })
-        .then(r => r.json())
-        .then(data => {
+btnVerDetalles.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const pedidoId = e.target.dataset.id; // Obtén el ID del pedido
+        if (!pedidoId) return;
 
-            if (!data.ok) {
-                Swal.fire('Error', data.error, 'error');
-                return;
-            }
-
-            let html = "";
-
-            data.items.forEach(i => {
-                let subtotal = i.precio * i.cantidad;
-
-                html += `
-                <div class="item-row">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5c-1.4 0-2.5-1.1-2.5-2.5S10.6 6.5 12 6.5s2.5 1.1 2.5 2.5S13.4 11.5 12 11.5z"/>
-                    </svg>
-
-                    <div class="item-info">
-                        <strong>${i.nombre_platillo}</strong>
-                        <span>${i.cantidad} × $${Intl.NumberFormat('es-CO').format(i.precio)}</span>
-                    </div>
-
-                    <div class="item-precio">
-                        <strong>$${Intl.NumberFormat('es-CO').format(subtotal)}</strong>
-                    </div>
-                </div>`;
+        // Realizamos la petición para obtener los detalles del pedido
+        fetch(`/DelixSystem/app/controllers/detalles_pedido.php?id=${pedidoId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    // Rellenamos el modal con los detalles
+                    modalBody.innerHTML = `
+                        <p><strong>Fecha:</strong> ${data.pedido.created_at}</p>
+                        <p><strong>Estado:</strong> ${data.pedido.estado}</p>
+                        <p><strong>Total:</strong> ${data.pedido.total_pedido}</p>
+                        <p><strong>Artículos:</strong></p>
+                        <ul>
+                            ${data.pedido.articulos.map(item => `<li>${item.nombre_platillo} x ${item.cantidad}</li>`).join('')}
+                        </ul>
+                    `;
+                    // Mostrar el modal
+                    modal.style.display = "block";
+                } else {
+                    Swal.fire("Error", "No se pudieron obtener los detalles del pedido", "error");
+                }
             });
-
-            document.getElementById('detallesContenido').innerHTML = html;
-
-            // activar animación
-            document.getElementById('modalDetalles').classList.add('active');
-        });
     });
 });
 
-// ===============================
-// CERRAR MODAL NUEVO
-// ===============================
-document.querySelector('.cerrar').onclick = () =>
-    document.getElementById('modalDetalles').classList.remove('active');
+// Cerrar el modal
+closeModal.addEventListener('click', () => {
+    modal.style.display = "none";
+});
 
-window.onclick = e => {
-    if (e.target.id === 'modalDetalles')
-        document.getElementById('modalDetalles').classList.remove('active');
-};
+// Cerrar el modal si el usuario hace clic fuera de él
+window.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        modal.style.display = "none";
+    }
+});

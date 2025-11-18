@@ -1,166 +1,190 @@
 <?php
-// DelixSystem/app/views/mesas/view/mis_pedidos.php
 session_start();
-// Si no hay cliente en sesión, intentar reconstruir desde localStorage (vía JS)
-if (!isset($_SESSION['cliente'])) {
-    echo "
-    <script>
-        let cliente = localStorage.getItem('nombre_cliente');
-        let idMesa = localStorage.getItem('id_mesa');
-        let idArea = localStorage.getItem('id_area');
-        let mesaNombre = localStorage.getItem('mesa');
-
-        if (cliente && idMesa && idArea) {
-            // reenviar con reconstrucción en PHP vía POST
-            fetch(location.href, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    cliente: cliente,
-                    id_mesa: idMesa,
-                    id_area: idArea,
-                    mesa: mesaNombre
-                })
-            }).then(() => location.reload());
-        }
-    </script>
-    ";
-
-    // detener ejecución (esperamos recarga)
-    exit;
-}
-
-// Reconstrucción automática si vienen datos desde fetch()
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $json = json_decode(file_get_contents('php://input'), true);
-
-    if (!empty($json['cliente'])) {
-        $_SESSION['cliente'] = [
-            'nombre' => $json['cliente'],
-            'id_mesa' => $json['id_mesa'],
-            'id_area' => $json['id_area'],
-            'mesa' => $json['mesa']
-        ];
-    }
-
-    echo json_encode(['ok' => true]);
-    exit;
-}
-
-
 require_once __DIR__ . '/../../../config/supabase.php';
 
-// ================================
-// 1️⃣ Verificar si hay cliente en sesión
-// ================================
-if (!isset($_SESSION['cliente'])) {
-
-    die("<p style='color:red; font-size:18px;'>⚠️ No hay cliente identificado.</p>");
+if (empty($_SESSION['cliente'])) {
+    header("Location: /DelixSystem/app/views/mesas/view/menu.php");
+    exit;
 }
 
-$cliente = $_SESSION['cliente']['nombre'];
-$id_mesa = $_SESSION['cliente']['id_mesa'];
-$id_area = $_SESSION['cliente']['id_area'];
-$mesa_text = $_SESSION['cliente']['mesa'];
-
-// ================================
-// 2️⃣ CONSULTA sin id_user
-// ================================
-$stmt = $conexion->prepare("
-    SELECT id, total_pedido, metodo_pago, pagado, estado, created_at
-    FROM orders
-    WHERE nombre_cliente = :cliente
-      AND id_mesa = :id_mesa
-      AND id_area = :id_area
-    ORDER BY id DESC
-");
-
-$stmt->execute([
-    ':cliente' => $cliente,
-    ':id_mesa' => $id_mesa,
-    ':id_area' => $id_area
-    
-]);
-
+$nombre_cliente = $_SESSION['cliente']['nombre'];
+$query = "SELECT * FROM orders WHERE nombre_cliente = :nombre_cliente";
+$stmt = $conexion->prepare($query);
+$stmt->execute(['nombre_cliente' => $nombre_cliente]);
 $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mis Pedidos</title>
-<link rel="stylesheet" href="/DelixSystem/app/views/mesas/css/mis_pedidos.css">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Pedidos</title>
+    <!-- Incluir CSS para el modal -->
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-<a class="boton-volver" 
-   href="/DelixSystem/app/views/mesas/view/menu.php?id=<?= $_SESSION['cliente']['id_mesa'] ?>&u=<?= $_SESSION['usuario']['id'] ?>">
-    <svg viewBox="0 0 24 24">
-        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-    </svg>
-</a>
-
-<h2 class="titulo-pedidos">📋 Mis Pedidos</h2>
-
-<div class="info-cliente">
-    <span><strong><?= htmlspecialchars($cliente) ?></strong></span>
-    <span class="mesa-pill">Mesa <?= htmlspecialchars($mesa_text) ?></span>
-</div>
-
-<?php if (empty($pedidos)): ?>
-    <p class="no-pedidos">No tienes pedidos aún.</p>
-
-<?php else: ?>
-
-<div class="pedidos-list">
-<?php foreach ($pedidos as $p): ?>
-
-    <div class="pedido-card">
-        <div class="pedido-top">
-            <span class="pedido-id">Pedido #<?= $p['id'] ?></span>
-            <span class="pedido-estado estado-<?= strtolower($p['estado']) ?>">
-                <?= htmlspecialchars($p['estado']) ?>
-            </span>
-        </div>
-
-        <div class="pedido-info">
-            <div><strong>Total:</strong> $<?= number_format($p['total_pedido'], 0, ',', '.') ?></div>
-            <div><strong>Pago:</strong> <?= htmlspecialchars($p['metodo_pago']) ?></div>
-            <div class="pedido-fecha"><?= htmlspecialchars($p['created_at']) ?></div>
-        </div>
-
-        <div class="pedido-acciones">
-            <?php if (in_array($p['estado'], ['Pending', 'Accepted'])): ?>
-                <button class="btn-cancelar cancelar-btn" data-id="<?= $p['id'] ?>">Cancelar</button>
-                <button class="btn-detalles detalles-btn" data-id="<?= $p['id'] ?>">Ver detalles</button>
-            <?php else: ?>
-                <span class="no-disponible">No disponible</span>
-            <?php endif; ?>
-        </div>
-    </div>
-
-<?php endforeach; ?>
-</div>
-<?php endif; ?>
+   <h2>Mis Pedidos</h2>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($pedidos as $pedido): ?>
+            <tr>
+                <td><?= htmlspecialchars($pedido['id']) ?></td>
+                <td><?= htmlspecialchars($pedido['created_at']) ?></td> <!-- O 'fecha' si es el nombre correcto -->
+                <td><?= htmlspecialchars($pedido['estado']) ?></td>
+                <td>
+                    <button class="btnVerDetalles" data-id="<?= $pedido['id'] ?>">Ver Detalles</button>
+                    <button class="btnCancelar" data-id="<?= $pedido['id'] ?>">Cancelar</button>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
 
 
-<!-- MODAL DETALLES SLIDE -->
-<div id="modalDetalles" class="modal-slide">
-    <div class="modal-box">
-        <div class="modal-header">
-            <span class="cerrar">&times;</span>
+    <!-- Modal para ver los detalles del pedido -->
+    <div id="detalleModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
             <h3>Detalles del Pedido</h3>
+            <div id="modalBody">
+                <!-- Aquí se cargarán los detalles del pedido -->
+            </div>
         </div>
+    </div>
 
-        <div id="detallesContenido" class="items-container">
-            Cargando...
+    <script>
+        // Abrir el modal
+        const modal = document.getElementById("detalleModal");
+        const modalBody = document.getElementById("modalBody");
+        const span = document.getElementsByClassName("close")[0];
+
+        const btnVerDetalles = document.querySelectorAll('.btnVerDetalles');
+        btnVerDetalles.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const pedidoId = e.target.dataset.id;
+
+                // Hacer una petición para obtener los detalles del pedido
+                fetch(`/DelixSystem/app/controllers/detalles_pedido.php?id=${pedidoId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.ok) {
+                            // Llenar el modal con los detalles
+                            modalBody.innerHTML = `
+                                <p><strong>Fecha:</strong> ${data.pedido.fecha}</p>
+                                <p><strong>Estado:</strong> ${data.pedido.estado}</p>
+                                <p><strong>Total:</strong> ${data.pedido.total}</p>
+                                <p><strong>Artículos:</strong></p>
+                                <ul>
+                                    ${data.pedido.articulos.map(item => `<li>${item.nombre} x ${item.cantidad}</li>`).join('')}
+                                </ul>
+                            `;
+                            // Mostrar el modal
+                            modal.style.display = "block";
+                        } else {
+                            Swal.fire("Error", "No se pudieron obtener los detalles del pedido", "error");
+                        }
+                    });
+            });
+        });
+
+        // Cerrar el modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Cerrar el modal si se hace clic fuera del modal
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        };
+
+        // Botón para cancelar el pedido
+        const btnCancelar = document.querySelectorAll('.btnCancelar');
+        btnCancelar.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const pedidoId = e.target.dataset.id;
+
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: "¡Este pedido será cancelado!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, cancelar',
+                    cancelButtonText: 'No, cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Hacer la solicitud para cancelar el pedido
+                        fetch(`/DelixSystem/app/controllers/cancelar_pedido.php?id=${pedidoId}`, {
+                            method: 'GET',
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.ok) {
+                                Swal.fire('Pedido Cancelado', '', 'success');
+                                window.location.reload();
+                            } else {
+                                Swal.fire('Error', 'No se pudo cancelar el pedido', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+    <!-- Modal -->
+<div id="modalDetalles" class="modal">
+    <div class="modal-content">
+        <span id="closeModal" class="close">&times;</span>
+        <h2>Detalles del Pedido</h2>
+        <div id="modalBody">
+            <!-- Aquí se mostrarán los detalles del pedido -->
         </div>
     </div>
 </div>
-
-
-<script src="/DelixSystem/app/views/mesas/js/mis_pedidos.js"></script>
-
 </body>
 </html>
