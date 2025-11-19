@@ -84,7 +84,21 @@ try {
   </nav>
 
   <main class="main-content container">
-    <h2 class="page-title">Gestor de Platos</h2>
+    <div class="header-left">
+      <h2 class="page-title">Gestor de Platos</h2>
+      <button id="toggleFilters">Mostrar filtros</button>
+    </div>
+
+    <div class="filters hidden-filters">
+      <select id="filterState">
+        <option value="Todos">Todos</option>
+        <option value="Activo">Activos</option>
+        <option value="Agotado">Agotados</option>
+        <option value="Inactivo">Inactivos</option>
+      </select>
+
+      <input type="text" id="searchInput" placeholder="Buscar por nombre...">
+    </div>
 
     <div class="card-container" id="dishGrid">
       <?php foreach ($categorias as $categoria => $items): ?>
