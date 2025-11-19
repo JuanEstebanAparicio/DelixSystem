@@ -21,20 +21,38 @@ try {
         throw new Exception("⚠️ No autorizado.");
     }
 
-    // Igual que en get_storage.php
-    if ($user['tipo'] === 'propietario') {
-        $id_user = $user['id'];
-    } elseif ($user['tipo'] === 'empleado') {
-        if (!empty($user['restaurant_id'])) {
-            $id_user = $user['restaurant_id'];
-        } elseif (!empty($user['user_id'])) {
-            $id_user = $user['user_id'];
-        } else {
-            throw new Exception("No se pudo determinar el propietario asociado al empleado.");
-        }
-    } else {
-        throw new Exception("Rol no permitido.");
+    // ============================================================
+// 📌 Resolver ID del propietario REAL (id_user)
+// ============================================================
+
+if ($user['tipo'] === 'propietario') {
+
+    // El propietario usa su propio ID
+    $id_user = $user['id'];
+
+} elseif ($user['tipo'] === 'empleado') {
+
+    // Se obtiene el propietario asociado desde employees.user_id
+    $stmt = $conexion->prepare("
+        SELECT user_id 
+        FROM employees 
+        WHERE id = :emp_id 
+        LIMIT 1
+    ");
+    $stmt->execute([':emp_id' => $user['id']]);
+    $owner = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$owner || empty($owner['user_id'])) {
+        throw new Exception("No se pudo determinar el propietario asociado al empleado.");
     }
+
+    $id_user = $owner['user_id'];
+
+} else {
+
+    throw new Exception("Rol no permitido.");
+}
+
 
     // ============================================================
     // 📦 CRUD de platillos
