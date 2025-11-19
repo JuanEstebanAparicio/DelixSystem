@@ -45,7 +45,11 @@ try {
 <head>
   <meta charset="UTF-8">
   <title>Gestor de Platos</title>
-  <link rel="stylesheet" href="../css/platillos.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/cards.css">
+  <link rel="stylesheet" href="../css/modal.css">
+  <link rel="stylesheet" href="../css/navbar.css">
+  <link rel="stylesheet" href="../css/sidebar.css">
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 
@@ -235,7 +239,8 @@ try {
 <script src="../../../../public/js/alert.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="../js/form_handler.js"></script>
+<script src="../js/dishes_base.js"></script>
+<script src="../js/dishes_modal.js"></script>
 <script>
   function goToInventory() {
     window.location.href = "/DelixSystem/app/pages/inventory/view/ingredient_manager.php";
