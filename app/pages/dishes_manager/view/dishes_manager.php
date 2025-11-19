@@ -4,8 +4,6 @@ require_once __DIR__ . '/../../../middleware/universal_guard.php';
 // 🔥 Devuelve array con: tipo (propietario/empleado), id y restaurant_id si aplica
 $user = universalGuard();
 
-// SI es propietario → usar su propio ID
-// SI es empleado → usar su restaurant_id (dueño)
 $id_usuario = ($user['tipo'] === 'propietario')
     ? $user['id']
     : $user['restaurant_id'];
