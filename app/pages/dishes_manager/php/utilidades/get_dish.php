@@ -2,16 +2,40 @@
 session_start();
 header('Content-Type: application/json');
 
-require_once __DIR__ . '/../../../../config/supabase.php';
-
-if (!isset($_SESSION['usuario'])) {
-    echo json_encode(["success" => false, "error" => "No autorizado"]);
-    exit;
-}
-
-$id_user = $_SESSION['usuario']['id'];
+// 📦 Cargar dependencias
+$baseDir = dirname(__DIR__, 4);
+require_once $baseDir . '/middleware/universal_guard.php';
+require_once $baseDir . '/config/supabase.php';
 
 try {
+    // ✅ Obtener usuario activo (propietario o empleado)
+    $usuario = universalGuard();
+
+    // Determinar ID del propietario
+    if ($usuario['tipo'] === 'propietario') {
+        $id_user = $usuario['id'];
+
+    } elseif ($usuario['tipo'] === 'empleado') {
+
+        if (!empty($usuario['restaurant_id'])) {
+            $id_user = $usuario['restaurant_id'];
+
+        } else {
+            // Último recurso: buscar al propietario del empleado
+            $stmt = $conexion->prepare("SELECT user_id FROM employees WHERE id = :id_empleado LIMIT 1");
+            $stmt->execute([':id_empleado' => $usuario['id']]);
+            $owner = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$owner || empty($owner['user_id'])) {
+                throw new Exception("No se pudo determinar el propietario del empleado.");
+            }
+
+            $id_user = $owner['user_id'];
+        }
+    } else {
+        throw new Exception("Usuario no autenticado.");
+    }
+
     // 🔹 Obtener platos
     $stmt = $conexion->prepare("
         SELECT * 
@@ -19,22 +43,20 @@ try {
         WHERE id_user = :id_user
         ORDER BY category, name_dish ASC
     ");
-    $stmt->bindParam(':id_user', $id_user, PDO::PARAM_INT);
-    $stmt->execute();
+    $stmt->execute([':id_user' => $id_user]);
     $platos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // 🔹 Obtener ingredientes disponibles
+    // 🔹 Obtener ingredientes
     $stmtIng = $conexion->prepare("
         SELECT id, name 
         FROM storage 
         WHERE id_user = :id_user
         ORDER BY name ASC
     ");
-    $stmtIng->bindParam(':id_user', $id_user, PDO::PARAM_INT);
-    $stmtIng->execute();
+    $stmtIng->execute([':id_user' => $id_user]);
     $ingredientes = $stmtIng->fetchAll(PDO::FETCH_ASSOC);
 
-    // 🔹 Agregar ingredientes a cada plato
+    // 🔹 Agregar ingredientes por plato
     foreach ($platos as $i => $dish) {
         $stmt2 = $conexion->prepare("
             SELECT di.ingredient_id AS id, di.quantity_used, di.unit, s.name
@@ -46,7 +68,7 @@ try {
         $platos[$i]['ingredients'] = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // 🔹 Extraer categorías únicas
+    // 🔹 Categorías únicas
     $categorias = array_unique(array_filter(array_column($platos, 'category')));
 
     echo json_encode([
@@ -56,10 +78,10 @@ try {
         "categorias" => array_values($categorias)
     ]);
 
-} catch (PDOException $e) {
+} catch (Exception $e) {
+
     echo json_encode([
         "success" => false,
-        "error" => "Error al obtener los datos: " . $e->getMessage()
+        "error" => $e->getMessage()
     ]);
 }
-?>
