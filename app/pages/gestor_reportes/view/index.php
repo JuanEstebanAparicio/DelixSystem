@@ -7,17 +7,33 @@ require_once __DIR__ . '/../../../middleware/employee_extended_guard.php';
 $usuario = employeeExtendedGuard(['ADMIN_LOCAL','SUPERVISOR','GESTOR_REPORTES']);
 
 // ================================
-// 🔎 Determinar el ID de usuario para los reportes
+// 🔎 Determinar el ID de usuario REAL para reportes
 // ================================
-$id_usuario = ($usuario['tipo'] === 'propietario')
-    ? $usuario['id']                // propietario usa su ID
-    : $usuario['restaurant_id'];    // empleado usa el restaurant_id asociado
+
+require_once __DIR__ . '/../../../config/supabase.php';
+
+if ($usuario['tipo'] === 'propietario') {
+
+    // El propietario usa su propio ID
+    $id_usuario = $usuario['id'];
+
+} else {
+
+    // Empleado: obtener el propietario al que pertenece
+    $stmt = $conexion->prepare("SELECT user_id FROM employees WHERE id = ?");
+    $stmt->execute([$usuario['id']]);
+    $id_usuario = $stmt->fetchColumn();
+
+    if (!$id_usuario) {
+        die("Error: No se encontró el propietario relacionado al empleado.");
+    }
+}
 
 // ================================
-// 📌 Cargar header y centro de control correctos
+// 📌 Cargar header y panel correctos
 // ================================
 if ($usuario['tipo'] === 'propietario') {
-    
+
     include __DIR__ . '/../../../components/header_propietario.php';
     include __DIR__ . '/../../../components/control_center_propietario.php';
 
@@ -30,7 +46,6 @@ if ($usuario['tipo'] === 'propietario') {
 // ================================
 // 📦 Dependencias
 // ================================
-require_once __DIR__ . '/../../../config/supabase.php';
 require_once __DIR__ . '/../php/ReportController.php';
 
 $reportController = new ReportController($conexion);
@@ -51,6 +66,7 @@ $area = $_GET['area'] ?? null;
 // 📅 Reporte por rango de fechas
 // ================================
 $reporteRango = null;
+
 if ($inicio && $fin) {
     $reporteRango = $reportController->obtenerReportePorRango(
         $id_usuario,
@@ -69,6 +85,7 @@ $ventasMes = $reportController->ventasMesActual($id_usuario);
 $topProductos = $reportController->topProductos($id_usuario, 5);
 
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
