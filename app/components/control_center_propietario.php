@@ -40,43 +40,43 @@ $nombreRestaurante = htmlspecialchars($propietario['restaurant_name']);
   </div>
 
   <!-- ⚙️ Acciones principales -->
-  <div class="p-6 flex flex-col gap-4">
-    <a href="/DelixSystem/app/pages/dashboard_propietario/view/index.php"
-       class="flex items-center gap-3 text-gray-700 hover:text-emerald-600 transition">
-      <i class="ri-dashboard-line text-2xl"></i>
-      <span class="text-base font-medium">Panel Principal</span>
+<!-- Contenido / Acciones principales -->
+<div class="flex-1 overflow-y-auto p-6">
+  <p class="text-xs text-gray-500 uppercase mb-4 font-medium tracking-wider">Gestores disponibles</p>
+
+  <div class="grid grid-cols-2 gap-4">
+    <a href="/DelixSystem/app/pages/dashboard_propietario/view/index.php" class="group card-control bg-emerald-50 hover:bg-emerald-100">
+      <i class="ri-dashboard-line text-emerald-600 text-3xl group-hover:scale-110 transition-transform"></i>
+      <span>Panel Principal</span>
     </a>
 
-    <a href="/DelixSystem/app/pages/gestion_mesas/view/gestion_mesas.php"
-       class="flex items-center gap-3 text-gray-700 hover:text-emerald-600 transition">
-      <i class="ri-restaurant-line text-2xl"></i>
-      <span class="text-base font-medium">Gestión de Mesas</span>
+    <a href="/DelixSystem/app/pages/gestion_mesas/view/gestion_mesas.php" class="group card-control bg-sky-50 hover:bg-sky-100">
+      <i class="ri-restaurant-line text-sky-500 text-3xl group-hover:scale-110 transition-transform"></i>
+      <span>Mesas</span>
     </a>
 
-    <a href="/DelixSystem/app/pages/dishes_manager/view/dishes_manager.php"
-       class="flex items-center gap-3 text-gray-700 hover:text-emerald-600 transition">
-      <i class="ri-bowl-line text-2xl"></i>
-      <span class="text-base font-medium">Gestor de Menú</span>
+    <a href="/DelixSystem/app/pages/dishes_manager/view/dishes_manager.php" class="group card-control bg-amber-50 hover:bg-amber-100">
+     <i class="ri-restaurant-2-fill text-amber-500 text-3xl group-hover:scale-110 transition-transform"></i>
+      <span>Gestor Menú</span>
     </a>
 
-    <a href="/DelixSystem/app/pages/gestor_empleado/view/gestor_empleados.php"
-       class="flex items-center gap-3 text-gray-700 hover:text-emerald-600 transition">
-      <i class="ri-team-line text-2xl"></i>
-      <span class="text-base font-medium">Gestión de Empleados</span>
+    <a href="/DelixSystem/app/pages/gestor_empleado/view/gestor_empleados.php" class="group card-control bg-indigo-50 hover:bg-indigo-100">
+      <i class="ri-team-line text-indigo-500 text-3xl group-hover:scale-110 transition-transform"></i>
+      <span>Empleados</span>
     </a>
 
-    <a href="/DelixSystem/app/pages/gestor_reportes/view/index.php"
-       class="flex items-center gap-3 text-gray-700 hover:text-emerald-600 transition">
-      <i class="ri-bar-chart-box-line text-2xl"></i>
-      <span class="text-base font-medium">Reportes y Ventas</span>
+    <a href="/DelixSystem/app/pages/gestor_reportes/view/index.php" class="group card-control bg-fuchsia-50 hover:bg-fuchsia-100">
+      <i class="ri-bar-chart-box-line text-fuchsia-500 text-3xl group-hover:scale-110 transition-transform"></i>
+      <span>Reportes</span>
     </a>
 
-    <a href="/DelixSystem/app/pages/perfil_propietario/view/index.php"
-       class="flex items-center gap-3 text-gray-700 hover:text-emerald-600 transition">
-      <i class="ri-user-settings-line text-2xl"></i>
-      <span class="text-base font-medium">Mi Perfil</span>
+    <a href="/DelixSystem/app/pages/perfil_propietario/view/index.php" class="group card-control bg-gray-50 hover:bg-gray-100">
+      <i class="ri-user-settings-line text-gray-500 text-3xl group-hover:scale-110 transition-transform"></i>
+      <span>Mi Perfil</span>
     </a>
   </div>
+</div>
+
 
   <!-- 🔒 Cerrar Sesión -->
   <div class="p-6 border-t border-gray-200">
