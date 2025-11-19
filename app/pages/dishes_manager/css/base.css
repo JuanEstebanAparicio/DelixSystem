@@ -103,10 +103,11 @@ body {
   background: rgba(122,95,255,0.08);
 }
 
-.header-left {
-    display: flex;
-    justify-content: space-between; 
-    align-items: center;
-    margin-bottom: 20px;
+.button-right {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end; /* Botón a la derecha */
+  margin-bottom: 15px;
 }
+
 

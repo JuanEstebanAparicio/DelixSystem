@@ -84,10 +84,12 @@ try {
   </nav>
 
   <main class="main-content container">
-    <div class="header-left">
-      <h2 class="page-title">Gestor de Platos</h2>
+    <h2 class="page-title">Gestor de Platos</h2>
+
+    <div class="button-right">
       <button id="toggleFilters">Mostrar filtros</button>
     </div>
+
 
     <div class="filters hidden-filters">
       <select id="filterState">
