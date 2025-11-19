@@ -175,24 +175,18 @@ try {
       <div class="form-group">
         <label for="unit">Unidad:</label>
         <select name="unit" id="unit" required>
-          <!-- Peso -->
           <option value="Kg">Kilogramos (Kg)</option>
           <option value="g">Gramos (g)</option>
           <option value="mg">Miligramos (mg)</option>
-
-          <!-- Volumen -->
           <option value="Litro">Litros (L)</option>
           <option value="ml">Mililitros (ml)</option>
           <option value="cc">Centímetros cúbicos (cc)</option>
           <option value="Galón">Galón</option>
-
-          <!-- Unidades -->
           <option value="Unidad">Unidad</option>
           <option value="Paquete">Paquete</option>
           <option value="Caja">Caja</option>
           <option value="Bolsa">Bolsa</option>
       </select>
-
       </div>
 
       <div class="form-group">

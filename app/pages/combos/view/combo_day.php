@@ -105,6 +105,7 @@ $user = universalGuard();
 
   <!-- === Scripts === -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../js/form_modal.js"></script>
+  <script src="../js/base.js"></script>
+  <script src="../js/modal.js"></script>
 </body>
 </html>
