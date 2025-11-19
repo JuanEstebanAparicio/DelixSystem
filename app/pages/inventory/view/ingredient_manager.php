@@ -22,8 +22,8 @@ require_once __DIR__ . '/../../../config/supabase.php';
 if ($usuario['tipo'] === 'propietario') {
     $id_usuario = $usuario['id'];
 } elseif ($usuario['tipo'] === 'empleado') {
-    $id_usuario = $usuario['restaurant_id'];
-} else {
+    $id_usuario = $usuario['user_id'];
+}else {
     header("Location: /DelixSystem/public/index.php");
     exit;
 }
