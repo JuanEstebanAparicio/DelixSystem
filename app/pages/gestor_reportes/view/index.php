@@ -1,36 +1,72 @@
 <?php
-require_once __DIR__ . '/../../../middleware/session_guard.php';
-protectPage('propietario');
+// 🔐 Cargar guardia con validación de roles
+require_once __DIR__ . '/../../../middleware/employee_extended_guard.php';
 
-include __DIR__ . '/../../../components/header_propietario.php';
-include __DIR__ . '/../../../components/control_center_propietario.php';
+// Solo los empleados con ciertos roles pueden acceder.
+// Los propietarios pasan automáticamente.
+$usuario = employeeExtendedGuard([
+    'ADMIN_LOCAL',
+    'SUPERVISOR',
+    'GESTOR_EMPLEADOS'
+]);
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+// ================================
+// 🔎 Determinar el ID de usuario para los reportes
+// ================================
+$id_usuario = ($usuario['tipo'] === 'propietario')
+    ? $usuario['id']                // propietario usa su ID
+    : $usuario['restaurant_id'];    // empleado usa el restaurant_id asociado
+
+// ================================
+// 📌 Cargar header y centro de control correctos
+// ================================
+if ($usuario['tipo'] === 'propietario') {
+    
+    include __DIR__ . '/../../../components/header_propietario.php';
+    include __DIR__ . '/../../../components/control_center_propietario.php';
+
+} else {
+
+    require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php';
+
 }
 
+// ================================
+// 📦 Dependencias
+// ================================
 require_once __DIR__ . '/../../../config/supabase.php';
 require_once __DIR__ . '/../php/ReportController.php';
 
-$usuario = $_SESSION['usuario'] ?? [];
-$id_usuario = $usuario['id'] ?? null;
-
 $reportController = new ReportController($conexion);
 
-// Reportes generales (diario, semanal, mensual)
+// ================================
+// 📊 Reportes principales
+// ================================
 $reportes = $reportController->obtenerReportes($id_usuario);
 
-// Filtros GET
-$inicio = $_GET['inicio'] ?? null;
-$fin = $_GET['fin'] ?? null;
+// ================================
+// 🎯 Filtros GET
+// ================================
+$inicio = $_GET['fecha_inicio'] ?? null;
+$fin = $_GET['fecha_fin'] ?? null;
 $area = $_GET['area'] ?? null;
 
-// Reporte por rango (si se aplicó filtro)
+// ================================
+// 📅 Reporte por rango de fechas
+// ================================
 $reporteRango = null;
 if ($inicio && $fin) {
-    $reporteRango = $reportController->obtenerReportePorRango($id_usuario, $inicio, $fin, $area);
+    $reporteRango = $reportController->obtenerReportePorRango(
+        $id_usuario,
+        $inicio,
+        $fin,
+        $area
+    );
 }
 
+// ================================
+// 📈 Otros datos estadísticos
+// ================================
 $ventas7 = $reportController->ventasUltimos7Dias($id_usuario);
 $areas = $reportController->pedidosPorArea($id_usuario);
 $ventasMes = $reportController->ventasMesActual($id_usuario);
