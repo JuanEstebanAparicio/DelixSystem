@@ -74,6 +74,16 @@ $nombreRestaurante = htmlspecialchars($propietario['restaurant_name']);
       <i class="ri-user-settings-line text-gray-500 text-3xl group-hover:scale-110 transition-transform"></i>
       <span>Mi Perfil</span>
     </a>
+
+     <a href="/DelixSystem/app/pages/dashboard_propietario/view/index.php" class="group card-control bg-cyan-50 hover:bg-cyan-100">
+          <i class="ri-dashboard-fill text-cyan-600 text-3xl group-hover:scale-110 transition-transform"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="/DelixSystem/app/pages/historial/view/historial.php" class="group card-control bg-orange-50 hover:bg-orange-100">
+          <i class="ri-history-line text-orange-500 text-3xl group-hover:scale-110 transition-transform"></i>
+          <span>Historial</span>
+        </a>
   </div>
 </div>
 
