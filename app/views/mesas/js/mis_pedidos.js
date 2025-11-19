@@ -1,60 +1,60 @@
-// ===============================
-// BOTONES VER DETALLES (NUEVO)
-// ===============================
-document.querySelectorAll('.detalles-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const id = btn.dataset.id;
+// ===============================================
+// CANCELAR PEDIDO CON SWEETALERT
+// ===============================================
+//DelixSystem/app/views/mesas/js/mis_pedidos.js
+document.addEventListener("DOMContentLoaded", () => {
 
-        fetch('/DelixSystem/app/views/mesas/php/obtener_items.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `id_pedido=${id}`
-        })
-        .then(r => r.json())
-        .then(data => {
+    document.querySelectorAll(".cancelar-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
 
-            if (!data.ok) {
-                Swal.fire('Error', data.error, 'error');
-                return;
-            }
+            let id = btn.dataset.id;
 
-            let html = "";
+            Swal.fire({
+                title: "¿Cancelar pedido?",
+                text: "Esta acción no se puede deshacer.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sí, cancelar",
+                cancelButtonText: "No",
+            }).then(result => {
+                if (result.isConfirmed) {
 
-            data.items.forEach(i => {
-                let subtotal = i.precio * i.cantidad;
+                    // 🔥 Enviamos petición al servidor
+                    fetch("/DelixSystem/app/views/mesas/php/cancelar_pedido.php", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: `pedido_id=${id}`
+                    })
+                    .then(res => res.json())
+                    .then(data => {
 
-                html += `
-                <div class="item-row">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5c-1.4 0-2.5-1.1-2.5-2.5S10.6 6.5 12 6.5s2.5 1.1 2.5 2.5S13.4 11.5 12 11.5z"/>
-                    </svg>
+                        console.log("📦 Respuesta cancelar:", data);
 
-                    <div class="item-info">
-                        <strong>${i.nombre_platillo}</strong>
-                        <span>${i.cantidad} × $${Intl.NumberFormat('es-CO').format(i.precio)}</span>
-                    </div>
+                        if (data.error) {
+                            Swal.fire("Error", data.error, "error");
+                            return;
+                        }
 
-                    <div class="item-precio">
-                        <strong>$${Intl.NumberFormat('es-CO').format(subtotal)}</strong>
-                    </div>
-                </div>`;
+                        Swal.fire({
+                            title: "Cancelado",
+                            text: data.mensaje,
+                            icon: "success",
+                        }).then(() => {
+                            location.reload(); // refrescar lista
+                        });
+
+                    })
+                    .catch(err => {
+                        console.error("❌ Error en fetch cancelar:", err);
+                        Swal.fire("Error", "No se pudo cancelar el pedido.", "error");
+                    });
+
+                }
             });
 
-            document.getElementById('detallesContenido').innerHTML = html;
-
-            // activar animación
-            document.getElementById('modalDetalles').classList.add('active');
         });
     });
+
 });
 
-// ===============================
-// CERRAR MODAL NUEVO
-// ===============================
-document.querySelector('.cerrar').onclick = () =>
-    document.getElementById('modalDetalles').classList.remove('active');
 
-window.onclick = e => {
-    if (e.target.id === 'modalDetalles')
-        document.getElementById('modalDetalles').classList.remove('active');
-};

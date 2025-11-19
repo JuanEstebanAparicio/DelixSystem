@@ -323,7 +323,20 @@ foreach($platillos as $p){
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/DelixSystem/app/views/mesas/js/menu.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("📌 Guardando id_user en localStorage...");
 
+    const idUser = "<?php echo $id_user; ?>";
+
+    if (idUser) {
+        localStorage.setItem("id_user", idUser);
+        console.log("✅ id_user guardado:", idUser);
+    } else {
+        console.warn("⚠️ No se pudo guardar id_user (valor vacío)");
+    }
+});
+</script>
 
 </body>
 </html>

@@ -1,6 +1,9 @@
 <?php
 // DelixSystem/app/views/mesas/view/mis_pedidos.php
 session_start();
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 // Si no hay cliente en sesión, intentar reconstruir desde localStorage (vía JS)
 if (!isset($_SESSION['cliente'])) {
     echo "
@@ -11,7 +14,6 @@ if (!isset($_SESSION['cliente'])) {
         let mesaNombre = localStorage.getItem('mesa');
 
         if (cliente && idMesa && idArea) {
-            // reenviar con reconstrucción en PHP vía POST
             fetch(location.href, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -19,14 +21,13 @@ if (!isset($_SESSION['cliente'])) {
                     cliente: cliente,
                     id_mesa: idMesa,
                     id_area: idArea,
-                    mesa: mesaNombre
+                    mesa: mesaNombre,
+                    id_user: localStorage.getItem('id_user')
                 })
             }).then(() => location.reload());
         }
     </script>
     ";
-
-    // detener ejecución (esperamos recarga)
     exit;
 }
 
@@ -39,7 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'nombre' => $json['cliente'],
             'id_mesa' => $json['id_mesa'],
             'id_area' => $json['id_area'],
-            'mesa' => $json['mesa']
+            'mesa' => $json['mesa'],
+            'id_user' => $json['id_user']
         ];
     }
 
@@ -54,7 +56,6 @@ require_once __DIR__ . '/../../../config/supabase.php';
 // 1️⃣ Verificar si hay cliente en sesión
 // ================================
 if (!isset($_SESSION['cliente'])) {
-
     die("<p style='color:red; font-size:18px;'>⚠️ No hay cliente identificado.</p>");
 }
 
@@ -62,6 +63,7 @@ $cliente = $_SESSION['cliente']['nombre'];
 $id_mesa = $_SESSION['cliente']['id_mesa'];
 $id_area = $_SESSION['cliente']['id_area'];
 $mesa_text = $_SESSION['cliente']['mesa'];
+$id_user = $_SESSION['cliente']['id_user'] ?? null;
 
 // ================================
 // 2️⃣ CONSULTA sin id_user
@@ -79,7 +81,6 @@ $stmt->execute([
     ':cliente' => $cliente,
     ':id_mesa' => $id_mesa,
     ':id_area' => $id_area
-    
 ]);
 
 $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -93,9 +94,18 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <link rel="stylesheet" href="/DelixSystem/app/views/mesas/css/mis_pedidos.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
-<a class="boton-volver" 
-   href="/DelixSystem/app/views/mesas/view/menu.php?id=<?= $_SESSION['cliente']['id_mesa'] ?>&u=<?= $_SESSION['usuario']['id'] ?>">
+
+<body 
+    data-id_user="<?= $id_user ?? '' ?>" 
+    data-id_mesa="<?= $id_mesa ?>"
+>
+<script>
+console.log("🔥 PHP id_user recibido en mis_pedidos.php:", "<?= $id_user ?>");
+console.log("🔥 id_user desde atributo BODY:", document.body.getAttribute("data-id_user"));
+console.log("🔥 id_user desde localStorage:", localStorage.getItem("id_user"));
+</script>
+
+<a class="boton-volver" id="btnVolverMenu" href="#">
     <svg viewBox="0 0 24 24">
         <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
     </svg>
@@ -110,7 +120,6 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <?php if (empty($pedidos)): ?>
     <p class="no-pedidos">No tienes pedidos aún.</p>
-
 <?php else: ?>
 
 <div class="pedidos-list">
@@ -146,19 +155,110 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
 <!-- MODAL DETALLES SLIDE -->
-<div id="modalDetalles" class="modal-slide">
-    <div class="modal-box">
-        <div class="modal-header">
-            <span class="cerrar">&times;</span>
-            <h3>Detalles del Pedido</h3>
-        </div>
+<div id="modalDetalles" class="modal">
+    <div class="modal-contenido">
+        <span class="cerrar">&times;</span>
 
-        <div id="detallesContenido" class="items-container">
-            Cargando...
-        </div>
+        <h2>Detalles del Pedido</h2>
+        <div id="detallesContenido"></div>
     </div>
 </div>
 
+
+<!-- =============================== -->
+<!-- SCRIPT INTERNO: VER DETALLES   -->
+<!-- =============================== -->
+<script>
+console.log("🎯 SCRIPT INTERNO SE ESTÁ EJECUTANDO");
+
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("🎯 DOM cargado: iniciando mis_pedidos JS.");
+
+    document.querySelectorAll('.detalles-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            console.log("🟢 Click en Ver Detalles, ID:", btn.dataset.id);
+
+            const id = btn.dataset.id;
+
+            fetch('/DelixSystem/app/views/mesas/php/obtener_items.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `id_pedido=${id}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                console.log("📦 Respuesta del servidor:", data);
+
+                if (!data.ok) {
+                    Swal.fire('Error', data.error, 'error');
+                    return;
+                }
+
+                let html = "";
+                data.items.forEach(i => {
+                    let subtotal = i.precio * i.cantidad;
+                    html += `
+                        <div class="item-row">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5c-1.4 0-2.5-1.1-2.5-2.5S10.6 6.5 12 6.5s2.5 1.1 2.5 2.5S13.4 11.5 12 11.5z"/>
+                            </svg>
+
+                            <div class="item-info">
+                                <strong>${i.nombre_platillo}</strong>
+                                <span>${i.cantidad} × $${Intl.NumberFormat('es-CO').format(i.precio)}</span>
+                            </div>
+
+                            <div class="item-precio">
+                                <strong>$${Intl.NumberFormat('es-CO').format(subtotal)}</strong>
+                            </div>
+                        </div>`;
+                });
+
+                document.getElementById('detallesContenido').innerHTML = html;
+
+                document.getElementById('modalDetalles').classList.add('active');
+            });
+        });
+    });
+
+    document.querySelector('.cerrar').onclick =
+        () => document.getElementById('modalDetalles').classList.remove('active');
+
+    window.onclick = (e) => {
+        if (e.target.id === 'modalDetalles') {
+            document.getElementById('modalDetalles').classList.remove('active');
+        }
+    };
+
+});
+</script>
+
+
+<!-- =============================== -->
+<!-- SCRIPT INTERNO: ARMAR BOTÓN    -->
+<!-- =============================== -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("🔥 DOM listo en unificador de id_user + mesa");
+
+    let id_user = document.body.getAttribute("data-id_user");
+    if (!id_user || id_user.trim() === "") {
+        console.warn("⚠️ id_user vacío en PHP, usando localStorage...");
+        id_user = localStorage.getItem("id_user");
+    }
+    console.log("🟢 id_user FINAL:", id_user);
+
+    let id_mesa = document.body.getAttribute("data-id_mesa");
+    console.log("🟢 id_mesa FINAL:", id_mesa);
+
+    const volverBtn = document.getElementById("btnVolverMenu");
+    if (volverBtn) {
+        volverBtn.href =
+            `/DelixSystem/app/views/mesas/view/menu.php?id=${id_mesa}&u=${id_user}`;
+        console.log("🔗BOTÓN VOLVER Generado:", volverBtn.href);
+    }
+});
+</script>
 
 <script src="/DelixSystem/app/views/mesas/js/mis_pedidos.js"></script>
 
