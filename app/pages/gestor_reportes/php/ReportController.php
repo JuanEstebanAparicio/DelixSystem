@@ -1,6 +1,4 @@
 <?php
-// DelixSystem/app/pages/gestor_reportes/php/ReportController.php
-
 require_once __DIR__ . '/ReportModel.php';
 
 class ReportController {
@@ -33,9 +31,9 @@ class ReportController {
         ];
     }
 
-    public function obtenerReportePorRango($id_user, $inicio, $fin){
+    public function obtenerReportePorRango($id_user, $inicio, $fin, $area = null){
         $this->validarIdUser($id_user);
-        return $this->model->getReportByRange($id_user, $inicio, $fin);
+        return $this->model->getReportByRange($id_user, $inicio, $fin, $area);
     }
 
     public function obtenerDetalleDiario($id_user, $inicio = null, $fin = null){
