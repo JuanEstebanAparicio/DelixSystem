@@ -75,7 +75,18 @@ function llenarSelectUsuarios(data) {
     const unicos = new Set();
 
     data.forEach(row => {
-        if (row.usuario_nombre) unicos.add(row.usuario_nombre);
+        // 1️⃣ Intentar tomar siempre usuario_nombre
+        let nombre = row.usuario_nombre;
+
+        // 2️⃣ Si está vacío, fallback a actor_name o usuario
+        if (!nombre || nombre.trim() === "") {
+            nombre = row.actor_name || row.usuario || null;
+        }
+
+        // 3️⃣ Último fallback si sigue sin nombre
+        if (!nombre) return;
+
+        unicos.add(nombre);
     });
 
     unicos.forEach(nombre => {
@@ -85,6 +96,7 @@ function llenarSelectUsuarios(data) {
         filtroUsuario.appendChild(op);
     });
 }
+
 
 // ================================
 // LLENAR SELECT DE GESTORES
