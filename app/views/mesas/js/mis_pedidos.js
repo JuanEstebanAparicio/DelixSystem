@@ -1,46 +1,60 @@
-// Código JS para cargar el detalle del pedido en el modal
-const btnVerDetalles = document.querySelectorAll('.btnVerDetalles');
-const modal = document.getElementById("modalDetalles");
-const modalBody = document.getElementById("modalBody");
-const closeModal = document.getElementById("closeModal");
+// ===============================================
+// CANCELAR PEDIDO CON SWEETALERT
+// ===============================================
+//DelixSystem/app/views/mesas/js/mis_pedidos.js
+document.addEventListener("DOMContentLoaded", () => {
 
-btnVerDetalles.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        const pedidoId = e.target.dataset.id; // Obtén el ID del pedido
-        if (!pedidoId) return;
+    document.querySelectorAll(".cancelar-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
 
-        // Realizamos la petición para obtener los detalles del pedido
-        fetch(`/DelixSystem/app/controllers/detalles_pedido.php?id=${pedidoId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.ok) {
-                    // Rellenamos el modal con los detalles
-                    modalBody.innerHTML = `
-                        <p><strong>Fecha:</strong> ${data.pedido.created_at}</p>
-                        <p><strong>Estado:</strong> ${data.pedido.estado}</p>
-                        <p><strong>Total:</strong> ${data.pedido.total_pedido}</p>
-                        <p><strong>Artículos:</strong></p>
-                        <ul>
-                            ${data.pedido.articulos.map(item => `<li>${item.nombre_platillo} x ${item.cantidad}</li>`).join('')}
-                        </ul>
-                    `;
-                    // Mostrar el modal
-                    modal.style.display = "block";
-                } else {
-                    Swal.fire("Error", "No se pudieron obtener los detalles del pedido", "error");
+            let id = btn.dataset.id;
+
+            Swal.fire({
+                title: "¿Cancelar pedido?",
+                text: "Esta acción no se puede deshacer.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sí, cancelar",
+                cancelButtonText: "No",
+            }).then(result => {
+                if (result.isConfirmed) {
+
+                    // 🔥 Enviamos petición al servidor
+                    fetch("/DelixSystem/app/views/mesas/php/cancelar_pedido.php", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: `pedido_id=${id}`
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+
+                        console.log("📦 Respuesta cancelar:", data);
+
+                        if (data.error) {
+                            Swal.fire("Error", data.error, "error");
+                            return;
+                        }
+
+                        Swal.fire({
+                            title: "Cancelado",
+                            text: data.mensaje,
+                            icon: "success",
+                        }).then(() => {
+                            location.reload(); // refrescar lista
+                        });
+
+                    })
+                    .catch(err => {
+                        console.error("❌ Error en fetch cancelar:", err);
+                        Swal.fire("Error", "No se pudo cancelar el pedido.", "error");
+                    });
+
                 }
             });
+
+        });
     });
+
 });
 
-// Cerrar el modal
-closeModal.addEventListener('click', () => {
-    modal.style.display = "none";
-});
 
-// Cerrar el modal si el usuario hace clic fuera de él
-window.addEventListener('click', (e) => {
-    if (e.target === modal) {
-        modal.style.display = "none";
-    }
-});
