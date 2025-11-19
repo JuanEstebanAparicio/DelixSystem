@@ -1,0 +1,92 @@
+/* NAVBAR */
+.navbar {
+  width: 100%;
+  background: linear-gradient(90deg, #7A5FFF, #02D6F2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1.5rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+}
+
+.navbar-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.hamburger {
+  font-size: 1.6rem;
+  background: none;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.hamburger:hover {
+  transform: scale(1.25) rotate(8deg);
+}
+
+/* BUTTON GROUP */
+.button-group {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.create-btn {
+  background: linear-gradient(135deg, #FF8A4C, #FF4F5A);
+  border: none;
+  padding: 9px 16px;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255,80,80,0.4);
+}
+
+.create-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255,80,80,0.55);
+}
+
+.inventory-btn {
+  background: linear-gradient(135deg, #02D6F2, #3A86FF);
+  color: white;
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s ease;
+  box-shadow: 0 4px 12px rgba(40,130,255,0.35);
+}
+
+.inventory-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(40,130,255,0.55);
+}
+
+.dashboard-btn {
+  background: linear-gradient(135deg, #2EE6A8, #18B88A);
+  padding: 9px 16px;
+  border-radius: 10px;
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 4px 12px rgba(0,200,150,0.35);
+}
+
+.dashboard-btn:hover {
+  transform: translateY(-2px);
+}

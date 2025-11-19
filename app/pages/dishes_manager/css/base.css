@@ -1,0 +1,113 @@
+/* RESET */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #FFEEE5, #FFF8FC);
+  color: #333;
+  min-height: 100vh;
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.5;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.page-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #2D2A4A;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+  padding: 10px 16px;
+  background: rgba(122, 95, 255, 0.13); 
+  border-left: 4px solid #7A5FFF;        
+  border-radius: 12px;
+  backdrop-filter: blur(3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+  transition: opacity 0.3s ease, transform 0.25s ease;
+  width: fit-content;
+  margin-left: auto;
+}
+
+#filterState,
+#searchInput {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 2px solid #02D6F2; 
+  background: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #333;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.25s ease;
+}
+
+#filterState { width: 130px; }
+#searchInput { width: 260px; }
+
+#filterState:focus,
+#searchInput:focus {
+  border-color: #3A86FF; 
+  box-shadow: 0 0 8px rgba(58,134,255,0.45);
+  outline: none;
+}
+
+#filterState:hover,
+#searchInput:hover {
+  border-color: #02D6F2;
+}
+
+#toggleFilters {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  background: linear-gradient(135deg, #7A5FFF, #3A86FF); /* Morado → Azul */
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(100,100,255,0.30);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#toggleFilters:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(100,100,255,0.45);
+}
+
+.hidden-filters select,
+.hidden-filters input {
+  display: none !important;
+}
+
+.hidden-filters {
+  opacity: 0;
+  transform: scale(0.96);
+  background: rgba(122,95,255,0.08);
+}
+
+.button-right {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end; /* Botón a la derecha */
+  margin-bottom: 15px;
+}
+
+
