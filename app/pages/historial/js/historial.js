@@ -28,10 +28,14 @@ async function cargarAuditorias() {
 
         const datos = json.data;
 
+        // 🔥 Llenar selects dinámicos
         llenarSelectUsuarios(datos);
+        llenarSelectGestores(datos);
+        llenarSelectAcciones(datos);
+
         renderTabla(datos);
 
-        window.__AUDIT_DATA__ = datos; // cache global
+        window.__AUDIT_DATA__ = datos;
     } catch (error) {
         console.error("Error fetch:", error);
     }
@@ -81,6 +85,50 @@ function llenarSelectUsuarios(data) {
         filtroUsuario.appendChild(op);
     });
 }
+
+// ================================
+// LLENAR SELECT DE GESTORES
+// ================================
+function llenarSelectGestores(data) {
+    const filtroGestor = document.getElementById("filtroGestor");
+
+    filtroGestor.innerHTML = `<option value="">Todos</option>`;
+
+    const gestores = new Set();
+
+    data.forEach(row => {
+        if (row.gestor) gestores.add(row.gestor);
+    });
+
+    gestores.forEach(g => {
+        const op = document.createElement("option");
+        op.value = g;
+        op.textContent = g.charAt(0).toUpperCase() + g.slice(1);
+        filtroGestor.appendChild(op);
+    });
+}
+// ================================
+// LLENAR SELECT DE ACCIONES
+// ================================
+function llenarSelectAcciones(data) {
+    const filtroAccion = document.getElementById("filtroAccion");
+
+    filtroAccion.innerHTML = `<option value="">Todas</option>`;
+
+    const acciones = new Set();
+
+    data.forEach(row => {
+        if (row.action) acciones.add(row.action);
+    });
+
+    acciones.forEach(a => {
+        const op = document.createElement("option");
+        op.value = a;
+        op.textContent = a.charAt(0).toUpperCase() + a.slice(1);
+        filtroAccion.appendChild(op);
+    });
+}
+
 
 // ================================
 //  FILTRAR DATOS
