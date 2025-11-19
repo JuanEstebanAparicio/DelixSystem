@@ -155,62 +155,69 @@ class ReportModel {
        GRAFICAS
     ========================================================== */
 
-    public function getVentasUltimos7Dias($id_user){
-        $stmt = $this->db->prepare("
-            SELECT DATE(created_at) AS fecha, COALESCE(SUM(total_pedido), 0) AS total
-            FROM orders
-            WHERE id_user = :id_user
-            AND created_at >= NOW() - INTERVAL '7 days'
-            GROUP BY DATE(created_at)
-            ORDER BY fecha ASC
-        ");
-        $stmt->execute(['id_user' => $id_user]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+  public function getVentasUltimos7Dias($id_user){
+    $stmt = $this->db->prepare("
+        SELECT DATE(created_at) AS fecha, COALESCE(SUM(total_pedido), 0) AS total
+        FROM orders
+        WHERE id_user = :id_user
+        AND pagado = 1
+        AND created_at >= NOW() - INTERVAL '7 days'
+        GROUP BY DATE(created_at)
+        ORDER BY fecha ASC
+    ");
+    $stmt->execute(['id_user' => $id_user]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
-    public function getPedidosPorArea($id_user){
-        $stmt = $this->db->prepare("
-            SELECT area, COUNT(*) AS total_pedidos
-            FROM orders
-            WHERE id_user = :id_user
-            GROUP BY area
-            ORDER BY total_pedidos DESC
-        ");
-        $stmt->execute(['id_user' => $id_user]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
 
-    public function getVentasMesActual($id_user){
-        $stmt = $this->db->prepare("
-            SELECT DATE(created_at) AS fecha, COALESCE(SUM(total_pedido), 0) AS total
-            FROM orders
-            WHERE id_user = :id_user
-            AND DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)
-            GROUP BY DATE(created_at)
-            ORDER BY fecha ASC
-        ");
-        $stmt->execute(['id_user' => $id_user]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+   public function getPedidosPorArea($id_user){
+    $stmt = $this->db->prepare("
+        SELECT area, COUNT(*) AS total_pedidos
+        FROM orders
+        WHERE id_user = :id_user
+        AND pagado = 1
+        GROUP BY area
+        ORDER BY total_pedidos DESC
+    ");
+    $stmt->execute(['id_user' => $id_user]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
-    public function getTopProductos($id_user, $limite = 5){
-        $stmt = $this->db->prepare("
-            SELECT 
-                oi.nombre_platillo AS producto,
-                SUM(oi.cantidad) AS total_vendidos
-            FROM order_items oi
-            INNER JOIN orders o ON oi.order_id = o.id
-            WHERE o.id_user = :id_user
-            GROUP BY oi.nombre_platillo
-            ORDER BY total_vendidos DESC
-            LIMIT :limite
-        ");
 
-        $stmt->bindValue(':id_user', $id_user, PDO::PARAM_INT);
-        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
-        $stmt->execute();
+ public function getVentasMesActual($id_user){
+    $stmt = $this->db->prepare("
+        SELECT DATE(created_at) AS fecha, COALESCE(SUM(total_pedido), 0) AS total
+        FROM orders
+        WHERE id_user = :id_user
+        AND pagado = 1
+        AND DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)
+        GROUP BY DATE(created_at)
+        ORDER BY fecha ASC
+    ");
+    $stmt->execute(['id_user' => $id_user]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+
+ public function getTopProductos($id_user, $limite = 5){
+    $stmt = $this->db->prepare("
+        SELECT 
+            oi.nombre_platillo AS producto,
+            SUM(oi.cantidad) AS total_vendidos
+        FROM order_items oi
+        INNER JOIN orders o ON oi.order_id = o.id
+        WHERE o.id_user = :id_user
+        AND o.pagado = 1
+        GROUP BY oi.nombre_platillo
+        ORDER BY total_vendidos DESC
+        LIMIT :limite
+    ");
+
+    $stmt->bindValue(':id_user', $id_user, PDO::PARAM_INT);
+    $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 }
