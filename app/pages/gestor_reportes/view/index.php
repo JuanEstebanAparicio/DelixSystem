@@ -4,11 +4,7 @@ require_once __DIR__ . '/../../../middleware/employee_extended_guard.php';
 
 // Solo los empleados con ciertos roles pueden acceder.
 // Los propietarios pasan automáticamente.
-$usuario = employeeExtendedGuard([
-    'ADMIN_LOCAL',
-    'SUPERVISOR',
-    'GESTOR_EMPLEADOS'
-]);
+$usuario = employeeExtendedGuard(['ADMIN_LOCAL','SUPERVISOR','GESTOR_REPORTES']);
 
 // ================================
 // 🔎 Determinar el ID de usuario para los reportes
