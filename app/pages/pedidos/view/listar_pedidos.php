@@ -5,20 +5,38 @@ require_once __DIR__ . '/../../../middleware/session_guard.php';
 protectPage('propietario');
 
 // ✅ Incluimos el Control Center
- include __DIR__ . '/../../../components/header_propietario.php'; 
-  include __DIR__ . '/../../../components/control_center_propietario.php'; 
+include __DIR__ . '/../../../components/header_propietario.php'; 
+include __DIR__ . '/../../../components/control_center_propietario.php'; 
 require_once __DIR__ . '/../../../config/supabase.php';
 
-// (opcional) intentar usar modelo de Areas si existe
-$areas = [];
+// Aseguramos que el usuario esté logueado y obtenemos su ID
 $userId = $_SESSION['usuario']['id'] ?? null;
+if (!$userId) {
+    echo '<p class="error">No estás autenticado. Por favor, inicia sesión.</p>';
+    exit;
+}
+
+// Log: Verificar el ID de usuario
+error_log("ID de Usuario: " . $userId);
+
+// Traemos las áreas del usuario logueado, solo aquellas asociadas a su `id_usuario`
+$areas = [];
 $modelPath = __DIR__ . '/../../../models/AreaModel.php';
 if ($userId && file_exists($modelPath)) {
     require_once $modelPath;
     try {
         $areaModel = new AreaModel($conexion);
-        $areasRaw = $areaModel->obtenerAreasAdaptable($userId, $conexion);
-        // normalizamos a array simple de nombres
+
+        // Log: Verificar la ejecución de la consulta para obtener áreas
+        error_log("Consultando áreas para el ID de usuario: " . $userId);
+        
+        // Filtramos las áreas por `id_usuario`
+        $areasRaw = $areaModel->obtenerAreasAdaptable($userId, $conexion); 
+        
+        // Log: Verificar qué áreas estamos recuperando
+        error_log("Áreas recuperadas (Raw): " . print_r($areasRaw, true));
+        
+        // Normalizamos las áreas a un array simple de nombres
         foreach ($areasRaw as $a) {
             if (isset($a['nombre'])) $areas[] = $a['nombre'];
             elseif (isset($a['name'])) $areas[] = $a['name'];
@@ -26,52 +44,65 @@ if ($userId && file_exists($modelPath)) {
         }
     } catch (Throwable $e) {
         $areas = [];
+        error_log("Error al recuperar las áreas: " . $e->getMessage());
     }
 }
 
-// fallback: si no obtuvimos areas por el modelo, sacarlas desde orders (DISTINCT)
+// Log: Verificar el resultado de las áreas recuperadas del modelo
+error_log("Áreas después de la consulta del modelo: " . print_r($areas, true));
+
+// fallback: si no obtuvimos áreas por el modelo, las obtenemos directamente desde la tabla `areas` (filtrando por `id_usuario`)
 if (empty($areas)) {
     try {
-        $stmtAreas = $conexion->prepare("SELECT DISTINCT area FROM orders WHERE area IS NOT NULL ORDER BY area ASC");
-        $stmtAreas->execute();
+        // Aquí usamos `nombre` en lugar de `area`
+        error_log("Recuperando áreas desde el fallback (sin modelo)");
+
+        $stmtAreas = $conexion->prepare("SELECT DISTINCT nombre FROM areas WHERE id_usuario = :user_id AND nombre IS NOT NULL ORDER BY nombre ASC");
+        $stmtAreas->execute(['user_id' => $userId]);
         $areas = $stmtAreas->fetchAll(PDO::FETCH_COLUMN);
+
+        // Log: Verificar el resultado de las áreas desde el fallback
+        error_log("Áreas recuperadas del fallback: " . print_r($areas, true));
     } catch (Throwable $e) {
         $areas = [];
+        error_log("Error al recuperar las áreas desde el fallback: " . $e->getMessage());
     }
 }
 
-// traer los pedidos más recientes (incluimos estado)
+
+// Log: Verificar las áreas antes de usarlas
+error_log("Áreas finales que se van a mostrar: " . print_r($areas, true));
+
+// Traemos los pedidos del usuario actual, más recientes, y con el estado filtrado
 $stmt = $conexion->prepare("SELECT id, restaurant_name, area, id_area, mesa, total_pedido, metodo_pago, pagado, estado, created_at
     FROM orders
-    WHERE estado != 'Delivered'
+    WHERE id_user = :user_id AND estado != 'Delivered'
     ORDER BY id DESC");
-$stmt->execute();
+$stmt->execute(['user_id' => $userId]);
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Si la petición es fetch=1 devolvemos sólo el grid (para polling AJAX)
+// Si la petición es fetch=1 devolvemos solo el grid (para polling AJAX)
 if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
-
     if (empty($orders)) {
         echo '<p class="no-orders">No hay pedidos todavía.</p>';
         exit;
     }
 
-foreach ($orders as $o) {
+    foreach ($orders as $o) {
+        $areaAttr = htmlspecialchars(strtolower($o['area'] ?? ''));
+        $paid = ((int)$o['pagado'] === 1);
+        $cardClass = $paid ? 'order-card' : 'order-card pending';
 
-    $areaAttr = htmlspecialchars(strtolower($o['area'] ?? ''));
-    $paid = ((int)$o['pagado'] === 1);
-    $cardClass = $paid ? 'order-card' : 'order-card pending';
+        $created = htmlspecialchars($o['created_at'] ?? '');
+        $restaurant = htmlspecialchars($o['restaurant_name'] ?? '');
+        $mesa = htmlspecialchars($o['mesa'] ?? '');
+        $total = number_format($o['total_pedido'] ?? 0, 0, ',', '.');
+        $metodo = htmlspecialchars($o['metodo_pago'] ?? '');
+        $id = htmlspecialchars($o['id']);
 
-    $created = htmlspecialchars($o['created_at'] ?? '');
-    $restaurant = htmlspecialchars($o['restaurant_name'] ?? '');
-    $mesa = htmlspecialchars($o['mesa'] ?? '');
-    $total = number_format($o['total_pedido'] ?? 0,0,',','.');
-    $metodo = htmlspecialchars($o['metodo_pago'] ?? '');
-    $id = htmlspecialchars($o['id']);
-
-    $estado = htmlspecialchars($o['estado'] ?? 'pending');
-    $badgeEstado = '<span class="badge-estado badge-' . $estado . '">' . ucfirst($estado) . '</span>';
-    $badgePago = $paid ? '<span class="badge-paid">Pagado</span>' : '<span class="badge-unpaid">No Pagado</span>';
+        $estado = htmlspecialchars($o['estado'] ?? 'pending');
+        $badgeEstado = '<span class="badge-estado badge-' . $estado . '">' . ucfirst($estado) . '</span>';
+        $badgePago = $paid ? '<span class="badge-paid">Pagado</span>' : '<span class="badge-unpaid">No Pagado</span>';
 
         // Use data-order-id and aria-label instead of adding element IDs (prevents duplicates)
         echo '<article class="' . $cardClass . '" data-area="' . $areaAttr . '" data-order-id="' . $id . '" aria-label="Pedido #' . $id . '">';
@@ -87,8 +118,8 @@ foreach ($orders as $o) {
     }
     exit;
 }
-
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
