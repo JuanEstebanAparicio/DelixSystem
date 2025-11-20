@@ -154,15 +154,24 @@ btnFiltrar.addEventListener("click", () => {
     const fecha = filtroFecha.value.trim();
 
     const filtrado = datos.filter(row => {
-        const rowFecha = row.created_at.substring(0, 10);
+    const rowFecha = row.created_at.substring(0, 10);
 
-        return (
-            (usuario === "" || row.usuario_nombre === usuario) &&
-            (gestor === "" || row.gestor === gestor) &&
-            (accion === "" || row.action === accion) &&
-            (fecha === "" || rowFecha === fecha)
-        );
-    });
+    const usuarioMatch =
+        usuario === "" ||
+        (row.usuario_nombre && row.usuario_nombre.toLowerCase().includes(usuario.toLowerCase()));
+
+    const gestorMatch =
+        gestor === "" || row.gestor === gestor;
+
+    const accionMatch =
+        accion === "" || row.action === accion;
+
+    const fechaMatch =
+        fecha === "" || rowFecha === fecha;
+
+    return usuarioMatch && gestorMatch && accionMatch && fechaMatch;
+});
+
 
     renderTabla(filtrado);
 });
