@@ -71,31 +71,14 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // CREAR PLATO
-function newDish() {
-  const form = document.getElementById("dishForm");
-  form.reset();
-  document.getElementById("dish_id").value = "";
-  document.getElementById("action").value = "add";
-  document.getElementById("modalTitle").textContent = "Registrar Plato";
-  document.getElementById("submitBtn").textContent = "Registrar Plato";
+function editDish(raw) {
+  const data = JSON.parse(raw);
 
-  $("#ingredients").val(null).trigger("change");
-  $("#ingredientQuantities").empty();
-
-  document.getElementById("currentPhotoContainer").classList.add("hidden");
-  document.getElementById("current_photo_input").value = "";
-
-  showModal("formModal");
-}
-
-// EDITAR PLATO
-function editDish(data) {
   const form = document.getElementById("dishForm");
   form.reset();
 
   document.getElementById("dish_id").name = "id";
   document.getElementById("dish_id").value = data.id;
-
   document.getElementById("action").value = "edit";
   document.getElementById("name_dish").value = data.name_dish;
   document.getElementById("price").value = data.price;
@@ -103,7 +86,7 @@ function editDish(data) {
   document.getElementById("description").value = data.description;
   document.getElementById("state").value = data.state;
 
-  // Foto
+  // Foto actual
   const cont = document.getElementById("currentPhotoContainer");
   const img = document.getElementById("currentPhoto");
   const hiddenInput = document.getElementById("current_photo_input");
@@ -117,16 +100,21 @@ function editDish(data) {
     hiddenInput.value = data.photo;
   }
 
-  // Ingredientes
+  // Ingredientes del plato
   if (Array.isArray(data.ingredients)) {
     const ids = data.ingredients.map(i => i.id);
+
+    // select2
     $("#ingredients").val(ids).trigger("change");
 
+    // cargar cantidades después de que select2 renderice
     setTimeout(() => {
       const container = $("#ingredientQuantities");
       container.empty();
+
       data.ingredients.forEach(ing => {
         const inputId = "quantity_" + ing.id;
+
         container.append(`
           <div class="ingredient-quantity-block">
             <label for="${inputId}">${ing.name} - Cantidad:</label>
@@ -147,6 +135,7 @@ function editDish(data) {
 
   showModal("formModal");
 }
+
 
 // ELIMINAR PLATO
 async function deleteDish(id) {

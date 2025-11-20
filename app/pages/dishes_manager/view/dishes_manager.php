@@ -1,15 +1,22 @@
 <?php
 require_once __DIR__ . '/../../../middleware/universal_guard.php';
+require_once __DIR__ . '/../../../config/supabase.php';
 
-// 🔥 Devuelve array con: tipo (propietario/empleado), id y restaurant_id si aplica
 $user = universalGuard();
 
 $id_usuario = ($user['tipo'] === 'propietario')
     ? $user['id']
-    : $user['restaurant_id'];
-
-require_once __DIR__ . '/../../../config/supabase.php';
-
+    : (
+        !empty($user['restaurant_id']) ? $user['restaurant_id'] :
+        (!empty($user['user_id']) ? $user['user_id'] :
+            (function($conexion, $user) {
+                $stmt = $conexion->prepare("SELECT user_id FROM employees WHERE id = :id LIMIT 1");
+                $stmt->execute([":id" => $user['id']]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                return $row ? $row['user_id'] : null;
+            })($conexion, $user)
+        )
+    );
 try {
 
     $stmt = $conexion->prepare("SELECT * FROM dish WHERE id_user = :id_user ORDER BY category, name_dish ASC");

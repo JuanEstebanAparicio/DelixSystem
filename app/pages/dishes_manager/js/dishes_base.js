@@ -42,6 +42,8 @@ function renderDishes(platos) {
         imgPath = "../" + dish.photo;
       }
 
+      const safeDish = JSON.stringify(dish).replace(/'/g, "&apos;");
+
       const card = document.createElement("div");
       card.className = "ingredient-card card";
       card.dataset.category = cat;
@@ -57,7 +59,7 @@ function renderDishes(platos) {
           ${renderIngredients(dish.ingredients)}
         </div>
         <div class="card-footer">
-          <button class="btn btn-edit" onclick='editDish(${JSON.stringify(dish)})'>✏️</button>
+          <button class="btn btn-edit" data-dish='${safeDish}' onclick="editDish(this.dataset.dish)">✏️</button>
           <button class="btn btn-delete" onclick="deleteDish(${dish.id})">🗑️</button>
         </div>
       `;

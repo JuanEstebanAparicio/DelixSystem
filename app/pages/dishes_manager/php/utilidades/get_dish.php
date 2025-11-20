@@ -2,104 +2,90 @@
 session_start();
 header('Content-Type: application/json');
 
-// 📦 Dependencias
 $baseDir = dirname(__DIR__, 4);
 require_once $baseDir . '/middleware/universal_guard.php';
 require_once $baseDir . '/config/supabase.php';
 
 try {
-
-    // 🧑‍🍳 1. Obtener usuario activo
     $usuario = universalGuard();
-
-    // 📌 2. Determinar el ID del propietario real
+    $id_user = null;
     if ($usuario['tipo'] === 'propietario') {
-
-        // El propietario SIEMPRE usa su propio ID
         $id_user = $usuario['id'];
-
     } elseif ($usuario['tipo'] === 'empleado') {
-
-        // Los empleados NO tienen restaurant_id, sino user_id del propietario
-        $stmt = $conexion->prepare("
-            SELECT user_id
-            FROM employees
-            WHERE id = :emp_id
-            LIMIT 1
-        ");
-        $stmt->execute([
-            ':emp_id' => $usuario['id']
-        ]);
-
-        $owner = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$owner || empty($owner['user_id'])) {
-            throw new Exception("No se pudo obtener el propietario del empleado.");
+        if (!empty($usuario['restaurant_id'])) {
+            $id_user = $usuario['restaurant_id'];
+        } elseif (!empty($usuario['user_id'])) {
+            $id_user = $usuario['user_id'];
+        } else {
+            $stmt = $conexion->prepare("
+                SELECT user_id 
+                FROM employees 
+                WHERE id = :id_empleado 
+                LIMIT 1
+            ");
+            $stmt->execute([":id_empleado" => $usuario['id']]);
+            $owner = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$owner || empty($owner['user_id'])) {
+                throw new Exception("No se pudo determinar el propietario del empleado.");
+            }
+            $id_user = $owner['user_id'];
         }
-
-        $id_user = $owner['user_id'];
-
-    } else {
-        throw new Exception("Usuario no autenticado.");
     }
-
-
-    // 🍽️ 3. Obtener PLATOS del propietario o empleado autorizado
-    $stmt = $conexion->prepare("
+    if (!$id_user) {
+        throw new Exception("No fue posible obtener el owner_id del usuario.");
+    }
+    $debug = [
+        "tipo" => $usuario['tipo'],
+        "empleado_id" => $usuario['id'],
+        "restaurant_id" => $usuario['restaurant_id'] ?? 'null',
+        "id_user_calculado" => $id_user
+    ];
+    $sqlPlatos = "
         SELECT *
         FROM dish
-        WHERE id_user = :id_user
+        WHERE id_user = :owner
         ORDER BY category, name_dish ASC
-    ");
-    $stmt->execute([':id_user' => $id_user]);
-    $platos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
-    // 🧂 4. Obtener INGREDIENTES (insumos)
-    $stmtIng = $conexion->prepare("
-        SELECT id, name
-        FROM storage
-        WHERE id_user = :id_user
-        ORDER BY name ASC
-    ");
-    $stmtIng->execute([':id_user' => $id_user]);
-    $ingredientes = $stmtIng->fetchAll(PDO::FETCH_ASSOC);
-
-
-    // 🧩 5. Unir los ingredientes por plato
+    ";
+    $stmtDish = $conexion->prepare($sqlPlatos);
+    $stmtDish->execute([":owner" => $id_user]);
+    $platos = $stmtDish->fetchAll(PDO::FETCH_ASSOC) ?: [];
     foreach ($platos as $i => $dish) {
-
-        $stmt2 = $conexion->prepare("
+        $stmtIng = $conexion->prepare("
             SELECT 
                 di.ingredient_id AS id,
                 di.quantity_used,
                 di.unit,
-                s.name
+                s.name,
+                s.state,
+                s.category AS storage_category
             FROM dish_ingredient di
             INNER JOIN storage s ON di.ingredient_id = s.id
-            WHERE di.dish_id = ?
+            WHERE di.dish_id = :dish
+              AND s.id_user = :owner
         ");
-        $stmt2->execute([$dish['id']]);
-
-        $platos[$i]['ingredients'] = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+        $stmtIng->execute([
+            ":dish" => $dish["id"],
+            ":owner" => $id_user
+        ]);
+        $platos[$i]["ingredients"] = $stmtIng->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
+    $stmtCat = $conexion->prepare("
+        SELECT DISTINCT category
+        FROM dish
+        WHERE id_user = :owner
+          AND category IS NOT NULL
+          AND category != ''
+        ORDER BY category ASC
+    ");
+    $stmtCat->execute([":owner" => $id_user]);
+    $categorias = $stmtCat->fetchAll(PDO::FETCH_COLUMN) ?: [];
 
-
-    // 🏷️ 6. Categorías únicas
-    $categorias = array_unique(
-        array_filter(
-            array_column($platos, 'category')
-        )
-    );
-
-    // 📤 7. Respuesta final
     echo json_encode([
         "success" => true,
+        "debug" => $debug,
         "platos" => $platos,
-        "ingredientes" => $ingredientes,
-        "categorias" => array_values($categorias)
-    ]);
-
+        "categorias" => $categorias
+    ], JSON_PRETTY_PRINT);
 } catch (Exception $e) {
 
     echo json_encode([
@@ -107,3 +93,4 @@ try {
         "error" => $e->getMessage()
     ]);
 }
+?>
