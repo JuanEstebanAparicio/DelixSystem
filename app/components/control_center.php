@@ -34,7 +34,7 @@ $displayEmail = htmlspecialchars($empleado['email']);
       <p class="text-xs text-gray-500 uppercase mb-4 font-medium tracking-wider">Gestores disponibles</p>
 
       <div class="grid grid-cols-2 gap-4">
-        <a href="/DelixSystem/app/pages/gestion_pedidos/view/index.php" class="group card-control bg-emerald-50 hover:bg-emerald-100">
+        <a href="/DelixSystem/app/pages/pedidos/view/listar_pedidos.php" class="group card-control bg-emerald-50 hover:bg-emerald-100">
           <i class="ri-shopping-bag-3-fill text-emerald-600 text-3xl group-hover:scale-110 transition-transform"></i>
           <span>Pedidos</span>
         </a>
