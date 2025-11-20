@@ -4,9 +4,6 @@ session_start();
 require_once __DIR__ . '/../../../middleware/session_guard.php';
 protectPage('propietario');
 
-// ✅ Incluimos el Control Center
-include __DIR__ . '/../../../components/header_propietario.php'; 
-include __DIR__ . '/../../../components/control_center_propietario.php'; 
 require_once __DIR__ . '/../../../config/supabase.php';
 
 // Aseguramos que el usuario esté logueado y obtenemos su ID
@@ -82,6 +79,8 @@ $stmt->execute(['user_id' => $userId]);
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Si la petición es fetch=1 devolvemos solo el grid (para polling AJAX)
+
+
 if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
     if (empty($orders)) {
         echo '<p class="no-orders">No hay pedidos todavía.</p>';
@@ -113,11 +112,16 @@ if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
         echo '<div class="method">Pago: ' . $metodo . '</div>';
         echo '<div class="state-row">' . $badgeEstado . ' &nbsp;|&nbsp; ' . $badgePago . '</div>';
         echo '<div class="date">' . $created . '</div>';
-        echo '<a class="btn-action" href="ver_pedido.php?id=' . urlencode($o['id']) . '">Ver Pedido</a>';
+         echo '<button class="btn-action verPedidoBtn" data-id="' . htmlspecialchars($o['id']) . '">Ver Pedido</button>';
         echo '</article>';
     }
     exit;
 }
+
+// === AQUÍ SÍ VA EL CONTROL CENTER ===
+include __DIR__ . '/../../../components/header_propietario.php';
+include __DIR__ . '/../../../components/control_center_propietario.php'
+
 ?>
 
 <!DOCTYPE html>
@@ -182,7 +186,10 @@ if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
 
                 <div class="date"><?= htmlspecialchars($o['created_at']) ?></div>
 
-                <a class="btn-action" href="ver_pedido.php?id=<?= urlencode($o['id']) ?>">Ver Pedido</a>
+                <button class="btn-action verPedidoBtn" data-id="<?= htmlspecialchars($o['id']) ?>">
+    Ver Pedido
+</button>
+
             </article>
             <?php endforeach; ?>
         <?php endif; ?>
@@ -194,6 +201,27 @@ if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
  <script src="/DelixSystem/app/shared/js/control_center_propietario.js"></script>
 <!-- JS -->
 <script src="../js/pedidos.js" defer></script>
+
+
+<!-- MODAL VER PEDIDO -->
+<div id="modalVerPedido"
+     class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[9999]">
+
+    <div class="bg-white rounded-xl shadow-xl w-[90%] max-w-3xl p-6 relative">
+        
+        <!-- Cerrar -->
+        <button id="cerrarModalPedido" 
+            class="absolute top-3 right-3 bg-gray-200 hover:bg-gray-300 rounded-full p-2">
+            ✕
+        </button>
+
+        <!-- CONTENIDO DINÁMICO -->
+        <div id="modalPedidoContenido">
+            <p class="text-center text-gray-500">Cargando...</p>
+        </div>
+
+    </div>
+</div>
 
 </body>
 </html>

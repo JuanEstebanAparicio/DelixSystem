@@ -1,18 +1,25 @@
-// DelixSystem/app/pages/pedidos/js/pedidos.js
-// Controla el filtrado por áreas, polling para refrescar y persistencia del filtro
+console.log("%c[INIT] pedidos.js cargado correctamente", "color: #4caf50; font-weight: bold;");
+
+// ======================================================
+//  ⚠ FLAG para evitar que el polling reemplace el pedido
+// ======================================================
+let modalAbierto = false;
+let ultimoPedidoVisto = null;
+
+// ======================================================
+//  FILTROS, POLLING Y EVENTOS DE ÁREAS
+// ======================================================
 (function(){
   const AREA_KEY = 'pedidos_area_actual';
-  const POLL_INTERVAL = 6000; // 6s
+  const POLL_INTERVAL = 6000;
 
   const navAreas = document.querySelectorAll('.nav-area');
   const ordersGridSelector = '#ordersGridContainer .orders-grid';
   const ordersGrid = document.querySelector(ordersGridSelector);
 
-  // Estado
   let areaActual = localStorage.getItem(AREA_KEY) || 'all';
   let pollingTimer = null;
 
-  // Helper: aplicar clase active en botones de nav
   function setActiveButton() {
     document.querySelectorAll('.nav-area').forEach(btn => {
       if (btn.dataset.area === areaActual) btn.classList.add('active');
@@ -20,25 +27,21 @@
     });
   }
 
-  // Filtrar pedidos en DOM por data-area
   function filtrarPedidosEnDOM() {
+    console.log("[Filtro] Aplicando filtro DOM:", areaActual);
     const pedidos = document.querySelectorAll('#ordersGridContainer .order-card');
     pedidos.forEach(p => {
       const a = (p.dataset.area || '').toLowerCase();
-      if (areaActual === 'all' || a === areaActual) {
-        p.style.display = '';
-      } else {
-        p.style.display = 'none';
-      }
+      p.style.display = (areaActual === 'all' || a === areaActual) ? '' : 'none';
     });
   }
 
-  // Re-attach events (if needed in el futuro)
   function attachNavEvents() {
     document.querySelectorAll('.nav-area').forEach(btn => {
       btn.addEventListener('click', () => {
         const newArea = btn.dataset.area || 'all';
         if (newArea === areaActual) return;
+        console.log("[Filtro] Área cambiada a:", newArea);
         areaActual = newArea;
         localStorage.setItem(AREA_KEY, areaActual);
         setActiveButton();
@@ -47,90 +50,63 @@
     });
   }
 
-  // Fetch partial grid HTML from server and replace innerHTML of .orders-grid
+  // =============================
+  // 🔁 POLLING (Actualización)
+  // =============================
   async function refreshGridFromServer() {
+
+    if (modalAbierto) {
+      console.log("%c[POLL] Saltado porque hay un modal abierto. Pedido:", "color: orange;", ultimoPedidoVisto);
+      return; // no reescribir cuando el modal está abierto
+    }
+
     try {
-      // fetch relative to current file: listar_pedidos.php?fetch=1
+      console.log("%c[POLL] Actualizando grid...", "color: cyan;");
+
       const res = await fetch(window.location.pathname + '?fetch=1', {cache: 'no-store'});
       if (!res.ok) return;
-      const html = await res.text();
 
+      const html = await res.text();
       const container = document.querySelector('#ordersGridContainer');
       if (!container) return;
 
-      // Replace .orders-grid content
-      // build temporary element to parse
       const tmp = document.createElement('div');
       tmp.innerHTML = html.trim();
 
-      // If server returned a .orders-grid wrapper, replace inner. If just article nodes, replace inner as well.
       const newGrid = tmp.querySelector('.orders-grid');
-      if (newGrid) {
-        // Safer: replace only innerHTML of the existing .orders-grid to keep references
-        const oldGrid = container.querySelector('.orders-grid');
-        if (oldGrid) {
-          oldGrid.innerHTML = newGrid.innerHTML;
-        } else {
-          // If oldGrid missing, append the newGrid's innerHTML inside a wrapper
-          const wrapper = document.createElement('div');
-          wrapper.className = 'orders-grid';
-          wrapper.innerHTML = newGrid.innerHTML;
-          container.innerHTML = '';
-          container.appendChild(wrapper);
-        }
+      const oldGrid = container.querySelector('.orders-grid');
+
+      if (newGrid && oldGrid) {
+        console.log("[POLL] Reemplazando grid interno");
+        oldGrid.innerHTML = newGrid.innerHTML;
       } else {
-        // server returned fragment (maybe only articles). We'll replace innerHTML
-        const oldGrid = container.querySelector('.orders-grid');
-        if (oldGrid) {
-          oldGrid.innerHTML = tmp.innerHTML;
-        } else {
-          const wrapper = document.createElement('div');
-          wrapper.className = 'orders-grid';
-          wrapper.innerHTML = tmp.innerHTML;
-          container.appendChild(wrapper);
-        }
+        console.log("[POLL] Reemplazo completo del grid (fallback)");
+        const wrapper = document.createElement('div');
+        wrapper.className = 'orders-grid';
+        wrapper.innerHTML = newGrid ? newGrid.innerHTML : tmp.innerHTML;
+        container.innerHTML = '';
+        container.appendChild(wrapper);
       }
 
-      // After replacing, reapply filter & nav events
       setActiveButton();
       filtrarPedidosEnDOM();
-      console.log("DEBUG REFRESH GRID: reaplicando eventos y reinit control center", new Date().toLocaleTimeString());
-
-      // Re-init header/control center if page exposes the initializer
-      if (typeof window.initControlCenterPropietario === "function") {
-        try {
-          console.log("DEBUG REFRESH GRID: re-inicializando control center");
-          window.initControlCenterPropietario();
-        } catch (err) {
-          console.warn('Error re-inicializando control center:', err);
-        }
-      }
+      console.log("%c[POLL] Grid actualizado", "color: lightgreen;");
 
     } catch (err) {
-      // silent fail (network temporarily down)
       console.error('Error refrescando pedidos:', err);
     }
   }
 
-  // Init
   function init() {
-    // mark active button and attach events
+    console.log("%c[INIT] Inicializando filtro y polling", "color: #03a9f4;");
     setActiveButton();
     attachNavEvents();
-
-    // apply initial filter
     filtrarPedidosEnDOM();
-
-    // Start polling
-    pollingTimer = setInterval(async () => {
-      await refreshGridFromServer();
-    }, POLL_INTERVAL);
+    pollingTimer = setInterval(refreshGridFromServer, POLL_INTERVAL);
   }
 
-  // Expose programmatic refresh for other scripts (avoid full page reloads)
   window.refreshOrdersGrid = refreshGridFromServer;
 
-  // Wait DOM loaded
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
@@ -139,37 +115,82 @@
 
 })();
 
-// Marcar pedido como pagado
 
+// ======================================================
+//  🟩 MARCAR COMO PAGADO
+// ======================================================
 document.addEventListener("DOMContentLoaded", ()=>{
-    const btn = document.getElementById("btnMarcarPagado");
+  const btn = document.getElementById("btnMarcarPagado");
 
-    if(btn){
-        btn.addEventListener("click", ()=>{
+  if(btn){
+    btn.addEventListener("click", ()=>{
+      console.log("[PAGO] Marcando como pagado id:", btn.dataset.id);
 
-            const idPedido = btn.dataset.id;
-
-            fetch("../php/marcar_pagado.php",{
-                method:"POST",
-                headers:{"Content-Type":"application/x-www-form-urlencoded"},
-                body:"id="+idPedido
-            })
-            .then(r=>r.json())
-            .then(data=>{
-                if(data.ok){
-                    // sonido
-                    const sonido = new Audio("/DelixSystem/public/audio/pagado.mp3");
-                    sonido.play();
-                    
+      fetch("../php/marcar_pagado.php",{
+        method:"POST",
+        headers:{"Content-Type":"application/x-www-form-urlencoded"},
+        body:"id="+btn.dataset.id
+      })
+      .then(r=>r.json())
+      .then(data=>{
+        if(data.ok){
+          new Audio("/DelixSystem/public/audio/pagado.mp3").play();
           alert("Pedido marcado como pagado");
-          // Preferir recargar sólo el grid si la función está disponible
+
           if (typeof window.refreshOrdersGrid === 'function') {
             window.refreshOrdersGrid();
           } else {
             location.reload();
           }
-                }
-            });
-        });
-    }
+        }
+      });
+    });
+  }
 });
+
+
+// ======================================================
+//  🟦 ABRIR MODAL VER PEDIDO
+// ======================================================
+document.addEventListener("click", async (e) => {
+
+  const btn = e.target.closest(".verPedidoBtn");
+
+  if (!btn){
+    return;
+  }
+
+  const id = btn.dataset.id;
+  console.log(`%c[MODAL] Click detectado en botón verPedidoBtn. ID=${id}`, "color: yellow; font-weight: bold;");
+
+  modalAbierto = true;          // bloquear polling
+  ultimoPedidoVisto = id;
+
+  const modal = document.getElementById("modalVerPedido");
+  const contenido = document.getElementById("modalPedidoContenido");
+
+  contenido.innerHTML = "<p>Cargando...</p>";
+  modal.classList.remove("hidden");
+
+  console.log("[MODAL] Fetch a ver_pedido.php?id=" + id);
+
+  const res = await fetch(`../php/ver_pedido.php?id=${id}`);
+  const html = await res.text();
+
+  console.log("[MODAL] Respuesta recibida, renderizando...");
+  contenido.innerHTML = html;
+});
+
+
+// ======================================================
+//  🟥 CERRAR MODAL
+// ======================================================
+const cerrar = document.getElementById("cerrarModalPedido");
+if (cerrar) {
+  cerrar.addEventListener("click", () => {
+    console.log("%c[MODAL] Cerrando modal", "color: red;");
+    modalAbierto = false;   // permitir polling otra vez
+    ultimoPedidoVisto = null;
+    document.getElementById("modalVerPedido").classList.add("hidden");
+  });
+}
