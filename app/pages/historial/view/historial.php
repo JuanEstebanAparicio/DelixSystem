@@ -104,6 +104,9 @@ $usuario = employeeExtendedGuard(['ADMIN_LOCAL','SUPERVISOR']);
         <button id="btnFiltrar" class="btn-filtrar">
             <i class="fa-solid fa-filter"></i> Aplicar filtros
         </button>
+        <button id="btnReset" class="btn-filtrar">
+            <i class="fa-solid fa-rotate-left"></i> Resetear filtros
+        </button>
 
     </section>
 
