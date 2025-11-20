@@ -1,0 +1,140 @@
+/* === ESTILO BASE === */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #f1f5f9;
+  color: #1e293b;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* === CONTENIDO PRINCIPAL === */
+.main-content {
+  padding: 40px;
+  min-height: 100vh;
+  transition: filter 0.3s ease;
+  position: relative;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 35px;
+}
+
+.header h1 {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-add {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+}
+
+/* === GRID DE COMBOS === */
+.combo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 28px;
+}
+
+.combo-card {
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+}
+
+.combo-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+.combo-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.combo-card .content {
+  padding: 18px;
+}
+
+.combo-card h3 {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #0f172a;
+}
+
+.combo-card p {
+  color: #475569;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.combo-card .price {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.action-btns {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.btn-edit {
+  background: #facc15;
+  color: #1e293b;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  transition: all 0.3s;
+}
+
+.btn-edit:hover {
+  background: #eab308;
+  transform: translateY(-2px);
+}
+
+.btn-delete {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  transition: all 0.3s;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 20px;
+  }
+}

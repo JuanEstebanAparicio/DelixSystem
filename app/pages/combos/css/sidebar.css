@@ -1,0 +1,85 @@
+/* === SIDEBAR === */
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: -90px;
+  width: 90px;
+  height: 100vh;
+  background: linear-gradient(180deg, #0f172a, #1e293b);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 30px;
+  transition: right 0.4s ease;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.25);
+  z-index: 1002;
+}
+
+.sidebar.open {
+  right: 0;
+}
+
+.sidebar button {
+  width: 55px;
+  height: 55px;
+  border-radius: 15px;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+  font-size: 1.5rem;
+  margin: 12px 0;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.sidebar button:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: scale(1.1);
+}
+
+/* === BOTÓN FLOTANTE === */
+.toggle-btn {
+  position: fixed;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #1e3a8a;
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  font-size: 1.3rem;
+  z-index: 1003;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-btn:hover {
+  background: #2563eb;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.toggle-btn.rotate {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* === OVERLAY === */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 1001;
+}
+
+.overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
