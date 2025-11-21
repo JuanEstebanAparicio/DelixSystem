@@ -119,7 +119,7 @@ if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
 }
 
 // === AQUÍ SÍ VA EL CONTROL CENTER ===
-include __DIR__ . '/../../../components/header_propietario.php';
+
 include __DIR__ . '/../../../components/control_center_propietario.php'
 
 ?>
@@ -136,12 +136,29 @@ include __DIR__ . '/../../../components/control_center_propietario.php'
   <link rel="stylesheet" href="/DelixSystem/app/shared/css/globals.css">
   <link rel="stylesheet" href="/DelixSystem/app/shared/css/control_center.css">
 </head>
-<body class="bg-gray-50 min-h-screen font-sans text-gray-800 pt-28 px-6">
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800 px-6">
+<header class="cc-header">
 
+  <div class="cc-left">
+    <div class="cc-logo">
+      <i class="ri-restaurant-2-line"></i>
+    </div>
+
+    <div class="cc-title">
+      <h1>Gestor de pedidos</h1>
+      <span>Panel de control</span>
+    </div>
+  </div>
+
+  <div class="cc-right">
+    <a href="../../../../../DelixSystem/app/pages/dashboard_propietario/view/index.php" class="cc-btn-back">
+      <i class="ri-arrow-left-line"></i>
+      Volver al Dashboard
+    </a>
+  </div>
+
+</header>
 <div class="page-container">
-
-    <h2 class="page-title">Gestión de Pedidos</h2>
-
     <!-- NAV ÁREAS -->
     <nav class="nav-areas" aria-label="Filtrar por área" style="margin-bottom:18px; display:flex; gap:10px; flex-wrap:wrap;">
         <button class="nav-area active" data-area="all">Todos</button>
