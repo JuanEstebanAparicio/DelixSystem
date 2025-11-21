@@ -42,23 +42,59 @@ if ($id_usuario) {
     }
 }
 
-$totalOrdenes = 0;
+$pedidosHoy = 0;
 
 if ($id_usuario) {
     try {
-        // total ordenes reales del propietario
-        $stmtPedidos = $conexion->prepare("
-            SELECT COUNT(*) AS total 
-            FROM orders 
+        $stmtPedidosHoy = $conexion->prepare("
+            SELECT COUNT(*) AS total
+            FROM orders
             WHERE id_user = ?
+              AND DATE(created_at) = CURRENT_DATE
+              AND pagado = true
         ");
-        $stmtPedidos->execute([$id_usuario]);
-        $totalOrdenes = $stmtPedidos->fetch(PDO::FETCH_ASSOC)['total'];
+        $stmtPedidosHoy->execute([$id_usuario]);
+        $pedidosHoy = $stmtPedidosHoy->fetch(PDO::FETCH_ASSOC)['total'];
     } catch (Exception $e) {
         $error = $e->getMessage();
     }
 }
 
+$ventasHoy = 0;
+
+if ($id_usuario) {
+    try {
+        $stmtVentasHoy = $conexion->prepare("
+            SELECT COALESCE(SUM(total_pedido), 0) AS total
+            FROM orders
+            WHERE id_user = ?
+              AND DATE(created_at) = CURRENT_DATE
+              AND pagado = true
+        ");
+        $stmtVentasHoy->execute([$id_usuario]);
+        $ventasHoy = $stmtVentasHoy->fetch(PDO::FETCH_ASSOC)['total'];
+    } catch (Exception $e) {
+        $error = $e->getMessage();
+    }
+}
+
+$pedidosRecientes = [];
+
+if ($id_usuario) {
+    try {
+        $stmtRecientes = $conexion->prepare("
+            SELECT id, nombre_cliente, mesa, estado, total_pedido
+            FROM orders
+            WHERE id_user = ?
+            ORDER BY created_at DESC
+            LIMIT 4
+        ");
+        $stmtRecientes->execute([$id_usuario]);
+        $pedidosRecientes = $stmtRecientes->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        $error = $e->getMessage();
+    }
+}
 
 ?>
 
@@ -131,11 +167,13 @@ if ($id_usuario) {
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
         <div class="bg-emerald-100 p-6 rounded-xl text-center">
           <h3 class="text-emerald-800 text-lg font-semibold">Pedidos del Día</h3>
-          <p class="text-3xl font-bold text-emerald-700 mt-2"><?= $totalOrdenes ?></p>
+         <p class="text-3xl font-bold text-emerald-700 mt-2"><?= $pedidosHoy ?></p>
         </div>
         <div class="bg-sky-100 p-6 rounded-xl text-center">
           <h3 class="text-sky-800 text-lg font-semibold">Ventas Totales</h3>
-          <p class="text-3xl font-bold text-sky-700 mt-2">$1,250.000</p>
+          <p class="text-3xl font-bold text-sky-700 mt-2">
+  $<?= number_format($ventasHoy, 0, ',', '.') ?>
+</p>
         </div>
         <div class="bg-amber-100 p-6 rounded-xl text-center">
   <h3 class="text-amber-800 text-lg font-semibold">Resumen de Mesas</h3>
@@ -184,34 +222,40 @@ if ($id_usuario) {
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-              <tr>
-                <td class="py-3 px-4">#1021</td>
-                <td class="py-3 px-4">Carlos Pérez</td>
-                <td class="py-3 px-4">5</td>
-                <td class="py-3 px-4">
-                  <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">Pendiente</span>
-                </td>
-                <td class="py-3 px-4">$45.000</td>
-              </tr>
-              <tr>
-                <td class="py-3 px-4">#1020</td>
-                <td class="py-3 px-4">Ana Torres</td>
-                <td class="py-3 px-4">2</td>
-                <td class="py-3 px-4">
-                  <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm">Entregado</span>
-                </td>
-                <td class="py-3 px-4">$72.000</td>
-              </tr>
-              <tr>
-                <td class="py-3 px-4">#1019</td>
-                <td class="py-3 px-4">Luis García</td>
-                <td class="py-3 px-4">1</td>
-                <td class="py-3 px-4">
-                  <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm">Entregado</span>
-                </td>
-                <td class="py-3 px-4">$33.000</td>
-              </tr>
-            </tbody>
+<?php if (count($pedidosRecientes) > 0): ?>
+    <?php foreach ($pedidosRecientes as $pedido): ?>
+        <tr>
+            <td class="py-3 px-4">#<?= $pedido['id'] ?></td>
+            <td class="py-3 px-4"><?= htmlspecialchars($pedido['nombre_cliente']) ?></td>
+            <td class="py-3 px-4"><?= htmlspecialchars($pedido['mesa']) ?></td>
+            <td class="py-3 px-4">
+                <?php
+                $estado = strtolower($pedido['estado']);
+                $color = match ($estado) {
+                    'pendiente' => 'bg-yellow-100 text-yellow-700',
+                    'entregado' => 'bg-emerald-100 text-emerald-700',
+                    'cancelado' => 'bg-red-100 text-red-700',
+                    default => 'bg-gray-100 text-gray-700'
+                };
+                ?>
+                <span class="<?= $color ?> px-3 py-1 rounded-full text-sm">
+                    <?= htmlspecialchars($pedido['estado']) ?>
+                </span>
+            </td>
+            <td class="py-3 px-4">
+                $<?= number_format($pedido['total_pedido'], 0, ',', '.') ?>
+            </td>
+        </tr>
+    <?php endforeach; ?>
+<?php else: ?>
+    <tr>
+        <td colspan="5" class="text-center py-6 text-gray-500">
+            No hay pedidos recientes
+        </td>
+    </tr>
+<?php endif; ?>
+</tbody>
+
           </table>
         </div>
       </div>
