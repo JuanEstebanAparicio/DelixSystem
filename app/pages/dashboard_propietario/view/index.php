@@ -41,42 +41,32 @@ if ($id_usuario) {
         $error = $e->getMessage();
     }
 }
-
 $pedidosHoy = 0;
-
-if ($id_usuario) {
-    try {
-        $stmtPedidosHoy = $conexion->prepare("
-            SELECT COUNT(*) AS total
-            FROM orders
-            WHERE id_user = ?
-              AND DATE(created_at) = CURRENT_DATE
-              AND pagado = true
-        ");
-        $stmtPedidosHoy->execute([$id_usuario]);
-        $pedidosHoy = $stmtPedidosHoy->fetch(PDO::FETCH_ASSOC)['total'];
-    } catch (Exception $e) {
-        $error = $e->getMessage();
-    }
-}
-
 $ventasHoy = 0;
 
 if ($id_usuario) {
     try {
-        $stmtVentasHoy = $conexion->prepare("
-            SELECT COALESCE(SUM(total_pedido), 0) AS total
+        $stmtDaily = $conexion->prepare("
+            SELECT 
+                COUNT(*) AS total_orders, 
+                COALESCE(SUM(total_pedido), 0) AS total_sales
             FROM orders
             WHERE id_user = ?
+              AND pagado = 1
               AND DATE(created_at) = CURRENT_DATE
-              AND pagado = true
         ");
-        $stmtVentasHoy->execute([$id_usuario]);
-        $ventasHoy = $stmtVentasHoy->fetch(PDO::FETCH_ASSOC)['total'];
+        
+        $stmtDaily->execute([$id_usuario]);
+        $daily = $stmtDaily->fetch(PDO::FETCH_ASSOC);
+
+        $pedidosHoy = $daily['total_orders'] ?? 0;
+        $ventasHoy = $daily['total_sales'] ?? 0;
+
     } catch (Exception $e) {
         $error = $e->getMessage();
     }
 }
+
 
 $pedidosRecientes = [];
 
