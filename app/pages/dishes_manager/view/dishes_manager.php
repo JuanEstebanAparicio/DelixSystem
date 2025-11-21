@@ -1,8 +1,19 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once __DIR__ . '/../../../middleware/universal_guard.php';
 require_once __DIR__ . '/../../../config/supabase.php';
 
 $user = universalGuard();
+
+if ($user['tipo'] === 'empleado') {
+    require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php';
+    echo "<style>
+        header.navbar { display: none !important; }
+        body { margin-top: 80px !important; }
+    </style>";
+}
 
 $id_usuario = ($user['tipo'] === 'propietario')
     ? $user['id']
@@ -17,8 +28,8 @@ $id_usuario = ($user['tipo'] === 'propietario')
             })($conexion, $user)
         )
     );
-try {
 
+try {
     $stmt = $conexion->prepare("SELECT * FROM dish WHERE id_user = :id_user ORDER BY category, name_dish ASC");
     $stmt->bindParam(':id_user', $id_usuario, PDO::PARAM_INT);
     $stmt->execute();
@@ -47,6 +58,7 @@ try {
     die("<p class='error-msg'>Error al obtener datos desde Supabase: " . htmlspecialchars($e->getMessage()) . "</p>");
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -61,6 +73,7 @@ try {
 </head>
 
 <body>
+
 <header class="navbar">
   <div id="sidebarOverlay" class="sidebar-overlay"></div>
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
@@ -73,49 +86,56 @@ try {
   </div>
 </header>
 
-
-  <nav class="sidebar" id="sidebarMenu">
+<nav class="sidebar" id="sidebarMenu">
     <h3 class="sidebar-title">Categorías</h3>
     <button id="reloadBtn" class="reload-btn" onclick="reloadCategories()">🔄 Recargar</button>
 
     <ul class="sidebar-list" id="categoryList">
       <li class="sidebar-item" onclick="mostrarCategoria('Todos')">Todos</li>
+
       <?php foreach ($categorias as $categoria => $items): ?>
         <li class="sidebar-item" onclick="mostrarCategoria('<?= htmlspecialchars($categoria) ?>')">
           <?= htmlspecialchars($categoria) ?>
         </li>
       <?php endforeach; ?>
     </ul>
-  </nav>
+</nav>
 
-  <main class="main-content container">
+<main class="main-content container">
     <h2 class="page-title">Gestor de Platos</h2>
+
     <div class="button-right">
-      <button id="toggleFilters">Mostrar filtros</button>
+        <button id="toggleFilters">Mostrar filtros</button>
+
+        <?php if ($user['tipo'] === 'empleado'): ?>
+            <button id="btnCreateDish" class="create-btn" onclick="newDish()">+ Crear</button>
+            <button id="btnOpenSidebarDishes" class="inventory-btn" onclick="toggleSidebar()">📂 Categorías</button>
+        <?php endif; ?>
     </div>
 
     <div class="filters hidden-filters">
-      <select id="filterState">
-        <option value="Todos">Todos</option>
-        <option value="Activo">Activos</option>
-        <option value="Agotado">Agotados</option>
-        <option value="Inactivo">Inactivos</option>
-      </select>
+        <select id="filterState">
+            <option value="Todos">Todos</option>
+            <option value="Activo">Activos</option>
+            <option value="Agotado">Agotados</option>
+            <option value="Inactivo">Inactivos</option>
+        </select>
 
-      <input type="text" id="searchInput" placeholder="Buscar por nombre...">
+        <input type="text" id="searchInput" placeholder="Buscar por nombre...">
     </div>
 
     <div class="card-container" id="dishGrid">
       <?php foreach ($categorias as $categoria => $items): ?>
         <?php foreach ($items as $dish): ?>
+
           <?php
-            $imgPath = "../img/default.png";
-            if (!empty($dish['photo'])) {
-                $ruta = htmlspecialchars($dish['photo']);
-                $imgPath = str_starts_with($ruta, 'media/') ? "../$ruta" : "../media/$ruta";
-            }
+            $imgPath = !empty($dish['photo'])
+                ? "../" . htmlspecialchars($dish['photo'])
+                : "../img/default.png";
           ?>
+
           <div class="ingredient-card card" data-category="<?= htmlspecialchars($categoria) ?>">
+
             <div class="card-image">
               <img src="<?= $imgPath ?>" alt="<?= htmlspecialchars($dish['name_dish']) ?>">
             </div>
@@ -141,7 +161,7 @@ try {
                         }
                       }
                     ?>
-                    <li><?= htmlspecialchars($nombreIng) ?> (<?= $ing['quantity_used'] . ' ' . $ing['unit'] ?>)</li>
+                    <li><?= htmlspecialchars($nombreIng) ?> (<?= $ing['quantity_used'].' '.$ing['unit'] ?>)</li>
                   <?php endforeach; ?>
                 </ul>
               <?php endif; ?>
@@ -150,10 +170,13 @@ try {
             <div class="card-footer">
               <button class="btn btn-edit"
                 onclick='editDish(<?= json_encode($dish, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>✏️</button>
+
               <button class="btn btn-delete"
                  onclick="deleteDish('<?= htmlspecialchars($dish['id']) ?>')">🗑️</button>
             </div>
+
           </div>
+
         <?php endforeach; ?>
       <?php endforeach; ?>
 
@@ -163,13 +186,15 @@ try {
           <p>Crear Plato</p>
         </div>
       </div>
-    </div>
-  </main>
 
-  <div id="formModal" class="modal hidden">
+    </div>
+</main>
+
+<div id="formModal" class="modal hidden">
     <div class="modal-content">
       <span class="close" onclick="hideModal('formModal')">&times;</span>
       <h2 id="modalTitle" class="modal-title">Registrar Plato</h2>
+
       <form id="dishForm" enctype="multipart/form-data">
         <input type="hidden" name="action" id="action" value="add">
         <input type="hidden" name="id" id="dish_id">
@@ -196,7 +221,7 @@ try {
           </select>
           <input type="text" id="newCategoryInput" name="new_category" placeholder="Nueva categoría" class="hidden-input">
         </div>
-        
+
         <div id="previousIngredients" style="margin-bottom: 10px; font-size: 14px;"></div>
 
         <div class="form-group">
@@ -212,7 +237,7 @@ try {
 
         <div class="form-group">
           <label for="description">Descripción:</label>
-          <textarea name="description" id="description" rows="3" placeholder="Breve descripción del plato..."></textarea>
+          <textarea name="description" id="description" rows="3"></textarea>
         </div>
 
         <div class="form-group">
@@ -231,16 +256,17 @@ try {
 
           <div id="currentPhotoContainer" class="photo-preview hidden-img">
             <p>Foto actual:</p>
-            <img id="currentPhoto" src="" alt="Foto actual del plato" class="preview-img">
+            <img id="currentPhoto" src="" alt="Foto actual" class="preview-img">
           </div>
         </div>
 
         <div class="modal-footer">
           <button type="submit" id="submitBtn" class="btn btn-primary">Guardar Plato</button>
         </div>
+
       </form>
     </div>
-  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../../../../public/js/alert.js"></script>
@@ -248,6 +274,7 @@ try {
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="../js/dishes_base.js"></script>
 <script src="../js/dishes_modal.js"></script>
+
 <script>
   function goToInventory() {
     window.location.href = "/DelixSystem/app/pages/inventory/view/ingredient_manager.php";

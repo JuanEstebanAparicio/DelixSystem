@@ -69,7 +69,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 });
-
+function newDish() {
+  const form = document.getElementById("dishForm");
+  form.reset();
+  document.getElementById("dish_id").value = "";
+  document.getElementById("action").value = "add";
+  document.getElementById("modalTitle").textContent = "Registrar Plato";
+  document.getElementById("submitBtn").textContent = "Registrar Plato";
+  const hoy = new Date().toISOString().split("T")[0];
+  document.getElementById("created_at").value = hoy;
+  $("#ingredients").val(null).trigger("change");
+  $("#ingredientQuantities").empty();
+  document.getElementById("currentPhotoContainer").classList.add("hidden");
+  document.getElementById("current_photo_input").value = "";
+  showModal("formModal");
+}
 // CREAR PLATO
 function editDish(raw) {
   const data = JSON.parse(raw);

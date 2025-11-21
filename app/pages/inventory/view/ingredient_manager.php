@@ -7,8 +7,6 @@ $usuario = universalGuard();
 
 if ($usuario['tipo'] === 'empleado') {
     require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php';
-
-    // Evitar que tu navbar propietario se vea encima
     echo "<style>
         header.navbar { display: none !important; }
         body { margin-top: 80px !important; }
@@ -17,8 +15,6 @@ if ($usuario['tipo'] === 'empleado') {
 
 
 require_once __DIR__ . '/../../../config/supabase.php';
-
-// Obtener ID usuario o restaurante
 if ($usuario['tipo'] === 'propietario') {
     $id_usuario = $usuario['id'];
 } elseif ($usuario['tipo'] === 'empleado') {
