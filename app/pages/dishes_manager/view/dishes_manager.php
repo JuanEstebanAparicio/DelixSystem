@@ -105,11 +105,11 @@ try {
     <h2 class="page-title">Gestor de Platos</h2>
 
     <div class="button-right">
-        <button id="toggleFilters">Mostrar filtros</button>
+        <button id="toggleFilters" class="btn-primary">Mostrar filtros</button>
 
         <?php if ($user['tipo'] === 'empleado'): ?>
-            <button id="btnCreateDish" class="create-btn" onclick="newDish()">+ Crear</button>
-            <button id="btnOpenSidebarDishes" class="inventory-btn" onclick="toggleSidebar()">📂 Categorías</button>
+            <button id="btnCreateDish" class="btn-primary" onclick="newDish()">+ Crear</button>
+            <button id="btnOpenSidebarDishes" class="btn-primary" onclick="toggleSidebar()">📂 Categorías</button>
         <?php endif; ?>
     </div>
 
@@ -274,6 +274,7 @@ try {
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="../js/dishes_base.js"></script>
 <script src="../js/dishes_modal.js"></script>
+<script src="../js/check.js"></script>
 
 <script>
   function goToInventory() {
