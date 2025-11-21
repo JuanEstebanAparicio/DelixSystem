@@ -9,7 +9,9 @@ $user = universalGuard();
   <title>Combos del Día | DelixSystem</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/visual_combo.css">
+  <link rel="stylesheet" href="../css/sidebar.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/modal.css">
 </head>
 
 <body>
@@ -105,6 +107,7 @@ $user = universalGuard();
 
   <!-- === Scripts === -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../js/form_modal.js"></script>
+  <script src="../js/base.js"></script>
+  <script src="../js/modal.js"></script>
 </body>
 </html>

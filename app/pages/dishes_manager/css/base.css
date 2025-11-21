@@ -30,6 +30,25 @@ body {
   text-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 
+.btn-primary {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  background: linear-gradient(135deg, #7A5FFF, #3A86FF);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(100,100,255,0.30);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(100,100,255,0.45);
+}
+
 .filters {
   display: flex;
   flex-wrap: wrap;
@@ -106,8 +125,11 @@ body {
 .button-right {
   width: 100%;
   display: flex;
-  justify-content: flex-end; /* Botón a la derecha */
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 15px;
 }
+
 
 

@@ -1,11 +1,8 @@
-// ---------- BASE: CARGA DE DATOS, CATEGORÍAS Y RENDER ---------- //
-
 document.addEventListener("DOMContentLoaded", () => {
   loadDishes();
   reloadCategories();
 });
 
-// Cargar platos
 async function loadDishes() {
   const grid = document.getElementById("dishGrid");
   grid.innerHTML = "<p class='loading'>Cargando platos...</p>";
@@ -19,7 +16,6 @@ async function loadDishes() {
   }
 }
 
-// Render de platos
 function renderDishes(platos) {
   const grid = document.getElementById("dishGrid");
   grid.innerHTML = "";
@@ -42,6 +38,8 @@ function renderDishes(platos) {
         imgPath = "../" + dish.photo;
       }
 
+      const safeDish = JSON.stringify(dish).replace(/'/g, "&apos;");
+
       const card = document.createElement("div");
       card.className = "ingredient-card card";
       card.dataset.category = cat;
@@ -57,7 +55,7 @@ function renderDishes(platos) {
           ${renderIngredients(dish.ingredients)}
         </div>
         <div class="card-footer">
-          <button class="btn btn-edit" onclick='editDish(${JSON.stringify(dish)})'>✏️</button>
+          <button class="btn btn-edit" data-dish='${safeDish}' onclick="editDish(this.dataset.dish)">✏️</button>
           <button class="btn btn-delete" onclick="deleteDish(${dish.id})">🗑️</button>
         </div>
       `;
@@ -78,14 +76,12 @@ function renderDishes(platos) {
   grid.appendChild(createCard);
 }
 
-// Render ingredientes
 function renderIngredients(ingredients) {
   if (!ingredients || ingredients.length === 0) return "";
   const listItems = ingredients.map(ing => `<li>${ing.name} (${ing.quantity_used} ${ing.unit})</li>`).join("");
   return `<p><strong>Ingredientes:</strong></p><ul>${listItems}</ul>`;
 }
 
-// Filtro de categorías
 window.mostrarCategoria = async function (categoria) {
   const grid = document.getElementById("dishGrid");
   grid.innerHTML = "<p class='loading'>Filtrando platillos...</p>";
@@ -108,7 +104,6 @@ window.mostrarCategoria = async function (categoria) {
   }
 };
 
-// Recargar categorías
 async function reloadCategories() {
   try {
     const response = await fetch("../php/utilidades/get_dish.php");
@@ -133,7 +128,6 @@ async function reloadCategories() {
   } catch (err) {}
 }
 
-// Sidebar
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebarMenu');
   const overlay = document.getElementById('sidebarOverlay');
@@ -145,11 +139,18 @@ document.addEventListener('click', (e) => {
   const sidebar = document.getElementById('sidebarMenu');
   const overlay = document.getElementById('sidebarOverlay');
   const hamburger = document.querySelector('.hamburger');
-  if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
+  const categoriesBtn = document.getElementById("btnOpenSidebarDishes");
+
+  if (
+    !sidebar.contains(e.target) &&
+    !hamburger.contains(e.target) &&
+    (!categoriesBtn || !categoriesBtn.contains(e.target))
+  ) {
     sidebar.classList.remove('active');
     overlay.classList.remove('active');
   }
 });
+
 
 const toggleFilters = document.getElementById("toggleFilters");
 const filtersContainer = document.querySelector(".filters");

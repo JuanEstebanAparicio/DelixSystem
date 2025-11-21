@@ -7,8 +7,6 @@ $usuario = universalGuard();
 
 if ($usuario['tipo'] === 'empleado') {
     require_once __DIR__ . '/../../../shared/bootstrap/employee_ui_bootstrap.php';
-
-    // Evitar que tu navbar propietario se vea encima
     echo "<style>
         header.navbar { display: none !important; }
         body { margin-top: 80px !important; }
@@ -17,8 +15,6 @@ if ($usuario['tipo'] === 'empleado') {
 
 
 require_once __DIR__ . '/../../../config/supabase.php';
-
-// Obtener ID usuario o restaurante
 if ($usuario['tipo'] === 'propietario') {
     $id_usuario = $usuario['id'];
 } elseif ($usuario['tipo'] === 'empleado') {
@@ -175,10 +171,18 @@ try {
       <div class="form-group">
         <label for="unit">Unidad:</label>
         <select name="unit" id="unit" required>
-          <option value="Kg">Kg</option>
-          <option value="Litro">Litro</option>
+          <option value="Kg">Kilogramos (Kg)</option>
+          <option value="g">Gramos (g)</option>
+          <option value="mg">Miligramos (mg)</option>
+          <option value="Litro">Litros (L)</option>
+          <option value="ml">Mililitros (ml)</option>
+          <option value="cc">Centímetros cúbicos (cc)</option>
+          <option value="Galón">Galón</option>
           <option value="Unidad">Unidad</option>
-        </select>
+          <option value="Paquete">Paquete</option>
+          <option value="Caja">Caja</option>
+          <option value="Bolsa">Bolsa</option>
+      </select>
       </div>
 
       <div class="form-group">
