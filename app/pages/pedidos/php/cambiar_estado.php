@@ -31,7 +31,7 @@ $flow = [
 if(!in_array($nuevo, $flow)){
     $_SESSION['flash_error'] = "Estado no permitido.";
     session_write_close();
-    header("Location: ../view/ver_pedido.php?id=".$id);
+    header("Location: ../view/listar_pedidos.php?id=".$id);
     exit;
 }
 
@@ -54,5 +54,5 @@ if ($nuevo === "Delivered") {
 }
 
 session_write_close();
-header("Location: ../view/ver_pedido.php?id=".$id);
+header("Location: ../view/listar_pedidos.php?id=".$id);
 exit;

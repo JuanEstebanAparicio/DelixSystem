@@ -1,0 +1,6 @@
+[21-Nov-2025 04:06:11 Europe/Berlin] PHP Warning:  Array to string conversion in C:\xampp\htdocs\DelixSystem\app\api\audit.php on line 111
+[21-Nov-2025 04:06:12 Europe/Berlin] ⚠️ Error en AreaController: SQLSTATE[22P02]: Invalid text representation: 7 ERROR:  invalid input syntax for type json
+LINE 12:                 'null', 'null', 'Array'
+                                         ^
+DETAIL:  Token "Array" is invalid.
+CONTEXT:  JSON data, line 1: Array
