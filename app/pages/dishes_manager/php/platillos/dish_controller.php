@@ -3,79 +3,76 @@ ob_start();
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
 header('Content-Type: application/json');
 
 require_once(__DIR__ . '/dishes.php');
 require_once(__DIR__ . '/dishes_crud.php');
 require_once(dirname(__DIR__, 4) . '/middleware/universal_guard.php');
+require_once(dirname(__DIR__, 4) . '/middleware/controller_bootstrap.php');
 require_once(dirname(__DIR__, 4) . '/config/supabase_img.php');
 
 try {
-
-    // ============================================================
-    // 🟢 Obtener usuario desde universal_guard (propietario/empleado)
-    // ============================================================
     $user = universalGuard();
-
     if (!$user) {
         throw new Exception("⚠️ No autorizado.");
     }
 
-    // ============================================================
-// 📌 Resolver ID del propietario REAL (id_user)
-// ============================================================
+    if ($user['tipo'] === 'propietario') {
 
-if ($user['tipo'] === 'propietario') {
+        $id_user = $user['id'];
 
-    // El propietario usa su propio ID
-    $id_user = $user['id'];
+    } elseif ($user['tipo'] === 'empleado') {
 
-} elseif ($user['tipo'] === 'empleado') {
+        $stmt = $conexion->prepare("
+            SELECT user_id 
+            FROM employees 
+            WHERE id = :emp_id 
+            LIMIT 1
+        ");
+        $stmt->execute([':emp_id' => $user['id']]);
+        $owner = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Se obtiene el propietario asociado desde employees.user_id
-    $stmt = $conexion->prepare("
-        SELECT user_id 
-        FROM employees 
-        WHERE id = :emp_id 
-        LIMIT 1
-    ");
-    $stmt->execute([':emp_id' => $user['id']]);
-    $owner = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$owner || empty($owner['user_id'])) {
+            throw new Exception("No se pudo determinar el propietario asociado al empleado.");
+        }
 
-    if (!$owner || empty($owner['user_id'])) {
-        throw new Exception("No se pudo determinar el propietario asociado al empleado.");
+        $id_user = $owner['user_id'];
+
+    } else {
+        throw new Exception("Rol no permitido.");
     }
-
-    $id_user = $owner['user_id'];
-
-} else {
-
-    throw new Exception("Rol no permitido.");
-}
-
-
-    // ============================================================
-    // 📦 CRUD de platillos
-    // ============================================================
-    $crud = new dishes_crud();
 
     $roundAction = $_POST['action'] ?? '';
     $actionMap = [
+        'create' => 'crear',
+        'add'    => 'crear',
+        'update' => 'editar',
+        'edit'   => 'editar',
+        'delete' => 'eliminar'
+    ];
+
+    $permissionAction = $actionMap[$roundAction] ?? 'ver';
+
+    verifyRoleAccess('menu', $permissionAction);
+
+
+    $crud = new dishes_crud();
+
+    $methodMap = [
         'create' => 'add',
         'add' => 'add',
         'update' => 'edit',
         'edit' => 'edit',
         'delete' => 'delete'
     ];
-    $method = $actionMap[$roundAction] ?? null;
+
+    $method = $methodMap[$roundAction] ?? null;
 
     if (!$method) {
         throw new Exception("Acción no válida.");
     }
 
-    // ============================================================
-    // 🖼 Upload a Supabase
-    // ============================================================
     $uploadPhoto = function ($file, $category, $dish, $photoOld = null) {
 
         $safeCategory = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($category));
@@ -94,9 +91,6 @@ if ($user['tipo'] === 'propietario') {
         return supabaseUploadImage($file, 'dish_img', $path);
     };
 
-    // ============================================================
-    // 🟢 ADD DISH
-    // ============================================================
     if ($method === 'add') {
 
         $name = trim($_POST['name_dish']);
@@ -105,10 +99,9 @@ if ($user['tipo'] === 'propietario') {
         $description = trim($_POST['description']);
         $state = $_POST['state'] ?? 'Activo';
 
-        if (!empty($_POST['new_category'])) 
+        if (!empty($_POST['new_category']))
             $category = trim($_POST['new_category']);
 
-        // Imagen
         $photo = null;
         if (!empty($_FILES['photo']['name'])) {
             $photo = $uploadPhoto($_FILES['photo'], $category, $name);
@@ -137,15 +130,11 @@ if ($user['tipo'] === 'propietario') {
         exit;
     }
 
-    // ============================================================
-    // ✏️ EDIT DISH
-    // ============================================================
     if ($method === 'edit') {
 
         $id = intval($_POST['id']);
         if ($id <= 0) throw new Exception("ID inválido.");
 
-        // Verificamos que el plato pertenezca al dueño del empleado
         $current = $crud->getDishById($id, $id_user);
         if (!$current) throw new Exception("Plato no encontrado.");
 
@@ -156,15 +145,13 @@ if ($user['tipo'] === 'propietario') {
         $state = $_POST['state'];
         $photo = $current['photo'];
 
-        if (!empty($_POST['new_category'])) 
+        if (!empty($_POST['new_category']))
             $category = trim($_POST['new_category']);
 
-        // Reemplazar imagen
         if (!empty($_FILES['photo']['name'])) {
             $photo = $uploadPhoto($_FILES['photo'], $category, $name, $photo);
         }
 
-        // Ingredientes nuevos
         $ingredients = [];
         if (!empty($_POST['ingredients'])) {
             foreach ($_POST['ingredients'] as $ingId) {
@@ -186,10 +173,6 @@ if ($user['tipo'] === 'propietario') {
         echo json_encode(["success" => true, "message" => "✅ Plato actualizado correctamente."]);
         exit;
     }
-
-    // ============================================================
-    // 🗑️ DELETE DISH
-    // ============================================================
     if ($method === 'delete') {
 
         $id = intval($_POST['id']);
@@ -211,6 +194,7 @@ if ($user['tipo'] === 'propietario') {
         echo json_encode(["success" => true, "message" => "🗑️ Plato eliminado correctamente."]);
         exit;
     }
+
 
 } catch (Exception $e) {
     ob_clean();
