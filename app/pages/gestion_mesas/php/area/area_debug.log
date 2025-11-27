@@ -4,3 +4,27 @@ LINE 12:                 'null', 'null', 'Array'
                                          ^
 DETAIL:  Token "Array" is invalid.
 CONTEXT:  JSON data, line 1: Array
+[27-Nov-2025 00:24:56 Europe/Berlin] PHP Warning:  Array to string conversion in C:\xampp\htdocs\DelixSystem\app\api\audit.php on line 111
+[27-Nov-2025 00:24:57 Europe/Berlin] ⚠️ Error en AreaController: SQLSTATE[22P02]: Invalid text representation: 7 ERROR:  invalid input syntax for type json
+LINE 12:                 'null', 'null', 'Array'
+                                         ^
+DETAIL:  Token "Array" is invalid.
+CONTEXT:  JSON data, line 1: Array
+[27-Nov-2025 00:25:00 Europe/Berlin] PHP Warning:  Array to string conversion in C:\xampp\htdocs\DelixSystem\app\api\audit.php on line 111
+[27-Nov-2025 00:25:00 Europe/Berlin] ⚠️ Error en AreaController: SQLSTATE[22P02]: Invalid text representation: 7 ERROR:  invalid input syntax for type json
+LINE 12:                 'null', 'null', 'Array'
+                                         ^
+DETAIL:  Token "Array" is invalid.
+CONTEXT:  JSON data, line 1: Array
+[27-Nov-2025 00:25:02 Europe/Berlin] PHP Warning:  Array to string conversion in C:\xampp\htdocs\DelixSystem\app\api\audit.php on line 111
+[27-Nov-2025 00:25:03 Europe/Berlin] ⚠️ Error en AreaController: SQLSTATE[22P02]: Invalid text representation: 7 ERROR:  invalid input syntax for type json
+LINE 12:                 'null', 'null', 'Array'
+                                         ^
+DETAIL:  Token "Array" is invalid.
+CONTEXT:  JSON data, line 1: Array
+[27-Nov-2025 00:25:29 Europe/Berlin] PHP Warning:  Array to string conversion in C:\xampp\htdocs\DelixSystem\app\api\audit.php on line 111
+[27-Nov-2025 00:25:29 Europe/Berlin] ⚠️ Error en AreaController: SQLSTATE[22P02]: Invalid text representation: 7 ERROR:  invalid input syntax for type json
+LINE 12:                 'null', 'null', 'Array'
+                                         ^
+DETAIL:  Token "Array" is invalid.
+CONTEXT:  JSON data, line 1: Array
