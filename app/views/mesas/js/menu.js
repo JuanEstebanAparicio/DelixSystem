@@ -240,7 +240,7 @@ if(APP.nombre_cliente && modalCliente){
 
 
     if (guardarClienteBtn) {
-        guardarClienteBtn.addEventListener("click", () => {
+        guardarClienteBtn.addEventListener("click", async () => {
             const input = document.getElementById("nombreCliente");
             const nombre = input.value.trim();
             if(nombre === ""){
@@ -254,13 +254,46 @@ if(APP.nombre_cliente && modalCliente){
                 },300);
                 return;
             }
+
+            // 🔥 GUARDAR EN LOCALSTORAGE
             localStorage.setItem("nombre_cliente", nombre);
             APP.nombre_cliente = nombre;
+
+            // 🔥 ACTUALIZAR UI HEADER
             if(nombreClienteHeader) nombreClienteHeader.textContent = `Cliente: ${nombre}`;
+
+            // 🔥 SINCRONIZAR CON SERVIDOR ANTES DE CERRAR MODAL
+            const clienteObj = {
+                nombre: nombre,
+                mesa: document.body.dataset.mesa,
+                id_mesa: document.body.dataset.id_mesa,
+                id_area: document.body.dataset.id_area,
+                id_user: document.body.dataset.id_user
+            };
+
+            try {
+                const res = await fetch("/DelixSystem/app/views/mesas/php/sincronizar_cliente.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ cliente: clienteObj })
+                });
+                const data = await res.json();
+                console.log("✅ Cliente sincronizado con servidor:", data);
+            } catch(err) {
+                console.error("⚠️ Error sincronizando cliente:", err);
+            }
+
+            // 🔥 CERRAR MODAL
             const modal = document.getElementById("clienteLoginModal");
             if(modal){
                 modal.style.opacity = 0;
                 setTimeout(()=> modal.style.display="none",300);
+            }
+
+            // 🔥 HABILITAR BOTÓN "VER MIS PEDIDOS" INMEDIATAMENTE
+            const btnVer = document.getElementById("verPedidosBtn");
+            if(btnVer) {
+                btnVer.disabled = false;
             }
         });
     }
@@ -391,50 +424,38 @@ function closeDishModal(){
 }
 
 // ====== SINCRONIZAR CLIENTE CON SERVIDOR ======
-document.addEventListener("DOMContentLoaded", () => {
-    console.log("=== Sincronizando cliente ===");
-
-    // 1️⃣ Leer localStorage (el nombre está en nombre_cliente)
+// Esta función se ejecuta si ya hay cliente guardado (recargas o sesiones previas)
+function sincronizarClienteExistente() {
     const rawName = localStorage.getItem("nombre_cliente");
-
-    console.log("Contenido actual del localStorage (nombre_cliente):", rawName);
-
-    let clienteObj = null;
-
-    // 2️⃣ Construir clienteObj aunque rawName NO sea JSON
-    if (rawName) {
-        // Obtenemos valores desde los data-atributos del <body>
-        const body = document.body;
-
-        clienteObj = {
-            nombre: rawName,
-            mesa: body.dataset.mesa,
-            id_mesa: body.dataset.id_mesa,
-            id_area: body.dataset.id_area
-        };
-    }
-
-    // 3️⃣ Si NO hay cliente, mostrar advertencia y salir
-    if (!clienteObj) {
+    
+    if (!rawName) {
         console.warn("⚠️ No hay cliente guardado en localStorage");
         return;
     }
 
-    console.log("Cliente armado:", clienteObj);
+    const clienteObj = {
+        nombre: rawName,
+        mesa: document.body.dataset.mesa,
+        id_mesa: document.body.dataset.id_mesa,
+        id_area: document.body.dataset.id_area,
+        id_user: document.body.dataset.id_user
+    };
 
-    // 4️⃣ Ocultar modal de identificación si ya existe
+    console.log("✅ Cliente ya estaba guardado, sincronizando:", clienteObj);
+
+    // Ocultar modal de identificación
     const modalCliente = document.getElementById("clienteLoginModal");
     if (modalCliente) {
         modalCliente.style.display = "none";
     }
 
-    // 5️⃣ Mostrar el nombre del cliente en el header
+    // Mostrar en header
     const nombreClienteHeader = document.getElementById("nombreClienteHeader");
     if (nombreClienteHeader) {
         nombreClienteHeader.textContent = `Cliente: ${clienteObj.nombre}`;
     }
 
-    // 6️⃣ Sincronizar con servidor: sincronizar_cliente.php
+    // Sincronizar con servidor
     fetch("/DelixSystem/app/views/mesas/php/sincronizar_cliente.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -445,17 +466,25 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Respuesta del servidor:", data);
     })
     .catch(err => console.error("Error enviando cliente al servidor:", err));
+
+    // Habilitar botón "Ver mis pedidos"
+    const btnVer = document.getElementById("verPedidosBtn");
+    if(btnVer) {
+        btnVer.disabled = false;
+    }
+}
+
+// Ejecutar sincronización cuando el DOM esté listo
+document.addEventListener("DOMContentLoaded", () => {
+    sincronizarClienteExistente();
 });
 
 // ====== BOTÓN "VER MIS PEDIDOS" ======
 document.addEventListener("DOMContentLoaded", () => {
-
     const btnVer = document.getElementById("verPedidosBtn");
 
     if (btnVer) {
         btnVer.addEventListener("click", () => {
-
-            // Si por algún motivo no está sincronizado, evitamos errores
             const nombre = localStorage.getItem("nombre_cliente");
 
             if (!nombre) {
@@ -467,5 +496,4 @@ document.addEventListener("DOMContentLoaded", () => {
             window.location.href = "/DelixSystem/app/views/mesas/view/mis_pedidos.php";
         });
     }
-
 });
