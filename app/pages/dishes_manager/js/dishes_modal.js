@@ -192,7 +192,7 @@ function editDish(raw) {
   const descriptionEl = document.getElementById("description");
   if (descriptionEl) descriptionEl.value = data.description || "";
   const stateEl = document.getElementById("state");
-  if (stateEl) stateEl.value = data.state || "Activo";
+  if (stateEl) stateEl.value = data.state || "";
   const cont = document.getElementById("currentPhotoContainer");
   const img = document.getElementById("currentPhoto");
   const hiddenInput = document.getElementById("current_photo_input");

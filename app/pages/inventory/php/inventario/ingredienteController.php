@@ -88,7 +88,7 @@ try {
             $_POST['batch'] ?? '',
             $_POST['description'] ?? '',
             $_POST['location'] ?? '',
-            $_POST['state'] ?? 'Activo',
+            $_POST['state'] ?? '',
             $_POST['supplier'] ?? '',
             $photo
         );
@@ -113,7 +113,7 @@ try {
                 'batch' => $_POST['batch'] ?? '',
                 'description' => $_POST['description'] ?? '',
                 'location' => $_POST['location'] ?? '',
-                'state' => $_POST['state'] ?? 'Activo',
+                'state' => $_POST['state'] ?? '',
                 'supplier' => $_POST['supplier'] ?? '',
                 'photo' => $photo
             ]

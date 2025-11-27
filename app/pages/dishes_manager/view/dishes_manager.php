@@ -245,7 +245,6 @@ try {
           <select name="state" id="state">
             <option value="Activo">Activo</option>
             <option value="Agotado">Agotado</option>
-            <option value="Inactivo">Inactivo</option>
           </select>
         </div>
 
