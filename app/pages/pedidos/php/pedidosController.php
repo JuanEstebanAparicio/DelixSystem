@@ -35,27 +35,29 @@ $estado_inicial = "Pending";
 // 🔥 CONVERSIÓN SIMPLE SOLO PARA G ↔ KG y ML ↔ L
 // =============================================================
 function convertirUnidad($cantidad, $origen, $destino) {
-    
+
+    // ✅ Si ya están en la misma unidad, no convertir
+    if ($origen === $destino) {
+        return $cantidad;
+    }
+
     // ---- PESO ----
     if (($origen === "g" || $origen === "kg") && ($destino === "g" || $destino === "kg")) {
-
-        // pasar siempre a gramos primero
         if ($origen === "kg") $cantidad = $cantidad * 1000;
         if ($destino === "kg") return $cantidad / 1000;
-        return $cantidad; // g → g
+        return $cantidad;
     }
 
     // ---- VOLUMEN ----
     if (($origen === "ml" || $origen === "l") && ($destino === "ml" || $destino === "l")) {
-
-        // todo a mililitros primero
         if ($origen === "l") $cantidad = $cantidad * 1000;
         if ($destino === "l") return $cantidad / 1000;
-        return $cantidad; // ml → ml
+        return $cantidad;
     }
 
     throw new Exception("Unidades incompatibles: $origen → $destino");
 }
+
 
 
 
