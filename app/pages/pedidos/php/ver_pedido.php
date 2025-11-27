@@ -37,6 +37,7 @@ ob_start();
 
 <h2>Pedido #<?= htmlspecialchars($order['id']) ?></h2>
 
+<p><strong>Cliente:</strong> <?= htmlspecialchars($order['nombre_cliente'] ?? 'No registrado') ?></p>
 <p><strong>Restaurante:</strong> <?= htmlspecialchars($order['restaurant_name']) ?></p>
 <p><strong>Área:</strong> <?= htmlspecialchars($order['area']) ?></p>
 <p><strong>Mesa:</strong> <?= htmlspecialchars($order['mesa']) ?></p>
