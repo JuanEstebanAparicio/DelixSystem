@@ -105,6 +105,9 @@ function getRoleAccess(): array
                 'crear'    => ['ADMIN_LOCAL', 'GESTOR_INVENTARIO'],
                 'editar'   => ['ADMIN_LOCAL', 'GESTOR_INVENTARIO'],
                 'eliminar' => ['ADMIN_LOCAL', 'GESTOR_INVENTARIO']
+         ],
+        'pedidos' => [
+                'estado' => ['ADMIN_LOCAL','GESTOR_PEDIDOS']
         ]
 
     ];
