@@ -41,10 +41,64 @@ try {
     $ingredientes = $stmtIng->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($platos as $i => $dish) {
-        $stmt2 = $conexion->prepare("SELECT ingredient_id AS id, quantity_used, unit FROM dish_ingredient WHERE dish_id = ?");
-        $stmt2->execute([$dish['id']]);
-        $platos[$i]['ingredients'] = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+
+    // Ingredientes que usa el plato
+    $stmt2 = $conexion->prepare("
+        SELECT ingredient_id AS id, quantity_used, unit 
+        FROM dish_ingredient 
+        WHERE dish_id = ?
+    ");
+    $stmt2->execute([$dish['id']]);
+    $ingredientesPlato = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+
+    $platos[$i]['ingredients'] = $ingredientesPlato;
+
+    // Por defecto asumimos que el plato está disponible
+    $stockSuficiente = true;
+
+    // Verificar cada ingrediente del plato
+    foreach ($ingredientesPlato as $ing) {
+
+        $stmtStock = $conexion->prepare("
+            SELECT amount 
+            FROM storage 
+            WHERE id = ? AND id_user = ?
+        ");
+        $stmtStock->execute([$ing['id'], $id_usuario]);
+        $storage = $stmtStock->fetch(PDO::FETCH_ASSOC);
+
+        // Si no existe o no alcanza, se marca como agotado
+        if (!$storage || $storage['amount'] < $ing['quantity_used']) {
+            $stockSuficiente = false;
+            break;
+        }
     }
+
+    // Si no hay stock suficiente, cambiar estado en BD
+    if (!$stockSuficiente && $dish['state'] !== 'Agotado') {
+        $update = $conexion->prepare("
+            UPDATE dish 
+            SET state = 'Agotado' 
+            WHERE id = ?
+        ");
+        $update->execute([$dish['id']]);
+
+        $platos[$i]['state'] = 'Agotado';
+    }
+
+    // Si vuelve a haber stock, reactivarlo automáticamente (opcional pero recomendado)
+    if ($stockSuficiente && $dish['state'] === 'Agotado') {
+        $update = $conexion->prepare("
+            UPDATE dish 
+            SET state = 'Activo' 
+            WHERE id = ?
+        ");
+        $update->execute([$dish['id']]);
+
+        $platos[$i]['state'] = 'Activo';
+    }
+}
+
 
     $categorias = [];
     foreach ($platos as $dish) {
