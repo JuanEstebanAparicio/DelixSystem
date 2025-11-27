@@ -30,6 +30,7 @@ $_SESSION['cliente'] = [
     'mesa'     => $cliente['mesa']     ?? null,
     'id_mesa'  => $cliente['id_mesa']  ?? null,
     'id_area'  => $cliente['id_area']  ?? null,
+    'id_user'  => $cliente['id_user']  ?? null,
 ];
 
 // Confirmar sincronización
