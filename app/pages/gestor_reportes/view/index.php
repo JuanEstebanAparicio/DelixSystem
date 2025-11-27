@@ -125,9 +125,9 @@ $topProductos = $reportController->topProductos($id_usuario, 5);
                   <i class="ri-bar-chart-fill"></i> Gráficas
                 </button>
 
-                <button class="nav-item" data-section="exportar">
+                <!--  <button class="nav-item" data-section="exportar">
                     <i class="ri-download-line"></i> Exportar datos
-                </button>            
+                </button> -->       
               
             </nav>
         </div>
