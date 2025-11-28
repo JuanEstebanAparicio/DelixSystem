@@ -52,7 +52,6 @@ $areas = $areaModel->obtenerAreasAdaptable($usuario['id'], $conexion);
     </a>
   </div>
 
-
   <div class="container">
 
     <!-- 🔹 ALERTAS -->

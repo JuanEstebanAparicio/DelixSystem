@@ -96,13 +96,6 @@ $nombreRestaurante = htmlspecialchars($propietario['restaurant_name']);
       <span>Reportes</span>
     </a>
 
-    <!-- PERFIL -->
-    <a href="/DelixSystem/app/pages/perfil_propietario/view/index.php" 
-       class="group card-control bg-gray-50 hover:bg-gray-100">
-      <i class="ri-user-settings-line text-gray-600 text-3xl group-hover:scale-110 transition-transform"></i>
-      <span>Mi Perfil</span>
-    </a>
-
     <!-- HISTORIAL -->
     <a href="/DelixSystem/app/pages/historial/view/historial.php"
        class="group card-control bg-orange-50 hover:bg-orange-100">
