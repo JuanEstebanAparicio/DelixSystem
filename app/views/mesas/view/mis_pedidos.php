@@ -99,8 +99,13 @@ $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     data-id_user="<?= $id_user ?? '' ?>" 
     data-id_mesa="<?= $id_mesa ?>"
 >
+<script>
+console.log("🔥 PHP id_user recibido en mis_pedidos.php:", "<?= $id_user ?>");
+console.log("🔥 id_user desde atributo BODY:", document.body.getAttribute("data-id_user"));
+console.log("🔥 id_user desde localStorage:", localStorage.getItem("id_user"));
+</script>
 
-<a class="boton-volver" id="btnVolverMenu" href="<?php echo "menu.php?id={$id_mesa}&u={$id_user}"; ?>">
+<a class="boton-volver" id="btnVolverMenu" href="#">
     <svg viewBox="0 0 24 24">
         <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
     </svg>
@@ -230,70 +235,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 <!-- =============================== -->
-<!-- SCRIPT INTERNO: VER DETALLES   -->
+<!-- SCRIPT INTERNO: ARMAR BOTÓN    -->
 <!-- =============================== -->
 <script>
-console.log("🎯 SCRIPT INTERNO SE ESTÁ EJECUTANDO");
-
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("🎯 DOM cargado: iniciando mis_pedidos JS.");
+    console.log("🔥 DOM listo en unificador de id_user + mesa");
 
-    document.querySelectorAll('.detalles-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            console.log("🟢 Click en Ver Detalles, ID:", btn.dataset.id);
+    let id_user = document.body.getAttribute("data-id_user");
+    if (!id_user || id_user.trim() === "") {
+        console.warn("⚠️ id_user vacío en PHP, usando localStorage...");
+        id_user = localStorage.getItem("id_user");
+    }
+    console.log("🟢 id_user FINAL:", id_user);
 
-            const id = btn.dataset.id;
+    let id_mesa = document.body.getAttribute("data-id_mesa");
+    console.log("🟢 id_mesa FINAL:", id_mesa);
 
-            fetch('/DelixSystem/app/views/mesas/php/obtener_items.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `id_pedido=${id}`
-            })
-            .then(r => r.json())
-            .then(data => {
-                console.log("📦 Respuesta del servidor:", data);
-
-                if (!data.ok) {
-                    Swal.fire('Error', data.error, 'error');
-                    return;
-                }
-
-                let html = "";
-                data.items.forEach(i => {
-                    let subtotal = i.precio * i.cantidad;
-                    html += `
-                        <div class="item-row">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5c-1.4 0-2.5-1.1-2.5-2.5S10.6 6.5 12 6.5s2.5 1.1 2.5 2.5S13.4 11.5 12 11.5z"/>
-                            </svg>
-
-                            <div class="item-info">
-                                <strong>${i.nombre_platillo}</strong>
-                                <span>${i.cantidad} × $${Intl.NumberFormat('es-CO').format(i.precio)}</span>
-                            </div>
-
-                            <div class="item-precio">
-                                <strong>$${Intl.NumberFormat('es-CO').format(subtotal)}</strong>
-                            </div>
-                        </div>`;
-                });
-
-                document.getElementById('detallesContenido').innerHTML = html;
-
-                document.getElementById('modalDetalles').classList.add('active');
-            });
-        });
-    });
-
-    document.querySelector('.cerrar').onclick =
-        () => document.getElementById('modalDetalles').classList.remove('active');
-
-    window.onclick = (e) => {
-        if (e.target.id === 'modalDetalles') {
-            document.getElementById('modalDetalles').classList.remove('active');
-        }
-    };
-
+    const volverBtn = document.getElementById("btnVolverMenu");
+    if (volverBtn) {
+        volverBtn.href =
+            `/DelixSystem/app/views/mesas/view/menu.php?id=${id_mesa}&u=${id_user}`;
+        console.log("🔗BOTÓN VOLVER Generado:", volverBtn.href);
+    }
 });
 </script>
 
