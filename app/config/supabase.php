@@ -2,7 +2,7 @@
 // DelixSystem/app/config/supabase.php
 
 // ============================
-// 🔹 CONFIGURACIÓN SUPABASE
+//  CONFIGURACIÓN SUPABASE
 // ============================
 $host = "aws-1-us-east-1.pooler.supabase.com";
 $port = "6543";
@@ -11,7 +11,7 @@ $user = "postgres.gqcaeecfhqdkpoatmkfs";
 $password = "Delix2025";
 
 // ============================
-// 🔹 CONEXIÓN CON PDO
+//  CONEXIÓN CON PDO
 // ============================
 try {
     $conexion = new PDO(
@@ -26,7 +26,7 @@ try {
         ]
     );
 } catch (PDOException $e) {
-    error_log("❌ Error de conexión a Supabase: " . $e->getMessage());
+    error_log(" Error de conexión a Supabase: " . $e->getMessage());
     die(json_encode([
         'status' => 'error',
         'message' => 'Error interno al conectar con la base de datos.'

@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../../../middleware/session_guard.php';
 protectPage('propietario');
 
-// ✅ Incluimos el Control Center
+//  Incluimos el Control Center
  include __DIR__ . '/../../../components/header_propietario.php'; 
  include __DIR__ . '/../../../components/control_center_propietario.php'; 
 
@@ -115,11 +115,11 @@ if ($id_usuario) {
 
 <body class="bg-gray-50 min-h-screen font-sans text-gray-800">
 
-  <!-- 🧭 Control Center -->
+  <!--  Control Center -->
    <?php include __DIR__ . '/../../../components/control_center_propietario.php'; ?>
 
 
-  <!-- 🌟 Contenido Principal -->
+  <!--  Contenido Principal -->
   <main class="pt-28 px-6 flex justify-center items-center">
     <section class="bg-white shadow-lg rounded-2xl p-10 w-full max-w-5xl fade-in">
       
@@ -141,7 +141,7 @@ if ($id_usuario) {
         </button>
       </div>
 
-      <!-- 📋 Información del propietario -->
+      <!--  Información del propietario -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div class="bg-gray-50 rounded-xl p-5">
           <p class="text-gray-500 text-sm">Correo</p>
@@ -153,7 +153,7 @@ if ($id_usuario) {
         </div>
       </div>
 
-      <!-- 📊 Estadísticas Rápidas -->
+      <!--  Estadísticas Rápidas -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
         <div class="bg-emerald-100 p-6 rounded-xl text-center">
           <h3 class="text-emerald-800 text-lg font-semibold">Pedidos del Día</h3>
@@ -173,7 +173,7 @@ if ($id_usuario) {
 
       </div>
 
-      <!-- 🔗 Accesos directos -->
+      <!--  Accesos directos -->
       <div class="flex flex-wrap gap-4 justify-center">
         <a href="/DelixSystem/app/pages/pedidos/view/listar_pedidos.php"
            class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-lg font-medium transition-all">
@@ -197,7 +197,7 @@ if ($id_usuario) {
         </a>
       </div>
 
-      <!-- 📈 Tabla de pedidos recientes -->
+      <!--  Tabla de pedidos recientes -->
       <div class="mt-12">
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Pedidos Recientes</h2>
         <div class="overflow-x-auto">
@@ -253,7 +253,7 @@ if ($id_usuario) {
     </section>
   </main>
 
-  <!-- 🧑 Modal de Edición de Perfil -->
+  <!--  Modal de Edición de Perfil -->
   <div id="profileModal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
     <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-8 relative">
       <button id="closeProfileModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl">&times;</button>

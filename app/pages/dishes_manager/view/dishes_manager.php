@@ -35,70 +35,62 @@ try {
     $stmt->execute();
     $platos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $stmtIng = $conexion->prepare("SELECT id, name FROM storage WHERE id_user = :id_user ORDER BY name ASC");
+    // ★ CORRECCIÓN: Agregar el campo unit al SELECT
+    $stmtIng = $conexion->prepare("SELECT id, name, unit FROM storage WHERE id_user = :id_user ORDER BY name ASC");
     $stmtIng->bindParam(':id_user', $id_usuario, PDO::PARAM_INT);
     $stmtIng->execute();
     $ingredientes = $stmtIng->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($platos as $i => $dish) {
 
-    // Ingredientes que usa el plato
-    $stmt2 = $conexion->prepare("
-        SELECT ingredient_id AS id, quantity_used, unit 
-        FROM dish_ingredient 
-        WHERE dish_id = ?
-    ");
-    $stmt2->execute([$dish['id']]);
-    $ingredientesPlato = $stmt2->fetchAll(PDO::FETCH_ASSOC);
-
-    $platos[$i]['ingredients'] = $ingredientesPlato;
-
-    // Por defecto asumimos que el plato está disponible
-    $stockSuficiente = true;
-
-    // Verificar cada ingrediente del plato
-    foreach ($ingredientesPlato as $ing) {
-
-        $stmtStock = $conexion->prepare("
-            SELECT amount 
-            FROM storage 
-            WHERE id = ? AND id_user = ?
+        $stmt2 = $conexion->prepare("
+            SELECT ingredient_id AS id, quantity_used, unit 
+            FROM dish_ingredient 
+            WHERE dish_id = ?
         ");
-        $stmtStock->execute([$ing['id'], $id_usuario]);
-        $storage = $stmtStock->fetch(PDO::FETCH_ASSOC);
+        $stmt2->execute([$dish['id']]);
+        $ingredientesPlato = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
-        // Si no existe o no alcanza, se marca como agotado
-        if (!$storage || $storage['amount'] < $ing['quantity_used']) {
-            $stockSuficiente = false;
-            break;
+        $platos[$i]['ingredients'] = $ingredientesPlato;
+
+        $stockSuficiente = true;
+
+        foreach ($ingredientesPlato as $ing) {
+
+            $stmtStock = $conexion->prepare("
+                SELECT amount 
+                FROM storage 
+                WHERE id = ? AND id_user = ?
+            ");
+            $stmtStock->execute([$ing['id'], $id_usuario]);
+            $storage = $stmtStock->fetch(PDO::FETCH_ASSOC);
+
+            if (!$storage || $storage['amount'] < $ing['quantity_used']) {
+                $stockSuficiente = false;
+                break;
+            }
+        }
+
+        if (!$stockSuficiente && $dish['state'] !== 'Agotado') {
+            $update = $conexion->prepare("
+                UPDATE dish 
+                SET state = 'Agotado' 
+                WHERE id = ?
+            ");
+            $update->execute([$dish['id']]);
+            $platos[$i]['state'] = 'Agotado';
+        }
+
+        if ($stockSuficiente && $dish['state'] === 'Agotado') {
+            $update = $conexion->prepare("
+                UPDATE dish 
+                SET state = 'Activo' 
+                WHERE id = ?
+            ");
+            $update->execute([$dish['id']]);
+            $platos[$i]['state'] = 'Activo';
         }
     }
-
-    // Si no hay stock suficiente, cambiar estado en BD
-    if (!$stockSuficiente && $dish['state'] !== 'Agotado') {
-        $update = $conexion->prepare("
-            UPDATE dish 
-            SET state = 'Agotado' 
-            WHERE id = ?
-        ");
-        $update->execute([$dish['id']]);
-
-        $platos[$i]['state'] = 'Agotado';
-    }
-
-    // Si vuelve a haber stock, reactivarlo automáticamente (opcional pero recomendado)
-    if ($stockSuficiente && $dish['state'] === 'Agotado') {
-        $update = $conexion->prepare("
-            UPDATE dish 
-            SET state = 'Activo' 
-            WHERE id = ?
-        ");
-        $update->execute([$dish['id']]);
-
-        $platos[$i]['state'] = 'Activo';
-    }
-}
-
 
     $categorias = [];
     foreach ($platos as $dish) {
@@ -282,7 +274,13 @@ try {
           <label for="ingredients">Ingredientes:</label>
           <select name="ingredients[]" id="ingredients" multiple required>
             <?php foreach ($ingredientes as $ing): ?>
-              <option value="<?= htmlspecialchars($ing['id']) ?>"><?= htmlspecialchars($ing['name']) ?></option>
+              <!-- ★ CORRECCIÓN: añadir data-unit -->
+              <option 
+                value="<?= htmlspecialchars($ing['id']) ?>"
+                data-unit="<?= htmlspecialchars($ing['unit']) ?>"
+              >
+                <?= htmlspecialchars($ing['name']) ?>
+              </option>
             <?php endforeach; ?>
           </select>
         </div>

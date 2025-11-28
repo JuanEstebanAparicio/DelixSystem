@@ -9,11 +9,11 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 $isEmpleado = isset($_SESSION['empleado_auth']) && !empty($_SESSION['empleado_auth']);
 
 if ($isEmpleado) {
-    // 🔹 Incluir los componentes visuales del empleado
+    //  Incluir los componentes visuales del empleado
     require_once __DIR__ . '/../../components/header_empleado.php';
     require_once __DIR__ . '/../../components/control_center.php';
 
-    // 🔹 Inyectar los estilos y scripts solo cuando el empleado esté autenticado
+    //  Inyectar los estilos y scripts solo cuando el empleado esté autenticado
     echo <<<HTML
     <link rel="stylesheet" href="/DelixSystem/app/shared/css/globals.css">
     <script src="https://cdn.tailwindcss.com"></script>

@@ -1,5 +1,5 @@
 // ==============================
-// 📘 Diccionario General (solo lo útil, nada técnico)
+//  Diccionario General (solo lo útil, nada técnico)
 // ==============================
 window.diccionarioGeneral = {
     nombre: "Nombre",
@@ -11,12 +11,12 @@ window.diccionarioGeneral = {
 };
 
 // ==============================
-// 📘 Diccionarios por Gestor
+//  Diccionarios por Gestor
 // ==============================
 window.diccionarioPorGestor = {
     
     // ======================
-    // 📌 MESAS
+    //  MESAS
     // ======================
     mesas: {
         nombre: "Nombre de la Mesa",
@@ -26,7 +26,7 @@ window.diccionarioPorGestor = {
     },
 
     // ======================
-    // 📌 AREAS
+    //  AREAS
     // ======================
     areas: {
         nombre: "Nombre del Área",
@@ -36,7 +36,7 @@ window.diccionarioPorGestor = {
     },
     
     // ======================
-    // 📌 EMPLEADOS
+    //  EMPLEADOS
     // ======================
     empleados: {
         full_name: "Nombre Completo",
@@ -55,7 +55,7 @@ window.diccionarioPorGestor = {
 },
 
 // ======================
-// 📦 INVENTARIO (STORAGE)
+//  INVENTARIO (STORAGE)
 // ======================
 inventario: {
     name: "Nombre del Ingrediente",
@@ -87,7 +87,7 @@ inventario: {
 };
 
 // ===========================================
-// 🔍 Detectar solo los campos modificados
+//  Detectar solo los campos modificados
 // ===========================================
 window.detectarCambios = function (oldObj, newObj) {
     const cambios = {};
@@ -101,7 +101,7 @@ window.detectarCambios = function (oldObj, newObj) {
     return cambios;
 };
 // ==========================================================
-// 🎯 Filtra SOLO los cambios del inventario antes de mostrar
+//  Filtra SOLO los cambios del inventario antes de mostrar
 // ==========================================================
 window.prepararDatosInventario = function (oldObj, newObj) {
     // Caso crear → no hay OLD
@@ -113,7 +113,7 @@ window.prepararDatosInventario = function (oldObj, newObj) {
 
 
 // ==============================
-// 📘 Formateo de objetos
+//  Formateo de objetos
 // ==============================
 window.formatearObjetoAuditoria = function (obj, gestor) {
     if (!obj) return "<i>Sin datos</i>";
@@ -132,7 +132,7 @@ window.formatearObjetoAuditoria = function (obj, gestor) {
         let valor = obj[key];
 
         // ============================================
-        // 🎯 FORMATO ESPECIAL PARA ROLES
+        //  FORMATO ESPECIAL PARA ROLES
         // ============================================
         if (key === "roles" && Array.isArray(valor)) {
             if (valor.length === 0) {
@@ -163,7 +163,7 @@ window.formatearObjetoAuditoria = function (obj, gestor) {
         }
 
         // ============================================
-        // 📌 Formato estándar
+        //  Formato estándar
         // ============================================
         if (typeof valor === "object" && valor !== null) {
             valor = JSON.stringify(valor, null, 2)
