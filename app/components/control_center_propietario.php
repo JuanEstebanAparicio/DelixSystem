@@ -106,8 +106,6 @@ $nombreRestaurante = htmlspecialchars($propietario['restaurant_name']);
   </div>
 </div>
 
-
-
   <!-- 🔒 Cerrar Sesión -->
   <div class="p-6 border-t border-gray-200">
   <a href="/DelixSystem/src/auth/logout.php"
