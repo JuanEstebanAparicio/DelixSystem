@@ -1,87 +1,136 @@
 <?php
-// DelixSystem/app/pages/pedidos/view/listar_pedidos.php
 session_start();
-require_once __DIR__ . '/../../../middleware/session_guard.php';
-protectPage('propietario');
 
-require_once __DIR__ . '/../../../config/supabase.php';
+// ==========================
+// 🔐 UNIVERSAL GUARD
+// ==========================
+require_once __DIR__ . '/../../../middleware/universal_guard.php';
+$usuario = universalGuard();
 
-// Aseguramos que el usuario esté logueado y obtenemos su ID
-$userId = $_SESSION['usuario']['id'] ?? null;
+// || IMPORTANTE ||
+// Si es propietario → su propio ID
+// Si es empleado → debemos buscar el propietario por restaurant_name
+if ($usuario['tipo'] === 'propietario') {
+
+    $userId = $usuario['id'];
+
+} elseif ($usuario['tipo'] === 'empleado') {
+
+    // El login de empleados guarda restaurant_name
+    $restaurantName = $_SESSION['empleado_auth']['restaurant_name'] ?? null;
+
+    if (!$restaurantName) {
+        echo '<p class="error">No se pudo determinar el restaurante del empleado.</p>';
+        exit;
+    }
+
+    // Buscar dueño real del restaurante
+    $rest = supabaseRest(
+        'usuarios',
+        'GET',
+        null,
+        '?restaurant_name=eq.' . urlencode($restaurantName)
+    );
+
+    if (!$rest || empty($rest['data'])) {
+        echo '<p class="error">No se encontró el propietario del restaurante.</p>';
+        exit;
+    }
+
+    // ID REAL DEL DUEÑO
+    $userId = $rest['data'][0]['id'];
+
+} else {
+    echo '<p class="error">No estás autenticado. Por favor, inicia sesión.</p>';
+    exit;
+}
+
+// Validación final
 if (!$userId) {
     echo '<p class="error">No estás autenticado. Por favor, inicia sesión.</p>';
     exit;
 }
 
-// Log: Verificar el ID de usuario
-error_log("ID de Usuario: " . $userId);
+// ==========================
+// 🔗 CONEXIÓN SUPABASE
+// ==========================
+require_once __DIR__ . '/../../../config/supabase.php';
 
-// Traemos las áreas del usuario logueado, solo aquellas asociadas a su `id_usuario`
+error_log("ID de Usuario/Dueño asignado para pedidos: " . $userId);
+
+
+// ==========================
+// 📌 OBTENER ÁREAS
+// ==========================
 $areas = [];
 $modelPath = __DIR__ . '/../../../models/AreaModel.php';
+
 if ($userId && file_exists($modelPath)) {
     require_once $modelPath;
+
     try {
         $areaModel = new AreaModel($conexion);
 
-        // Log: Verificar la ejecución de la consulta para obtener áreas
-        error_log("Consultando áreas para el ID de usuario: " . $userId);
-        
-        // Filtramos las áreas por `id_usuario`
-        $areasRaw = $areaModel->obtenerAreasAdaptable($userId, $conexion); 
-        
-        // Log: Verificar qué áreas estamos recuperando
-        error_log("Áreas recuperadas (Raw): " . print_r($areasRaw, true));
-        
-        // Normalizamos las áreas a un array simple de nombres
+        error_log("Consultando áreas desde AreaModel para usuario: $userId");
+
+        $areasRaw = $areaModel->obtenerAreasAdaptable($userId, $conexion);
+
+        error_log("Áreas crudas: " . print_r($areasRaw, true));
+
         foreach ($areasRaw as $a) {
             if (isset($a['nombre'])) $areas[] = $a['nombre'];
             elseif (isset($a['name'])) $areas[] = $a['name'];
             elseif (isset($a['nombre_area'])) $areas[] = $a['nombre_area'];
         }
     } catch (Throwable $e) {
-        $areas = [];
-        error_log("Error al recuperar las áreas: " . $e->getMessage());
+        error_log("Error obteniendo áreas desde modelo: " . $e->getMessage());
     }
 }
 
-// Log: Verificar el resultado de las áreas recuperadas del modelo
-error_log("Áreas después de la consulta del modelo: " . print_r($areas, true));
-
-// fallback: si no obtuvimos áreas por el modelo, las obtenemos directamente desde la tabla `areas` (filtrando por `id_usuario`)
+// fallback si no hay resultado
 if (empty($areas)) {
     try {
-        // Aquí usamos `nombre` en lugar de `area`
-        error_log("Recuperando áreas desde el fallback (sin modelo)");
+        error_log("Fallback: buscando áreas directamente en BD.");
 
-        $stmtAreas = $conexion->prepare("SELECT DISTINCT nombre FROM areas WHERE id_usuario = :user_id AND nombre IS NOT NULL ORDER BY nombre ASC");
+        $stmtAreas = $conexion->prepare("
+            SELECT DISTINCT nombre FROM areas 
+            WHERE id_usuario = :user_id 
+              AND nombre IS NOT NULL 
+            ORDER BY nombre ASC
+        ");
         $stmtAreas->execute(['user_id' => $userId]);
         $areas = $stmtAreas->fetchAll(PDO::FETCH_COLUMN);
 
-        // Log: Verificar el resultado de las áreas desde el fallback
-        error_log("Áreas recuperadas del fallback: " . print_r($areas, true));
+        error_log("Áreas obtenidas por fallback: " . print_r($areas, true));
     } catch (Throwable $e) {
         $areas = [];
-        error_log("Error al recuperar las áreas desde el fallback: " . $e->getMessage());
+        error_log("Error fallback áreas: " . $e->getMessage());
     }
 }
 
+error_log("Áreas finales: " . print_r($areas, true));
 
-// Log: Verificar las áreas antes de usarlas
-error_log("Áreas finales que se van a mostrar: " . print_r($areas, true));
 
-// Traemos los pedidos del usuario actual, más recientes, y con el estado filtrado
-$stmt = $conexion->prepare("SELECT id, restaurant_name, area, id_area, mesa, total_pedido, metodo_pago, pagado, estado, created_at
+// ==========================
+// 📦 OBTENER PEDIDOS
+// ==========================
+$stmt = $conexion->prepare("
+    SELECT id, restaurant_name, area, id_area, mesa, total_pedido, metodo_pago, pagado, estado, created_at
     FROM orders
-    WHERE id_user = :user_id AND estado != 'Delivered'
-    ORDER BY id DESC");
+    WHERE id_user = :user_id 
+      AND estado != 'Delivered'
+    ORDER BY id DESC
+");
+
 $stmt->execute(['user_id' => $userId]);
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Si la petición es fetch=1 devolvemos solo el grid (para polling AJAX)
 
-
+// ==========================
+// 🔄 FETCH AJAX (ACTUALIZACIÓN AUTOMÁTICA)
+// ==========================
 if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
+
     if (empty($orders)) {
         echo '<p class="no-orders">No hay pedidos todavía.</p>';
         exit;
@@ -103,7 +152,6 @@ if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
         $badgeEstado = '<span class="badge-estado badge-' . $estado . '">' . ucfirst($estado) . '</span>';
         $badgePago = $paid ? '<span class="badge-paid">Pagado</span>' : '<span class="badge-unpaid">No Pagado</span>';
 
-        // Use data-order-id and aria-label instead of adding element IDs (prevents duplicates)
         echo '<article class="' . $cardClass . '" data-area="' . $areaAttr . '" data-order-id="' . $id . '" aria-label="Pedido #' . $id . '">';
         echo '<div class="order-id">#' . $id . '</div>';
         echo '<div class="restaurant">' . $restaurant . '</div>';
@@ -112,15 +160,17 @@ if (isset($_GET['fetch']) && $_GET['fetch'] == "1") {
         echo '<div class="method">Pago: ' . $metodo . '</div>';
         echo '<div class="state-row">' . $badgeEstado . ' &nbsp;|&nbsp; ' . $badgePago . '</div>';
         echo '<div class="date">' . $created . '</div>';
-         echo '<button class="btn-action verPedidoBtn" data-id="' . htmlspecialchars($o['id']) . '">Ver Pedido</button>';
+        echo '<button class="btn-action verPedidoBtn" data-id="' . htmlspecialchars($o['id']) . '">Ver Pedido</button>';
         echo '</article>';
     }
     exit;
 }
 
-// === AQUÍ SÍ VA EL CONTROL CENTER ===
 
-include __DIR__ . '/../../../components/control_center_propietario.php'
+// ==========================
+// 🟦 CONTROL CENTER (SOLO PROPIETARIO)
+// ==========================
+include __DIR__ . '/../../../components/control_center_propietario.php';
 
 ?>
 
@@ -220,34 +270,22 @@ include __DIR__ . '/../../../components/control_center_propietario.php'
 <script src="../js/pedidos.js" defer></script>
 
 
-<!-- MODAL VER PEDIDO - DISEÑO RESTAURANTE PREMIUM -->
-<div id="modalVerPedido" class="modal-overlay hidden">
-    <div class="modal-container">
+<!-- MODAL VER PEDIDO -->
+<div id="modalVerPedido"
+     class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[9999]">
+
+    <div class="bg-white rounded-xl shadow-xl w-[90%] max-w-3xl p-6 relative">
         
-        <!-- Header del Modal -->
-        <div class="modal-header">
-            <div class="modal-header-content">
-                <h2 class="modal-title">
-                    <i class="ri-file-list-line"></i>
-                    Detalles del Pedido
-                </h2>
-                <p class="modal-subtitle">Información completa del pedido</p>
-            </div>
-            
-            <!-- Botón Cerrar -->
-            <button id="cerrarModalPedido" class="modal-close-btn" aria-label="Cerrar modal">
-                <i class="ri-close-line"></i>
-            </button>
-        </div>
+        <!-- Cerrar -->
+        <button id="cerrarModalPedido" 
+            class="absolute top-3 right-3 bg-gray-200 hover:bg-gray-300 rounded-full p-2">
+            ✕
+        </button>
 
-        <!-- Contenido Dinámico -->
-        <div id="modalPedidoContenido" class="modal-content">
-            <div class="loading-state">
-                <div class="spinner"></div>
-                <p>Cargando detalles del pedido...</p>
-            </div>
+        <!-- CONTENIDO DINÁMICO -->
+        <div id="modalPedidoContenido">
+            <p class="text-center text-gray-500">Cargando...</p>
         </div>
-
 
     </div>
 </div>

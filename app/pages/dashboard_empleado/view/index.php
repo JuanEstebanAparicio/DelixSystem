@@ -86,7 +86,7 @@ $empleado = DashboardEmpleadoController::obtenerDatosEmpleado($empleadoAuth['id'
   </div>
 
   <div class="flex flex-wrap gap-4 justify-center">
-    <a href="/DelixSystem/app/pages/gestion_pedidos/view/index.php" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-lg font-medium transition-all">Pedidos</a>
+    <a href="/DelixSystem/app/pages/pedidos/view/listar_pedidos.php" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-lg font-medium transition-all">Pedidos</a>
     <a href="/DelixSystem/app/pages/gestion_mesas/view/gestion_mesas.php" class="bg-sky-500 hover:bg-sky-600 text-white px-5 py-2 rounded-lg font-medium transition-all">Mesas</a>
     <a href="/DelixSystem/app/pages/gestor_empleado/view/gestor_empleados.php" class="bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2 rounded-lg font-medium transition-all">Empleados</a>
     <a href="/DelixSystem/app/pages/dishes_manager/view/dishes_manager.php" class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-lg font-medium transition-all">Gestor Menú</a>
