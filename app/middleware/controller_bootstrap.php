@@ -88,7 +88,6 @@ function getRoleAccess(): array
             'editar'   => ['GESTOR_MESAS', 'ADMIN_LOCAL'],
             'eliminar' => ['GESTOR_MESAS', 'ADMIN_LOCAL']
         ],
-        // 🧩 Nuevo bloque
         'empleados' => [
             'ver'           => ['ADMIN_LOCAL', 'GESTOR_EMPLEADOS', 'SUPERVISOR'],
             'crear'         => ['ADMIN_LOCAL', 'GESTOR_EMPLEADOS'],          
@@ -106,10 +105,15 @@ function getRoleAccess(): array
                 'editar'   => ['ADMIN_LOCAL', 'GESTOR_INVENTARIO'],
                 'eliminar' => ['ADMIN_LOCAL', 'GESTOR_INVENTARIO']
          ],
+         'menu' => [
+            'ver'      => ['ADMIN_LOCAL', 'GESTOR_MENU', 'SUPERVISOR'],
+            'crear'    => ['ADMIN_LOCAL', 'GESTOR_MENU'],
+            'editar'   => ['ADMIN_LOCAL', 'GESTOR_MENU'],
+            'eliminar' => ['ADMIN_LOCAL', 'GESTOR_MENU']
+         ],
         'pedidos' => [
                 'estado' => ['ADMIN_LOCAL','GESTOR_PEDIDOS']
         ]
-
     ];
 }
 

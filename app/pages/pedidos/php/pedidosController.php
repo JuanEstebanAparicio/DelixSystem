@@ -25,12 +25,41 @@ foreach($required as $r){
 }
 
 // regla final general
-// si paga tarjeta = TRUE
-// otros metodos = FALSE
 $pagado = ($data['metodo_pago'] === 'tarjeta') ? 1 : 0;
 
-// estado inicial de un pedido NUEVO
+// estado inicial
 $estado_inicial = "Pending";
+
+
+// =============================================================
+// 🔥 CONVERSIÓN SIMPLE SOLO PARA G ↔ KG y ML ↔ L
+// =============================================================
+function convertirUnidad($cantidad, $origen, $destino) {
+
+    // ✅ Si ya están en la misma unidad, no convertir
+    if ($origen === $destino) {
+        return $cantidad;
+    }
+
+    // ---- PESO ----
+    if (($origen === "g" || $origen === "kg") && ($destino === "g" || $destino === "kg")) {
+        if ($origen === "kg") $cantidad = $cantidad * 1000;
+        if ($destino === "kg") return $cantidad / 1000;
+        return $cantidad;
+    }
+
+    // ---- VOLUMEN ----
+    if (($origen === "ml" || $origen === "l") && ($destino === "ml" || $destino === "l")) {
+        if ($origen === "l") $cantidad = $cantidad * 1000;
+        if ($destino === "l") return $cantidad / 1000;
+        return $cantidad;
+    }
+
+    throw new Exception("Unidades incompatibles: $origen → $destino");
+}
+
+
+
 
 try {
     $conexion->beginTransaction();
@@ -78,22 +107,26 @@ try {
         ]);
     }
 
-    // =======================================================
+    // ============================================================
     // 3. DESCONTAR INGREDIENTES POR CADA PLATILLO DEL PEDIDO
-    // =======================================================
+    // ============================================================
+
+    // datos del ingrediente del platillo
     $stmtIng = $conexion->prepare("
-        SELECT ingredient_id, quantity_used
+        SELECT ingredient_id, quantity_used, unit
         FROM dish_ingredient
         WHERE dish_id = :dish_id
     ");
 
+    // stock
     $stmtStock = $conexion->prepare("
-        SELECT amount
+        SELECT amount, unit
         FROM storage
         WHERE id = :ingredient_id
         FOR UPDATE
     ");
 
+    // update
     $stmtUpdateStock = $conexion->prepare("
         UPDATE storage
         SET amount = amount - :consumo
@@ -112,18 +145,28 @@ try {
         foreach($ingredientes as $ing){
 
             $ingredient_id = $ing['ingredient_id'];
-            $qty_por_plato = floatval($ing['quantity_used']);
+            $qty_plato = floatval($ing['quantity_used']);
+            $unidad_ing = $ing['unit'];
 
-            // consumo total = qty_plato × cantidad pedida
-            $consumo = $qty_por_plato * $cantidadPedido;
-
-            // verificar stock
+            // stock
             $stmtStock->execute([":ingredient_id"=>$ingredient_id]);
             $stock = $stmtStock->fetch(PDO::FETCH_ASSOC);
 
             if(!$stock){
                 throw new Exception("Ingrediente ID $ingredient_id no existe.");
             }
+
+            $unidad_storage = $stock['unit'];
+
+            // convertir de unidad del platillo a unidad del almacenamiento
+            $qty_convertida = convertirUnidad(
+                $qty_plato,
+                $unidad_ing,
+                $unidad_storage
+            );
+
+            // consumo total
+            $consumo = $qty_convertida * $cantidadPedido;
 
             if(floatval($stock['amount']) < $consumo){
                 throw new Exception("Stock insuficiente para ingrediente ID $ingredient_id");
@@ -138,7 +181,7 @@ try {
     }
 
     // ===============================
-    // 4. CONFIRMAR TODO
+    // 4. CONFIRMAR
     // ===============================
     $conexion->commit();
 
@@ -149,4 +192,3 @@ try {
     error_log("pedidoController error: ".$e->getMessage());
     echo json_encode(["success"=>false,"error"=>$e->getMessage()]);
 }
-
