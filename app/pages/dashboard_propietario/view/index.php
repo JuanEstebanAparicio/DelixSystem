@@ -47,13 +47,13 @@ $ventasHoy = 0;
 if ($id_usuario) {
     try {
         $stmtDaily = $conexion->prepare("
-            SELECT 
-                COUNT(*) AS total_orders, 
-                COALESCE(SUM(total_pedido), 0) AS total_sales
-            FROM orders
-            WHERE id_user = ?
-              AND pagado = 1
-              AND DATE(created_at) = CURRENT_DATE
+              SELECT 
+        COUNT(*) AS total_orders, 
+        COALESCE(SUM(total_pedido), 0) AS total_sales
+    FROM orders
+    WHERE id_user = ?
+      AND pagado = 1
+      AND DATE(created_at AT TIME ZONE 'America/Bogota') = CURRENT_DATE
         ");
         
         $stmtDaily->execute([$id_usuario]);
