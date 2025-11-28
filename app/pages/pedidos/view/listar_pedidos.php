@@ -220,22 +220,34 @@ include __DIR__ . '/../../../components/control_center_propietario.php'
 <script src="../js/pedidos.js" defer></script>
 
 
-<!-- MODAL VER PEDIDO -->
-<div id="modalVerPedido"
-     class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[9999]">
-
-    <div class="bg-white rounded-xl shadow-xl w-[90%] max-w-3xl p-6 relative">
+<!-- MODAL VER PEDIDO - DISEÑO RESTAURANTE PREMIUM -->
+<div id="modalVerPedido" class="modal-overlay hidden">
+    <div class="modal-container">
         
-        <!-- Cerrar -->
-        <button id="cerrarModalPedido" 
-            class="absolute top-3 right-3 bg-gray-200 hover:bg-gray-300 rounded-full p-2">
-            ✕
-        </button>
-
-        <!-- CONTENIDO DINÁMICO -->
-        <div id="modalPedidoContenido">
-            <p class="text-center text-gray-500">Cargando...</p>
+        <!-- Header del Modal -->
+        <div class="modal-header">
+            <div class="modal-header-content">
+                <h2 class="modal-title">
+                    <i class="ri-file-list-line"></i>
+                    Detalles del Pedido
+                </h2>
+                <p class="modal-subtitle">Información completa del pedido</p>
+            </div>
+            
+            <!-- Botón Cerrar -->
+            <button id="cerrarModalPedido" class="modal-close-btn" aria-label="Cerrar modal">
+                <i class="ri-close-line"></i>
+            </button>
         </div>
+
+        <!-- Contenido Dinámico -->
+        <div id="modalPedidoContenido" class="modal-content">
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <p>Cargando detalles del pedido...</p>
+            </div>
+        </div>
+
 
     </div>
 </div>

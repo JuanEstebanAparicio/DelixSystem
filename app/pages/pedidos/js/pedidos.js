@@ -169,7 +169,7 @@ document.addEventListener("click", async (e) => {
   const modal = document.getElementById("modalVerPedido");
   const contenido = document.getElementById("modalPedidoContenido");
 
-  contenido.innerHTML = "<p>Cargando...</p>";
+  contenido.innerHTML = "<div class='loading-state'><div class='spinner'></div><p>Cargando detalles del pedido...</p></div>";
   modal.classList.remove("hidden");
 
   console.log("[MODAL] Fetch a ver_pedido.php?id=" + id);
@@ -185,12 +185,28 @@ document.addEventListener("click", async (e) => {
 // ======================================================
 //  🟥 CERRAR MODAL
 // ======================================================
-const cerrar = document.getElementById("cerrarModalPedido");
-if (cerrar) {
-  cerrar.addEventListener("click", () => {
+const cerrarBtn = document.getElementById("cerrarModalPedido");
+const cerrarBtnFooter = document.getElementById("cerrarModalPedidoFooter");
+
+function cerrarModal() {
     console.log("%c[MODAL] Cerrando modal", "color: red;");
     modalAbierto = false;   // permitir polling otra vez
     ultimoPedidoVisto = null;
     document.getElementById("modalVerPedido").classList.add("hidden");
-  });
 }
+
+if (cerrarBtn) {
+    cerrarBtn.addEventListener("click", cerrarModal);
+}
+
+if (cerrarBtnFooter) {
+    cerrarBtnFooter.addEventListener("click", cerrarModal);
+}
+
+// Cerrar al hacer click fuera del modal
+document.addEventListener("click", (e) => {
+    const modal = document.getElementById("modalVerPedido");
+    if (e.target === modal) {
+        cerrarModal();
+    }
+});

@@ -1,9 +1,23 @@
 /* =============================
-   📦 ver_pedidos.css - VERSIÓN MEJORADA
-   Estilos modernos para vista de detalle de pedido
+   📦 ver_pedidos.css - DISEÑO RESTAURANTE PREMIUM
+   Estilos modernos coherentes con paleta de colores
 ============================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --primary-color: #f50b0b;
+  --primary-light: #cf0a00;
+  --primary-dark: #c20808;
+  --success-color: #00ff3c;
+  --warning-color: #D97706;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --border-color: #E5E7EB;
+  --bg-light: #F3F4F6;
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.12);
+}
 
 * {
   margin: 0;
@@ -12,10 +26,10 @@
 }
 
 body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
   background-attachment: fixed;
-  color: #1a1a1a;
+  color: var(--text-primary);
   min-height: 100vh;
   padding: 20px;
   line-height: 1.6;
@@ -48,11 +62,11 @@ body {
 
 /* ===== HEADER ===== */
 h2 {
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-size: 36px;
   font-weight: 800;
   margin-bottom: 25px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -60,13 +74,13 @@ h2 {
 }
 
 h3 {
-  color: #2d3748;
+  color: var(--text-primary);
   font-size: 20px;
   font-weight: 700;
   margin-top: 35px;
   margin-bottom: 16px;
   padding-bottom: 10px;
-  border-bottom: 3px solid #e2e8f0;
+  border-bottom: 3px solid var(--border-color);
   position: relative;
 }
 
@@ -77,7 +91,7 @@ h3::after {
   left: 0;
   width: 60px;
   height: 3px;
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
   border-radius: 2px;
 }
 
@@ -86,19 +100,19 @@ h3::after {
   font-size: 16px;
   margin: 12px 0;
   padding: 12px 18px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  background: linear-gradient(135deg, var(--bg-light) 0%, #ffffff 100%);
   border-radius: 12px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid var(--primary-color);
   transition: all 0.3s ease;
 }
 
 .pedido-container > p:hover {
   transform: translateX(5px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 4px 12px rgba(245, 11, 11, 0.1);
 }
 
 .pedido-container > p strong {
-  color: #667eea;
+  color: var(--primary-color);
   font-weight: 600;
   margin-right: 8px;
 }
@@ -136,7 +150,7 @@ h3::after {
 }
 
 .badge-unpaid {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
   color: white;
   border: 2px solid rgba(255, 255, 255, 0.3);
 }
@@ -164,7 +178,7 @@ h3::after {
 }
 
 .table-items thead {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
 }
 
 .table-items thead th {
@@ -188,9 +202,9 @@ h3::after {
 }
 
 .table-items tbody tr:hover {
-  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+  background: linear-gradient(135deg, var(--bg-light) 0%, #ffffff 100%);
   transform: scale(1.01);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 4px 12px rgba(245, 11, 11, 0.1);
 }
 
 .table-items tbody tr:last-child {
@@ -198,25 +212,25 @@ h3::after {
 }
 
 .table-items td {
-  color: #4a5568;
+  color: var(--text-secondary);
   font-size: 15px;
   font-weight: 500;
 }
 
 .table-items td:first-child {
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .table-items td:nth-child(2),
 .table-items td:nth-child(4) {
-  color: #667eea;
+  color: var(--primary-color);
   font-weight: 700;
 }
 
 /* ===== TOTAL FINAL ===== */
 .pedido-container > h3:last-of-type {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
   color: white;
   padding: 20px 30px;
   border-radius: 16px;
@@ -225,21 +239,21 @@ h3::after {
   font-weight: 800;
   margin-top: 30px;
   border: none;
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 25px rgba(245, 11, 11, 0.3);
   animation: pulse 2s ease-in-out infinite;
 }
 
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3); }
-  50% { box-shadow: 0 8px 35px rgba(102, 126, 234, 0.5); }
+  0%, 100% { box-shadow: 0 8px 25px rgba(245, 11, 11, 0.3); }
+  50% { box-shadow: 0 8px 35px rgba(245, 11, 11, 0.5); }
 }
 
 /* ===== ESTADO BOX ===== */
 .estado-box {
-  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+  background: linear-gradient(135deg, var(--bg-light) 0%, #ffffff 100%);
   border-radius: 20px;
   padding: 30px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--border-color);
   margin-top: 35px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   position: relative;
@@ -253,7 +267,7 @@ h3::after {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
 }
 
 .estado-box h3 {
@@ -265,13 +279,13 @@ h3::after {
 }
 
 .estado-tag {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
   color: white;
   padding: 8px 18px;
   border-radius: 50px;
   font-size: 15px;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(245, 11, 11, 0.3);
 }
 
 /* ===== BOTONES ===== */
@@ -292,9 +306,9 @@ a.btn-volver {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
   color: white;
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(245, 11, 11, 0.4);
   margin-top: 20px;
 }
 
@@ -315,7 +329,7 @@ a.btn-volver {
 
 .btn-primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 8px 30px rgba(245, 11, 11, 0.5);
 }
 
 .btn-primary:active {
