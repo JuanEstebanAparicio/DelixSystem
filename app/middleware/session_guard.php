@@ -1,13 +1,13 @@
 <?php
 // DelixSystem/app/middleware/session_guard.php
 
-// 🔒 Iniciar sesión solo si no está activa
+//  Iniciar sesión solo si no está activa
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 /**
- * ✅ Protege páginas que requieren login y rol específico
+ *  Protege páginas que requieren login y rol específico
  * Si el usuario no tiene sesión o no tiene el rol correcto,
  * será redirigido al inicio público.
  */
@@ -31,7 +31,7 @@ function protectPage($requiredRole = null) {
 }
 
 /**
- * 🚪 Si ya está logueado, evita que regrese al login
+ *  Si ya está logueado, evita que regrese al login
  */
 function checkIfLoggedIn() {
     if (isset($_SESSION['usuario']['id'])) {

@@ -1,5 +1,5 @@
 <?php
-// DelixSystem/app/middleware/universal_guard.php
+
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/../../app/config/database.php';
 
 function universalGuard() {
-    // 👑 Propietario
+    //  Propietario
     if (isset($_SESSION['usuario']['id'])) {
         return [
             'tipo' => 'propietario',
@@ -17,7 +17,7 @@ function universalGuard() {
         ];
     }
 
-    // 👷‍♂️ Empleado
+    //  Empleado
     if (isset($_SESSION['empleado_auth']['id'])) {
         $empleadoId = $_SESSION['empleado_auth']['id'];
         $result = supabaseRest('employees', 'GET', null, '?id=eq.' . $empleadoId);
@@ -36,7 +36,7 @@ function universalGuard() {
         ];
     }
 
-    // 🚫 Nadie logueado
+    //  Nadie logueado
     header('Location: /DelixSystem/public/index.php');
     exit();
 }

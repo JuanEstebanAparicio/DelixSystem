@@ -9,7 +9,7 @@
 require_once __DIR__ . '/constants.php';
 
 /**
- * 🔹 Interacción con tablas de Supabase mediante HTTP
+ *  Interacción con tablas de Supabase mediante HTTP
  */
 function supabaseRest(string $table, string $method = 'GET', array $data = null, string $query = '', bool $useService = true): array {
     $url = rtrim(SUPABASE_URL, '/') . '/rest/v1/' . ltrim($table, '/') . $query;
@@ -46,7 +46,7 @@ function supabaseRest(string $table, string $method = 'GET', array $data = null,
 }
 
 /**
- * 🔹 Autenticación vía Supabase Auth API
+ *  Autenticación vía Supabase Auth API
  */
 function supabaseAuth(string $endpoint, string $method = 'POST', array $data = null): array {
     $url = rtrim(SUPABASE_URL, '/') . '/auth/v1/' . ltrim($endpoint, '/');

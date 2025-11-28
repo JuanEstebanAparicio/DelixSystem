@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 /**
- * 🛡️ Control de permisos basado en roles de empleado o propietario.
+ *  Control de permisos basado en roles de empleado o propietario.
  *
  * @param array|string $allowedRoles Roles permitidos para la acción.
  * @param bool $returnBool Si es true, devuelve solo true/false sin terminar el script.
@@ -19,12 +19,12 @@ function canEmployeePerform($allowedRoles, $returnBool = false)
     // Asegurar que $allowedRoles sea array
     $allowedRoles = is_array($allowedRoles) ? $allowedRoles : [$allowedRoles];
 
-    // ✅ Propietario (tabla usuarios): acceso total
+    //  Propietario (tabla usuarios): acceso total
     if (isset($_SESSION['usuario']['id'])) {
         return true;
     }
 
-    // 🚫 Si no hay sesión de empleado, negar acceso
+    //  Si no hay sesión de empleado, negar acceso
     if (!isset($_SESSION['empleado_auth']['id'])) {
         if ($returnBool) return false;
 
@@ -36,7 +36,7 @@ function canEmployeePerform($allowedRoles, $returnBool = false)
     $empleadoId = $_SESSION['empleado_auth']['id'];
 
     try {
-        // 🔹 Obtener roles del empleado directamente desde la BD
+        //  Obtener roles del empleado directamente desde la BD
         $stmt = $conexion->prepare("
             SELECT r.nombre 
             FROM roles r
@@ -46,14 +46,14 @@ function canEmployeePerform($allowedRoles, $returnBool = false)
         $stmt->execute([$empleadoId]);
         $rolesEmpleado = array_map('strtoupper', $stmt->fetchAll(PDO::FETCH_COLUMN));
 
-        // 🔹 Si el empleado tiene alguno de los roles permitidos
+        //  Si el empleado tiene alguno de los roles permitidos
         foreach ($allowedRoles as $rol) {
             if (in_array(strtoupper($rol), $rolesEmpleado)) {
                 return true;
             }
         }
 
-        // 🚫 Si no tiene permisos suficientes
+        //  Si no tiene permisos suficientes
         if ($returnBool) return false;
 
         http_response_code(403);

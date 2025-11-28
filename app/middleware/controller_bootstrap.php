@@ -126,7 +126,7 @@ function verifyRoleAccess(string $resource, string $action): void
     canEmployeePerform($rolesPermitidos);
 }
 /**
- * 📝 Función global simple para registrar auditoría
+ *  Función global simple para registrar auditoría
  */
 function auditLog(string $gestor, string $action, array $params = []): bool
 {
