@@ -24,6 +24,12 @@ $usuario = employeeExtendedGuard(['ADMIN_LOCAL','SUPERVISOR']);
 
 <body>
 
+  <div class="resumen-btn-container" style="text-align:right; margin: 15px 30px;">
+    <a href="../../../../../DelixSystem/app/pages/dashboard_propietario/view/index.php" class="btn-summary" title="Ver resumen general">
+      <i class="fa-solid fa-chart-pie"></i> Volver al Dashboard
+    </a>
+  </div>
+  
 <br><br><br>
 
 <div class="historial-wrapper fade-in">

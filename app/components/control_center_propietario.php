@@ -42,50 +42,77 @@ $nombreRestaurante = htmlspecialchars($propietario['restaurant_name']);
   <!-- ⚙️ Acciones principales -->
 <!-- Contenido / Acciones principales -->
 <div class="flex-1 overflow-y-auto p-6">
-  <p class="text-xs text-gray-500 uppercase mb-4 font-medium tracking-wider">Gestores disponibles</p>
+  <p class="text-xs text-gray-500 uppercase mb-4 font-medium tracking-wider">
+    Gestores disponibles
+  </p>
 
   <div class="grid grid-cols-2 gap-4">
-    <a href="/DelixSystem/app/pages/dashboard_propietario/view/index.php" class="group card-control bg-emerald-50 hover:bg-emerald-100">
+
+    <!-- PANEL PRINCIPAL -->
+    <a href="/DelixSystem/app/pages/dashboard_propietario/view/index.php" 
+       class="group card-control bg-emerald-50 hover:bg-emerald-100">
       <i class="ri-dashboard-line text-emerald-600 text-3xl group-hover:scale-110 transition-transform"></i>
       <span>Panel Principal</span>
     </a>
 
-    <a href="/DelixSystem/app/pages/gestion_mesas/view/gestion_mesas.php" class="group card-control bg-sky-50 hover:bg-sky-100">
-      <i class="ri-restaurant-line text-sky-500 text-3xl group-hover:scale-110 transition-transform"></i>
-      <span>Mesas</span>
+    <!-- PEDIDOS -->
+    <a href="/DelixSystem/app/pages/pedidos/view/listar_pedidos.php" 
+       class="group card-control bg-sky-50 hover:bg-sky-100">
+      <i class="ri-file-list-3-line text-sky-500 text-3xl group-hover:scale-110 transition-transform"></i>
+      <span>Pedidos</span>
     </a>
 
-    <a href="/DelixSystem/app/pages/dishes_manager/view/dishes_manager.php" class="group card-control bg-amber-50 hover:bg-amber-100">
-     <i class="ri-restaurant-2-fill text-amber-500 text-3xl group-hover:scale-110 transition-transform"></i>
-      <span>Gestor Menú</span>
+    <!-- MESAS -->
+    <a href="/DelixSystem/app/pages/gestion_mesas/view/gestion_mesas.php" 
+       class="group card-control bg-cyan-50 hover:bg-cyan-100">
+      <i class="ri-table-2 text-cyan-600 text-3xl group-hover:scale-110 transition-transform"></i>
+      <span>Gestor Mesas</span>
     </a>
 
-    <a href="/DelixSystem/app/pages/gestor_empleado/view/gestor_empleados.php" class="group card-control bg-indigo-50 hover:bg-indigo-100">
-      <i class="ri-team-line text-indigo-500 text-3xl group-hover:scale-110 transition-transform"></i>
+    <!-- GESTOR MENÚ -->
+   <a href="/DelixSystem/app/pages/dishes_manager/view/dishes_manager.php" class="group card-control bg-amber-50 hover:bg-amber-100"> 
+    <i class="ri-restaurant-2-fill text-amber-500 text-3xl group-hover:scale-110 transition-transform"></i>
+     <span>Gestor Menú</span> 
+    </a>
+
+    <!-- INVENTARIO -->
+    <a href="/DelixSystem/app/pages/inventory/view/ingredient_manager.php" 
+       class="group card-control bg-violet-50 hover:bg-violet-100">
+      <i class="ri-archive-drawer-line text-violet-600 text-3xl group-hover:scale-110 transition-transform"></i>
+      <span>Gestor de Inventario</span>
+    </a>
+
+    <!-- EMPLEADOS -->
+    <a href="/DelixSystem/app/pages/gestor_empleado/view/gestor_empleados.php" 
+       class="group card-control bg-indigo-50 hover:bg-indigo-100">
+      <i class="ri-user-3-line text-indigo-600 text-3xl group-hover:scale-110 transition-transform"></i>
       <span>Empleados</span>
     </a>
 
-    <a href="/DelixSystem/app/pages/gestor_reportes/view/index.php" class="group card-control bg-fuchsia-50 hover:bg-fuchsia-100">
-      <i class="ri-bar-chart-box-line text-fuchsia-500 text-3xl group-hover:scale-110 transition-transform"></i>
+    <!-- REPORTES -->
+    <a href="/DelixSystem/app/pages/gestor_reportes/view/index.php" 
+       class="group card-control bg-fuchsia-50 hover:bg-fuchsia-100">
+      <i class="ri-bar-chart-2-line text-fuchsia-600 text-3xl group-hover:scale-110 transition-transform"></i>
       <span>Reportes</span>
     </a>
 
-    <a href="/DelixSystem/app/pages/perfil_propietario/view/index.php" class="group card-control bg-gray-50 hover:bg-gray-100">
-      <i class="ri-user-settings-line text-gray-500 text-3xl group-hover:scale-110 transition-transform"></i>
+    <!-- PERFIL -->
+    <a href="/DelixSystem/app/pages/perfil_propietario/view/index.php" 
+       class="group card-control bg-gray-50 hover:bg-gray-100">
+      <i class="ri-user-settings-line text-gray-600 text-3xl group-hover:scale-110 transition-transform"></i>
       <span>Mi Perfil</span>
     </a>
 
-     <a href="/DelixSystem/app/pages/dashboard_propietario/view/index.php" class="group card-control bg-cyan-50 hover:bg-cyan-100">
-          <i class="ri-dashboard-fill text-cyan-600 text-3xl group-hover:scale-110 transition-transform"></i>
-          <span>Dashboard</span>
-        </a>
+    <!-- HISTORIAL -->
+    <a href="/DelixSystem/app/pages/historial/view/historial.php"
+       class="group card-control bg-orange-50 hover:bg-orange-100">
+      <i class="ri-history-line text-orange-600 text-3xl group-hover:scale-110 transition-transform"></i>
+      <span>Historial</span>
+    </a>
 
-        <a href="/DelixSystem/app/pages/historial/view/historial.php" class="group card-control bg-orange-50 hover:bg-orange-100">
-          <i class="ri-history-line text-orange-500 text-3xl group-hover:scale-110 transition-transform"></i>
-          <span>Historial</span>
-        </a>
   </div>
 </div>
+
 
 
   <!-- 🔒 Cerrar Sesión -->
